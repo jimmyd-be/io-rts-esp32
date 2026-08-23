@@ -26,7 +26,7 @@
             otaUploadButton:      document.getElementById("ota-upload"),
             otaProgress:          document.getElementById("ota-progress"),
             otaStatus:            document.getElementById("ota-status"),
-            themeToggle:          document.getElementById("toggle-theme")
+            themeSelect:          document.getElementById("theme-select")
         };
     }
 
@@ -85,32 +85,28 @@
 
     function initTheme() {
         var THEMES = [
-            { id:"charcoal", icon:"●", next:"Navy"   },
-            { id:"navy",     icon:"◑", next:"Light"  },
-            { id:"light",    icon:"○", next:"Purple" },
-            { id:"purple",   icon:"◆", next:"Dark"   }
+            { id:"charcoal", icon:"●", label:"Charcoal" },
+            { id:"navy",     icon:"◑", label:"Navy"     },
+            { id:"light",    icon:"○", label:"Light"    },
+            { id:"purple",   icon:"◆", label:"Purple"   }
         ];
         var saved = localStorage.getItem("v2theme") || "charcoal";
-        var idx = THEMES.findIndex(function (t) { return t.id === saved; });
-        if (idx < 0) idx = 0;
 
-        function applyTheme() {
-            var t = THEMES[idx];
-            document.documentElement.setAttribute("data-theme", t.id);
-            localStorage.setItem("v2theme", t.id);
-            var icon = document.getElementById("theme-icon");
-            var lbl  = document.getElementById("theme-label");
-            if (icon) icon.textContent = t.icon;
-            if (lbl)  lbl.textContent  = THEMES[idx].next;
-        }
+        var sel = document.getElementById("theme-select");
+        if (sel) {
+            THEMES.forEach(function (t) {
+                var opt = document.createElement("option");
+                opt.value = t.id;
+                opt.textContent = t.icon + " " + t.label;
+                sel.appendChild(opt);
+            });
+            sel.value = THEMES.find(function (t) { return t.id === saved; }) ? saved : "charcoal";
+            document.documentElement.setAttribute("data-theme", sel.value);
+            localStorage.setItem("v2theme", sel.value);
 
-        applyTheme();
-
-        var btn = document.getElementById("theme-btn");
-        if (btn) {
-            btn.addEventListener("click", function () {
-                idx = (idx + 1) % THEMES.length;
-                applyTheme();
+            sel.addEventListener("change", function () {
+                document.documentElement.setAttribute("data-theme", sel.value);
+                localStorage.setItem("v2theme", sel.value);
             });
         }
     }

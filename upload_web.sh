@@ -36,10 +36,7 @@ upload_file() {
     *.js|*.css)
       # Upload only the pre-compressed .gz (saves ~80% LittleFS space)
       local gz="${full}.gz"
-      if [ ! -f "$gz" ]; then
-        echo "Compressing $rel..."
-        gzip -9 -k "$full"
-      fi
+      gzip -9 -k -f "$full"
       upload "$gz" "${rel}.gz"
       ;;
     *.gz)

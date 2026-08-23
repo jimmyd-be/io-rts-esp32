@@ -753,8 +753,6 @@ namespace Helpers
 
     esp_err_t MqttHelpers::RestartMqttClient()
     {
-        if (!MqttConfig::isEnabled())
-            return ESP_ERR_NOT_ALLOWED;
         if (mStarted && mMqttClientHandle != nullptr)
         {
             // Tear down existing client; preserve the reconnect timer for reuse
@@ -766,6 +764,8 @@ namespace Helpers
             mMqttConnected = false;
         }
         mMqttState = MqttState::DISABLED;
+        if (!MqttConfig::isEnabled())
+            return ESP_ERR_NOT_ALLOWED;
         // Re-read cached topic/discovery prefix so new values take effect immediately
         mTopicPrefix = MqttConfig::GetTopicPrefix();
         mDiscoveryPrefix = MqttConfig::GetDiscoveryPrefix();
