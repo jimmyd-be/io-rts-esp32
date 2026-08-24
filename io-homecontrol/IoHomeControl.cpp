@@ -1024,11 +1024,24 @@ namespace iohome
       PairResult result = PairResult::FAILED_NO_RESPONSE;
       UBaseType_t currentPriority = uxTaskPriorityGet(NULL);
       vTaskPrioritySet(NULL, IO_FRAME_PROCESSING_TASK); // change task priority to higher!
+      // Drain non-discovery frames from the queue so a stale status update or remote
+      // command doesn't cause an immediate FAILED_NO_RESPONSE on a busy controller.
+      auto waitForDiscovery = [&]() -> bool {
+        TickType_t deadline = xTaskGetTickCount() + RECEIVED_IO_DISCOVERY_RESPONSE_WAIT_TICKS;
+        while (true) {
+          TickType_t now = xTaskGetTickCount();
+          if (now >= deadline) return false;
+          if (xQueueReceive(sRxIoQueue, &rxItem, deadline - now)
+              && rxItem.frame.command_id == CMD_DISCOVER_RESPONSE)
+            return true;
+          // Wrong frame type — keep waiting until deadline
+        }
+      };
       // Send discovery request
-      if (create_discovery_request(request, mOwnNodeId)                                                                                          // request created
-          && TransmitFrame(request, FREQUENCY_CHANNEL_2, LONG_PREAMBLE_LENGTH)                                                                   // send OK, received something
-          && xQueueReceive(sRxIoQueue, &rxItem, RECEIVED_IO_DISCOVERY_RESPONSE_WAIT_TICKS) && (rxItem.frame.command_id == CMD_DISCOVER_RESPONSE) // expected answer
-          && process_discovery_response(rxItem.frame, device))                                                                                   // discovery response parsing OK
+      if (create_discovery_request(request, mOwnNodeId)              // request created
+          && TransmitFrame(request, FREQUENCY_CHANNEL_2, LONG_PREAMBLE_LENGTH) // sent OK
+          && waitForDiscovery()                                       // got CMD_DISCOVER_RESPONSE within 2 s
+          && process_discovery_response(rxItem.frame, device))        // parsing OK
       {
         // Confirm discovery with device (CMD 2C → 2D) before key exchange
         if (create_discovery_confirmation_request(request, mOwnNodeId, device.info.node_id) // request created

@@ -3194,13 +3194,10 @@ static void pairing_task(void *)
         result = s_manager->mIoHome->DiscoverAndPairDevice();
         if (result == iohome::PairResult::PAIRED_FULL || result == iohome::PairResult::PAIRED_SHORTCUT_VERIFIED) break;
         if (result == iohome::PairResult::FAILED_KEY_MISMATCH) break; // definitive — don't retry
-        // FAILED_NO_RESPONSE: keep scanning, broadcast remaining time every ~5 attempts (~10 s)
+        // FAILED_NO_RESPONSE: keep scanning, broadcast liveness heartbeat every ~5 attempts
         if (++heartbeat_counter >= 5) {
             heartbeat_counter = 0;
-            int remaining_s = (MAX_ATTEMPTS - attempt - 1) * 2;
-            char buf[64];
-            snprintf(buf, sizeof(buf), "{\"type\":\"pairing_active\",\"remaining_s\":%d}", remaining_s);
-            web_server_broadcast_message(buf);
+            web_server_broadcast_message("{\"type\":\"pairing_active\"}");
         }
     }
     s_pairing_active = false;

@@ -832,7 +832,7 @@ app.logStatus("Error fetching devices: " + error.message, "error");
 }
 var pairingWizard = (function () {
 var _app = null, _wizard = null, _statusEl = null, _btnsEl = null;
-var _badge = null, _scanning = false, _pendingCaptureDeviceId = null;
+var _badge = null, _scanning = false, _pendingCaptureDeviceId = null, _countdownTimer = null;
 function open(app) {
 _app = app;
 _wizard  = document.getElementById("pair-wizard");
@@ -843,7 +843,8 @@ document.getElementById("pair-wizard-close").onclick = cancel;
 _wizard.classList.add("open");
 showStep1();
 }
-function close() { if (_wizard) _wizard.classList.remove("open"); hideBadge(); _scanning = false; }
+function stopCountdown() { if (_countdownTimer) { clearInterval(_countdownTimer); _countdownTimer = null; } }
+function close() { if (_wizard) _wizard.classList.remove("open"); hideBadge(); _scanning = false; stopCountdown(); }
 function cancel() {
 if (_pendingCaptureDeviceId !== null) {
 window.MiOpenApi.postJson("/api/remote/capture/cancel", {}).catch(function () {});
@@ -871,7 +872,7 @@ btn.textContent = label; btn.className = cls || "";
 btn.addEventListener("click", onClick); return btn;
 }
 function showStep1() {
-_pendingCaptureDeviceId = null; _scanning = false; hideBadge();
+_pendingCaptureDeviceId = null; _scanning = false; hideBadge(); stopCountdown();
 _statusEl.innerHTML = "";
 var title = document.createElement("p");
 title.style.cssText = "font-size:13px;color:var(--text2);margin:0 0 12px;";
@@ -919,11 +920,21 @@ function show2wDiscovery() {
 setStatus(_app.i18nText("popup.pair_step1_text", "Put the device into pairing mode, then press Start."));
 setButtons([
 makeBtn(_app.i18nText("button.start_discovery", "Start Discovery"), "pair", function () {
-_scanning = true; showBadge(120);
-setStatus(_app.i18nText("popup.pair_step2_scanning", "Scanning up to 2 minutes...") + " <strong>2m 0s</strong>");
+_scanning = true;
+var remaining = 120;
+function fmtTime(s) { var m = Math.floor(s / 60), ss = s % 60; return (m > 0 ? m + "m " : "") + ss + "s"; }
+function tickCountdown() {
+    showBadge(remaining);
+    if (_statusEl && _wizard && _wizard.classList.contains("open"))
+        _statusEl.innerHTML = _app.i18nText("popup.pair_step2_scanning", "Scanning up to 2 minutes...") + " <strong>" + fmtTime(remaining) + "</strong>";
+    if (remaining > 0) remaining--;
+}
+tickCountdown();
 setButtons([makeBtn(_app.i18nText("button.cancel", "Cancel"), "danger", cancel)]);
+stopCountdown();
+_countdownTimer = setInterval(tickCountdown, 1000);
 window.MiOpenApi.postJson("/api/pair/start", {}).catch(function (e) {
-_scanning = false; hideBadge();
+_scanning = false; hideBadge(); stopCountdown();
 setStatus(_app.i18nText("popup.pair_failed", "Pairing request failed.") + " " + e.message);
 showRetry();
 });
@@ -1011,17 +1022,12 @@ makeBtn("Cancel", "danger", doCancel)
 function showRetry() {
 setButtons([makeBtn(_app.i18nText("button.retry","Retry"),"pair",showStep1), makeBtn(_app.i18nText("button.cancel","Cancel"),"danger",cancel)]);
 }
-function onPairingActive(remainingS) {
-if (!_scanning) return;
-showBadge(remainingS);
-if (_statusEl && _wizard && _wizard.classList.contains("open")) {
-var m = Math.floor(remainingS/60), s = remainingS%60;
-_statusEl.innerHTML = _app.i18nText("popup.pair_step2_scanning","Scanning up to 2 minutes...") + " <strong>" + (m>0?m+"m ":"") + s + "s</strong>";
-}
+function onPairingActive() {
+// Server liveness heartbeat — countdown is driven client-side
 }
 function onDeviceAdded(deviceId, deviceName) {
 if (!_wizard || !_wizard.classList.contains("open")) return;
-_scanning = false; hideBadge(); _pendingCaptureDeviceId = deviceId;
+_scanning = false; hideBadge(); stopCountdown(); _pendingCaptureDeviceId = deviceId;
 setStatus(_app.i18nText("popup.pair_step3_success","Device paired: {name}").replace("{name}", deviceName));
 setButtons([
 makeBtn(_app.i18nText("button.link_remote","Link Remote"), "pair", function () { startCapture(deviceId); }),
@@ -1031,7 +1037,7 @@ fetchAndDisplayDevices(_app);
 }
 function onPairFailed(data) {
 if (!_wizard || !_wizard.classList.contains("open")) return;
-_scanning = false; hideBadge();
+_scanning = false; hideBadge(); stopCountdown();
 if (data && data.status === "key_mismatch") {
 setStatus('<span style="color:#c0392b">' + (data.message || _app.i18nText("popup.pair_key_mismatch","Device found but has a different system key. Factory reset the device and try again.")) + '</span>');
 } else {
@@ -1054,7 +1060,10 @@ makeBtn(_app.i18nText("button.link_remote","Link"), "pair", function () {
 window.MiOpenApi.postJson("/api/remote/capture/cancel", {}).catch(function () {});
 window.MiOpenApi.postJson("/api/action", { deviceId: devId, action: "linkRemote", remoteId: remoteId })
 .then(function () { _app.logStatus("Remote " + remoteId + " linked.", "info"); fetchAndDisplayDevices(_app); cancel(); })
-.catch(function (e) { _app.logStatus("Link failed: " + e.message, "error"); });
+.catch(function (e) {
+    _app.logStatus("Link failed: " + e.message, "error");
+    setButtons([makeBtn(_app.i18nText("button.retry","Retry"), "pair", function () { startCapture(devId); }), makeBtn(_app.i18nText("button.skip","Done"), "", cancel)]);
+});
 }),
 makeBtn(_app.i18nText("button.skip","Skip"), "", function () { window.MiOpenApi.postJson("/api/remote/capture/cancel", {}).catch(function () {}); cancel(); })
 ]);
