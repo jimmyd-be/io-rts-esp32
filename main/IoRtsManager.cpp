@@ -352,8 +352,16 @@ namespace IoRts
         mIoDevicesMutex.unlock();
         // Re-link remotes in radio layer
         if (mIoHome != nullptr)
+        {
+            bool is1w = (storedDevice.device.info.protocol_mode == iohome::ProtocolMode::PROTO_1W);
             for (const std::string &remoteID : storedDevice.linked_remotes)
-                mIoHome->LinkRemoteToDevice(remoteID, deviceID);
+            {
+                if (is1w)
+                    mIoHome->AddRemoteLink(remoteID, deviceID);
+                else
+                    mIoHome->LinkRemoteToDevice(remoteID, deviceID);
+            }
+        }
         if (sMqttHelper != nullptr)
         {
             sMqttHelper->SendDiscovery();
@@ -401,7 +409,15 @@ namespace IoRts
     bool IoRtsManager::LinkRemoteToDevice(const std::string &remoteID, const std::string &deviceID)
     {
         if (mIoHome == nullptr) return false;
-        bool success = mIoHome->LinkRemoteToDevice(remoteID, deviceID);
+        mIoDevicesMutex.lock();
+        auto it = mIoDevices.find(deviceID);
+        bool is1w = (it != mIoDevices.end() && !it->second.is_deleted &&
+                     it->second.info.protocol_mode == iohome::ProtocolMode::PROTO_1W);
+        bool exists = (it != mIoDevices.end() && !it->second.is_deleted);
+        mIoDevicesMutex.unlock();
+        if (!exists) return false;
+        bool success = is1w ? mIoHome->AddRemoteLink(remoteID, deviceID)
+                            : mIoHome->LinkRemoteToDevice(remoteID, deviceID);
         if (success)
         {
             Helpers::DeviceStorage::AddRemoteToIoDevice(remoteID, deviceID);
@@ -482,7 +498,12 @@ namespace IoRts
                     mIoHome->RestoreDevice(deviceID, dev);
                 }
                 for (const std::string &remoteID : storedDevice.linked_remotes)
-                    mIoHome->LinkRemoteToDevice(remoteID, deviceID);
+                {
+                    if (is1w)
+                        mIoHome->AddRemoteLink(remoteID, deviceID);
+                    else
+                        mIoHome->LinkRemoteToDevice(remoteID, deviceID);
+                }
                 ESP_LOGI(TAG, "Restored %s device %s (%s) with %u remote(s), transit=%ums",
                          is1w ? "1W" : "2W", deviceID.c_str(), dev.info.name,
                          storedDevice.linked_remotes.size(), dev.transit_time_ms);
@@ -700,6 +721,26 @@ namespace IoRts
                 mIoHome->SetMovementStartedCallback([](const std::string &deviceID, uint32_t transit_ms, float dist) {
                     if (sIoRtsManager)
                         sIoRtsManager->ScheduleConfirmationPoll(deviceID, transit_ms, dist);
+                });
+                mIoHome->SetRemote1WCallback([](const std::string &deviceID, float target) {
+                    if (!sIoRtsManager) return;
+                    std::lock_guard<std::mutex> guard(sIoRtsManager->mIoDevicesMutex);
+                    auto it = sIoRtsManager->mIoDevices.find(deviceID);
+                    if (it == sIoRtsManager->mIoDevices.end() || it->second.is_deleted) return;
+                    auto &dev = it->second;
+                    if (target >= 0.0f)
+                    {
+                        dev.move_start_us   = esp_timer_get_time();
+                        dev.move_start_pos  = dev.position;
+                        dev.move_target_pos = target;
+                        dev.is_stopped      = false;
+                    }
+                    else
+                    {
+                        // STOP command — freeze interpolation at current estimated position
+                        dev.move_start_us = 0;
+                        dev.is_stopped    = true;
+                    }
                 });
             }
         }

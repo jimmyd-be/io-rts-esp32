@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <functional>
 #include <string>
 
 #include "esp_log_level.h"
@@ -247,6 +248,17 @@ namespace iohome
     /// @param deviceID Device ID (6 characters as hex representation of the 3 bytes, eg "112233")
     /// @return true if success, false if failed (unknown device ID, ...)
     bool LinkRemoteToDevice(const std::string &remoteID, const std::string &deviceID);
+
+    /// @brief Link a remote to a device without requiring the device to be in sDeviceMap. Used for 1W devices.
+    /// @param remoteID Remote ID
+    /// @param deviceID Device ID
+    /// @return true if added, false if already linked
+    bool AddRemoteLink(const std::string &remoteID, const std::string &deviceID);
+
+    /// @brief Register callback invoked when a linked remote commands a 1W device (not in sDeviceMap).
+    ///        target >= 0 means a position (0–100%), target == -1 means STOP/unknown.
+    /// @param cb Callback function, or nullptr to unregister
+    void SetRemote1WCallback(std::function<void(const std::string &deviceID, float target)> cb);
 
     /// @brief Delete a previously declared remote
     /// @param remoteID Remote ID (6 characters as hex representation of the 3 bytes, eg "112233")

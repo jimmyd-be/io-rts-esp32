@@ -94,6 +94,8 @@ namespace iohome
   static UnknownSenderCallback sUnknownSenderCallback = nullptr;   // Callback for frames from unregistered senders
   static KeySniffCallback sKeySniffCallback = nullptr;             // Callback invoked when a key is captured during sniffing
   static MovementStartedCallback sMovementStartedCallback = nullptr; // Callback invoked when movement tracking starts
+  using Remote1WCallback = std::function<void(const std::string &deviceID, float target)>;
+  static Remote1WCallback sRemote1WCallback = nullptr; // Callback invoked when a linked remote targets a 1W device
   static volatile bool sSniffKeyActive = false;                    // true while passive key sniffing is active
   static char sSniffedKey[33] = {};                                // last captured key as 32-char hex + null
   static int64_t sSniffStartUs = 0;                                // timestamp when sniffing started
@@ -781,7 +783,6 @@ namespace iohome
                 if (device != sDeviceMap.end())
                 {
                   device->second.next_status_update_timestamp = esp_timer_get_time() + STATUS_UPDATE_AFTER_REMOTE_US;
-                  // Start interpolation if we know the target (not STOP/FAVORITE/UNKNOWN)
                   if (remoteTarget >= 0.0f)
                   {
                     device->second.move_start_us   = esp_timer_get_time();
@@ -797,6 +798,11 @@ namespace iohome
                   {
                     device->second.move_start_us = 0; // STOP or special command, no interpolation
                   }
+                }
+                else if (sRemote1WCallback)
+                {
+                  // Device not in sDeviceMap — it's a 1W device; notify manager to update position estimate
+                  sRemote1WCallback(deviceID, remoteTarget);
                 }
               }
               if (sUnknownSenderCallback != nullptr)
@@ -2568,6 +2574,26 @@ namespace iohome
   void IoHomeControl::SetMovementStartedCallback(MovementStartedCallback cb)
   {
     sMovementStartedCallback = cb;
+  }
+
+  void IoHomeControl::SetRemote1WCallback(std::function<void(const std::string &, float)> cb)
+  {
+    sRemote1WCallback = cb;
+  }
+
+  bool IoHomeControl::AddRemoteLink(const std::string &remoteID, const std::string &deviceID)
+  {
+    std::lock_guard<std::mutex> guard(sRemoteMapMutex);
+    auto it = sRemoteMap.find(remoteID);
+    if (it == sRemoteMap.end())
+    {
+      sRemoteMap.insert({remoteID, {deviceID}});
+      return true;
+    }
+    for (const std::string &device : it->second)
+      if (device == deviceID) return false; // already linked
+    it->second.push_back(deviceID);
+    return true;
   }
 
   void IoHomeControl::StartKeySniff()
