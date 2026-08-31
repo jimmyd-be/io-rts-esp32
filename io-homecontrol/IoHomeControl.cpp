@@ -1043,10 +1043,7 @@ namespace iohome
           && waitForDiscovery()                                       // got CMD_DISCOVER_RESPONSE within 2 s
           && process_discovery_response(rxItem.frame, device))        // parsing OK
       {
-        // Confirm discovery with device (CMD 2C → 2D) before key exchange
-        if (create_discovery_confirmation_request(request, mOwnNodeId, device.info.node_id) // request created
-            && SendAndReceive(request, response, FREQUENCY_CHANNEL_2)                       // send OK, received something
-            && (response.command_id == CMD_DISCOVER_CONFIRMATION_ACK))                      // expected answer (CMD 2D)
+        // CMD 2C/2D step temporarily disabled for testing — sending CMD 31 immediately after CMD 29
         {
           // We have confirmed discovery, let's start pairing process
           if (create_init_transfer(request, mOwnNodeId, device.info.node_id)        // request created
@@ -1161,12 +1158,7 @@ namespace iohome
           }
           else
           {
-            IO_LOGE("DiscoverAndPairDevice: failed to confirm discovery (CMD 2C/2D)!");
-          }
-        }
-        else
-        {
-          IO_LOGE("DiscoverAndPairDevice: failed to send discovery request / no or bad answer received!");
+            IO_LOGE("DiscoverAndPairDevice: failed to send discovery request / no or bad answer received!");
       }
       vTaskPrioritySet(NULL, currentPriority); // restore task priority
       xSemaphoreGive(sMutex);
