@@ -1156,9 +1156,10 @@ namespace iohome
               IO_LOGE("DiscoverAndPairDevice: failed to send key init request!");
             }
           }
-          else
-          {
-            IO_LOGE("DiscoverAndPairDevice: failed to send discovery request / no or bad answer received!");
+        }
+        else
+        {
+          IO_LOGE("DiscoverAndPairDevice: failed to send discovery request / no or bad answer received!");
       }
       vTaskPrioritySet(NULL, currentPriority); // restore task priority
       xSemaphoreGive(sMutex);
