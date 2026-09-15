@@ -1043,7 +1043,9 @@ namespace iohome
           && waitForDiscovery()                                       // got CMD_DISCOVER_RESPONSE within 2 s
           && process_discovery_response(rxItem.frame, device))        // parsing OK
       {
-        // CMD 2C/2D step temporarily disabled for testing — sending CMD 31 immediately after CMD 29
+        if (create_discovery_confirmation_request(request, mOwnNodeId, device.info.node_id) // request created
+            && SendAndReceive(request, response, FREQUENCY_CHANNEL_2)                       // send OK, received something
+            && response.command_id == CMD_DISCOVER_CONFIRMATION_ACK)                        // device acked
         {
           // We have confirmed discovery, let's start pairing process
           if (create_init_transfer(request, mOwnNodeId, device.info.node_id)        // request created
