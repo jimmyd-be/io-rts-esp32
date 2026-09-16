@@ -3173,6 +3173,79 @@ static esp_err_t api_upload_web_post(httpd_req_t *req)
     return ESP_OK;
 }
 
+// ─── POST /api/devices/add ──────────────────────────────────────────────────
+
+static esp_err_t api_devices_add_post(httpd_req_t *req)
+{
+    if (!ota_check_key(req)) { httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Unauthorized"); return ESP_OK; }
+    char *body = nullptr;
+    if (read_body(req, &body) != ESP_OK) { send_result(req, false, "Failed to read body"); return ESP_OK; }
+
+    cJSON *json = cJSON_Parse(body);
+    free(body);
+    if (!cJSON_IsObject(json)) { cJSON_Delete(json); send_result(req, false, "Invalid JSON"); return ESP_OK; }
+
+    cJSON *idItem = cJSON_GetObjectItem(json, "id");
+    if (!cJSON_IsString(idItem) || strlen(idItem->valuestring) != 6) {
+        cJSON_Delete(json); send_result(req, false, "id must be exactly 6 hex characters"); return ESP_OK;
+    }
+    std::string deviceID = idItem->valuestring;
+    for (auto &c : deviceID) c = (char)toupper((unsigned char)c);
+
+    if (deviceID == Config::IoHomeConfig::GetIoNodeId()) {
+        cJSON_Delete(json); send_result(req, false, "Cannot add own controller address"); return ESP_OK;
+    }
+
+    iohome::IoDevice dev = {};
+    dev.position   = iohome::UNKNOWN_POSITION;
+    dev.target     = iohome::UNKNOWN_POSITION;
+    dev.tilt       = iohome::UNKNOWN_POSITION;
+    dev.is_stopped = true;
+    for (int i = 0; i < iohome::NODE_ID_SIZE; i++)
+        dev.info.node_id[i] = (uint8_t)strtol(deviceID.substr(i * 2, 2).c_str(), nullptr, 16);
+
+    cJSON *nameItem = cJSON_GetObjectItem(json, "name");
+    if (cJSON_IsString(nameItem) && strlen(nameItem->valuestring) > 0)
+        strncpy(dev.info.name, nameItem->valuestring, iohome::CMD_PARAM_NAME_MAXSIZE - 1);
+    else
+        strncpy(dev.info.name, " ", iohome::CMD_PARAM_NAME_MAXSIZE - 1); // placeholder — CMD 50 will fill real name
+
+    cJSON *typeItem = cJSON_GetObjectItem(json, "device_type");
+    if (cJSON_IsNumber(typeItem))
+        dev.info.device_type = (iohome::DeviceType)(uint8_t)typeItem->valuedouble;
+
+    cJSON *protoItem = cJSON_GetObjectItem(json, "protocol");
+    dev.info.protocol_mode = (cJSON_IsString(protoItem) && strcmp(protoItem->valuestring, "1W") == 0)
+        ? iohome::ProtocolMode::PROTO_1W : iohome::ProtocolMode::PROTO_2W;
+
+    cJSON *lpItem = cJSON_GetObjectItem(json, "is_low_power");
+    dev.info.is_low_power = cJSON_IsBool(lpItem) ? cJSON_IsTrue(lpItem) : false;
+
+    cJSON_Delete(json);
+
+    Helpers::StoredIoDevice sd = {};
+    sd.device = dev;
+    std::map<std::string, Helpers::StoredIoDevice> allDevices;
+    Helpers::DeviceStorage::LoadAllIoDevices(allDevices);
+    allDevices[deviceID] = sd;
+    Helpers::DeviceStorage::SaveAllIoDevices(allDevices);
+
+    if (s_manager->mIoHome) {
+        s_manager->mIoHome->RestoreDevice(deviceID, dev);
+        s_manager->mIoHome->NotifyDeviceStatus(deviceID);
+    }
+    s_manager->mIoDevicesMutex.lock();
+    {
+        auto it = s_manager->mIoDevices.find(deviceID);
+        if (it != s_manager->mIoDevices.end()) it->second = dev;
+        else s_manager->mIoDevices.insert({deviceID, dev});
+    }
+    s_manager->mIoDevicesMutex.unlock();
+
+    send_result(req, true, deviceID.c_str());
+    return ESP_OK;
+}
+
 // ─── Pairing ────────────────────────────────────────────────────────────────
 
 static bool s_pairing_active = false;
@@ -3192,8 +3265,7 @@ static void pairing_task(void *)
     for (int attempt = 0; attempt < MAX_ATTEMPTS && s_pairing_active; attempt++)
     {
         result = s_manager->mIoHome->DiscoverAndPairDevice();
-        if (result == iohome::PairResult::PAIRED_FULL || result == iohome::PairResult::PAIRED_SHORTCUT_VERIFIED) break;
-        if (result == iohome::PairResult::FAILED_KEY_MISMATCH) break; // definitive — don't retry
+        if (result == iohome::PairResult::PAIRED_FULL) break;
         // FAILED_NO_RESPONSE: keep scanning, broadcast liveness heartbeat every ~5 attempts
         if (++heartbeat_counter >= 5) {
             heartbeat_counter = 0;
@@ -3201,11 +3273,7 @@ static void pairing_task(void *)
         }
     }
     s_pairing_active = false;
-    if (result == iohome::PairResult::FAILED_KEY_MISMATCH) {
-        ESP_LOGW(TAG, "Pairing failed: device has a different system key");
-        web_server_broadcast_message("{\"type\":\"pair_failed\",\"status\":\"key_mismatch\","
-            "\"message\":\"Device found but has a different system key. Factory reset the device and try again.\"}");
-    } else if (result != iohome::PairResult::PAIRED_FULL && result != iohome::PairResult::PAIRED_SHORTCUT_VERIFIED) {
+    if (result != iohome::PairResult::PAIRED_FULL) {
         ESP_LOGW(TAG, "Pairing timed out after 120 s");
         web_server_broadcast_message("{\"type\":\"pair_failed\",\"status\":\"timeout\"}");
     }
@@ -3695,6 +3763,7 @@ void web_server_start(void *ioRtsManager)
     reg("/api/info",              HTTP_GET,  api_info_get);
     reg("/api/info/fs",           HTTP_GET,  api_info_fs_get);
     reg("/api/upload/web*",       HTTP_POST, api_upload_web_post);
+    reg("/api/devices/add",       HTTP_POST, api_devices_add_post);
     reg("/api/pair/start",        HTTP_POST, api_pair_start_post);
     reg("/api/pair/status",       HTTP_GET,  api_pair_status_get);
     reg("/api/learn/start",              HTTP_POST, api_learn_start_post);

@@ -24,10 +24,8 @@ namespace iohome
 {
 
   enum class PairResult {
-    PAIRED_FULL,               // full key exchange succeeded (CMD 33 received)
-    PAIRED_SHORTCUT_VERIFIED,  // key exchange skipped, CMD 03 confirmed matching key
-    FAILED_KEY_MISMATCH,       // shortcut tried, CMD 03 failed — device has a different key
-    FAILED_NO_RESPONSE         // no CMD 29 received — device not in range or not in pairing mode
+    PAIRED_FULL,        // full key exchange succeeded (CMD 33 received)
+    FAILED_NO_RESPONSE  // no CMD 29 received, or key exchange failed — retry
   };
 
   typedef void (*LoggerCallback)(esp_log_level_t log_level, const char *tag, std::string log); // Callback to receive logs from the IO controller (if verbose)
@@ -156,6 +154,10 @@ namespace iohome
     /// @brief Delete 2W device from controller
     /// @param deviceID Device ID (6 characters as hex representation of the 3 bytes, eg "112233")
     void DeleteDevice(const std::string &deviceID);
+
+    /// @brief Push a device from sDeviceMap to sIoDeviceStatusQueue so deviceStatusCallback fires immediately.
+    /// Sets a placeholder name if the name is empty so the callback guard passes.
+    void NotifyDeviceStatus(const std::string &deviceID);
 
     /// @brief Start device discovery and pair any discovered device
     PairResult DiscoverAndPairDevice();

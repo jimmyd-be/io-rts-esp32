@@ -981,6 +981,21 @@ namespace iohome
     }
   }
 
+  void IoHomeControl::NotifyDeviceStatus(const std::string &deviceID)
+  {
+    if (xSemaphoreTake(sMutex, MUTEX_MAX_WAIT_TICKS))
+    {
+      auto it = sDeviceMap.find(deviceID);
+      if (it != sDeviceMap.end())
+      {
+        if (strlen(it->second.info.name) == 0)
+          strncpy(it->second.info.name, " ", sizeof(it->second.info.name) - 1);
+        xQueueSend(sIoDeviceStatusQueue, &it->second, 0);
+      }
+      xSemaphoreGive(sMutex);
+    }
+  }
+
   void IoHomeControl::RestoreDevice(const std::string &deviceID, const iohome::IoDevice &device)
   {
     if (xSemaphoreTake(sMutex, MUTEX_MAX_WAIT_TICKS))
@@ -1123,28 +1138,20 @@ namespace iohome
                 {
                   IO_LOGE("ConfigureDeviceToSendStatus: failed to send request or didn't receive a response!");
                 }
+                // Queue device for immediate NVS save and UI notification
+                {
+                  auto it = sDeviceMap.find(deviceID);
+                  if (it != sDeviceMap.end())
+                  {
+                    if (strlen(it->second.info.name) == 0)
+                      strncpy(it->second.info.name, " ", sizeof(it->second.info.name) - 1);
+                    xQueueSend(sIoDeviceStatusQueue, &it->second, 0);
+                  }
+                }
               }
               else
               {
-                // Key exchange failed — device may already share our key (re-pairing scenario).
-                // Add provisionally and verify with CMD 03. Already holding sMutex — call low-level directly.
-                std::string deviceID = buffToHexString(NODE_ID_SIZE, device.info.node_id);
-                device.is_deleted = false;
-                sDeviceMap.insert({deviceID, device});
-                IoFrame statusReq, statusResp;
-                if (create_getstatus03_request(statusReq, mOwnNodeId, device.info.node_id)
-                    && SendAndReceive(statusReq, statusResp, FREQUENCY_CHANNEL_2)
-                    && statusResp.command_id == CMD_PRIVATE_RESPONSE)
-                {
-                  IO_LOGI("DiscoverAndPairDevice: shortcut verified — device {} responds to CMD 03, shared key confirmed", deviceID);
-                  result = PairResult::PAIRED_SHORTCUT_VERIFIED;
-                }
-                else
-                {
-                  IO_LOGE("DiscoverAndPairDevice: CMD 03 no response — device {} has a different key, factory reset required", deviceID);
-                  sDeviceMap.erase(deviceID);
-                  result = PairResult::FAILED_KEY_MISMATCH;
-                }
+                IO_LOGE("DiscoverAndPairDevice: key exchange failed — CMD 33 not received");
               }
             }
           }

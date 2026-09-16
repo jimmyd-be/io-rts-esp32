@@ -20,9 +20,7 @@ static iohome::IoHomeControl *sIoHome;
 static int do_iodiscover_cmd(int argc, char **argv)
 {
     auto result = sIoHome->DiscoverAndPairDevice();
-    if (result == iohome::PairResult::FAILED_KEY_MISMATCH)
-        ESP_LOGW(TAG, "Discover: device has a different key — factory reset required");
-    else if (result == iohome::PairResult::FAILED_NO_RESPONSE)
+    if (result == iohome::PairResult::FAILED_NO_RESPONSE)
         ESP_LOGW(TAG, "Discover failed — no device responded");
     return 0;
 }

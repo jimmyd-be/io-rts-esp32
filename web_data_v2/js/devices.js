@@ -914,7 +914,86 @@ _statusEl.appendChild(choiceCard(
     ],
     show1wWizard
 ));
+_statusEl.appendChild(choiceCard(
+    "Add by address",
+    [
+        "Device already has the system key — enter its address directly.",
+        "Use when re-adding a known device after a controller reset.",
+        "No radio pairing needed."
+    ],
+    showAddByAddress
+));
 setButtons([makeBtn(_app.i18nText("button.cancel", "Cancel"), "danger", cancel)]);
+}
+function showAddByAddress() {
+_statusEl.innerHTML = "";
+var desc = document.createElement("p");
+desc.style.cssText = "font-size:13px;color:var(--text2);margin:0 0 10px;line-height:1.5;";
+desc.textContent = "Enter the device address and select its type. The device must already share the system key.";
+_statusEl.appendChild(desc);
+var inputCss = "width:100%;background:var(--input-bg,var(--surface2));border:1px solid var(--input-border,var(--surface3));border-radius:7px;color:var(--text);padding:8px 12px;font-size:13px;font-family:inherit;outline:none;margin-bottom:6px;display:block;box-sizing:border-box;";
+var addrInput = document.createElement("input");
+addrInput.type = "text"; addrInput.placeholder = "Address (e.g. 750C4B)"; addrInput.maxLength = 6;
+addrInput.style.cssText = inputCss;
+addrInput.style.textTransform = "uppercase";
+_statusEl.appendChild(addrInput);
+var nameInput = document.createElement("input");
+nameInput.type = "text"; nameInput.placeholder = "Name (optional — fetched automatically)"; nameInput.maxLength = 31;
+nameInput.style.cssText = inputCss;
+_statusEl.appendChild(nameInput);
+function selRow(label, opts) {
+    var row = document.createElement("div");
+    row.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:6px;";
+    var lbl = document.createElement("span");
+    lbl.style.cssText = "font-size:11px;color:var(--text3);width:90px;flex-shrink:0;";
+    lbl.textContent = label;
+    var sel = document.createElement("select");
+    sel.style.cssText = "flex:1;background:var(--input-bg,var(--surface2));border:1px solid var(--input-border,var(--surface3));border-radius:6px;color:var(--text);padding:6px 8px;font-size:12px;font-family:inherit;";
+    opts.forEach(function (o) { var op = document.createElement("option"); op.value = o[0]; op.textContent = o[1]; sel.appendChild(op); });
+    row.appendChild(lbl); row.appendChild(sel);
+    _statusEl.appendChild(row);
+    return sel;
+}
+var protoSelect = selRow("Protocol",    [["2W","2W — Bidirectional"],["1W","1W — Simplex"]]);
+var typeSelect  = selRow("Device type", [["0","Unknown"],["2","Roller shutter"],["3","Awning"],["10","Blind"]]);
+var lpRow = document.createElement("div");
+lpRow.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:10px;";
+var lpCheck = document.createElement("input"); lpCheck.type = "checkbox"; lpCheck.id = "addr-lp";
+var lpLbl = document.createElement("label"); lpLbl.htmlFor = "addr-lp";
+lpLbl.style.cssText = "font-size:12px;color:var(--text2);cursor:pointer;";
+lpLbl.textContent = "Low power device (battery-operated)";
+lpRow.appendChild(lpCheck); lpRow.appendChild(lpLbl);
+_statusEl.appendChild(lpRow);
+setTimeout(function () { addrInput.focus(); }, 50);
+setButtons([
+makeBtn("Add Device", "pair", function () {
+    var addr = addrInput.value.trim().toUpperCase();
+    if (!/^[0-9A-F]{6}$/.test(addr)) { addrInput.style.borderColor = "var(--red,#c0392b)"; addrInput.focus(); return; }
+    setStatus("Adding device…");
+    setButtons([]);
+    window.MiOpenApi.postJson("/api/devices/add", {
+        id: addr,
+        name: nameInput.value.trim(),
+        device_type: parseInt(typeSelect.value, 10),
+        protocol: protoSelect.value,
+        is_low_power: lpCheck.checked
+    }).then(function (r) {
+        if (r && r.success) {
+            setStatus("✓ Device <strong>" + addr + "</strong> added.");
+            fetchAndDisplayDevices(_app);
+            setButtons([makeBtn("Done", "", cancel)]);
+        } else {
+            setStatus("Failed: " + (r && r.message ? r.message : "Unknown error"));
+            setButtons([makeBtn("Retry", "pair", showAddByAddress), makeBtn("Cancel", "danger", cancel)]);
+        }
+    }).catch(function (e) {
+        setStatus("Error: " + (e.message || "Unknown error"));
+        setButtons([makeBtn("Retry", "pair", showAddByAddress), makeBtn("Cancel", "danger", cancel)]);
+    });
+}),
+makeBtn("Back", "", showStep1),
+makeBtn("Cancel", "danger", cancel)
+]);
 }
 function show2wDiscovery() {
 setStatus(_app.i18nText("popup.pair_step1_text", "Put the device into pairing mode, then press Start."));
