@@ -1,7 +1,5 @@
 import { AccordionHead } from "../AccordionHead";
 
-
-//TODO: implement web ui update functionality
 export function WebUIUpdateSettings() {
   return (
     <div class="acc-row">
@@ -11,17 +9,25 @@ export function WebUIUpdateSettings() {
         summary={<span class="acc-sum-hint">Upload .bin file</span>}
       >
         <div>
-          <label class={"label-title"} data-i18n="label.web-ui-file">
+          <label
+            style="font-size:11px;color:var(--text3);"
+            data-i18n="label.web-ui-file"
+          >
             Web UI file (.bin)
           </label>
           <input
             type="file"
+            id="ota-web-file"
             accept=".bin"
             class="s-input"
             style="padding:5px 10px;margin-top:4px;"
           />
         </div>
-        <button class="s-btn primary" data-i18n="button.upload-web-ui">
+        <button
+          class="s-btn primary"
+          id="ota-web-upload"
+          data-i18n="button.upload-web-ui"
+        >
           Upload Web UI
         </button>
         <progress
@@ -29,8 +35,8 @@ export function WebUIUpdateSettings() {
           max={100}
           value={0}
           style="display:none;"
-        />
-        <span id="ota-web-status" class="field-status" />
+        ></progress>
+        <span id="ota-web-status" class="field-status"></span>
       </AccordionHead>
     </div>
   );

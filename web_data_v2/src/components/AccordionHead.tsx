@@ -1,12 +1,10 @@
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
-import HelpPanel from "./HelpPanel";
 
 type AccordionHeadProps = {
   title: ComponentChildren;
-  titleI18n: string;
+  titleI18n?: string;
   helpLabel?: string;
-  helpKey?: string;
   summary?: ComponentChildren;
   children?: ComponentChildren;
 };
@@ -15,7 +13,6 @@ export function AccordionHead({
   title,
   titleI18n,
   helpLabel,
-  helpKey,
   summary,
   children,
 }: AccordionHeadProps) {
@@ -23,13 +20,14 @@ export function AccordionHead({
 
   return (
     <>
-      <div
-        class={isOpen ? "acc-head open" : "acc-head"}
-        onClick={() => setIsOpen((value) => !value)}
-      >
+      <div class={isOpen ? "acc-head open" : "acc-head"} onClick={() => setIsOpen((value) => !value)}>
         <span class="row-label" data-i18n={titleI18n}>
           {title}
-          {helpLabel ? <HelpPanel helpKey={helpKey} /> : null}
+          {helpLabel ? (
+            <button class="help-btn" aria-label={helpLabel}>
+              ?
+            </button>
+          ) : null}
         </span>
         <div class="acc-summary">{summary}</div>
         <div class="acc-chevron">

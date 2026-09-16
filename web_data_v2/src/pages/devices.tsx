@@ -1,100 +1,79 @@
-import { useEffect, useMemo, useState } from "react";
-import useApi from "../hooks/useApi";
-import useI18n from "../hooks/useI18n";
-import { Device, Remote } from "../models/Types";
-import { Remotes } from "../components/Remotes";
-import { DeviceCard } from "../components/DeviceCard";
-import { RemoteWizardProvider } from "../components/Modals/remoteWizard";
+import { useState } from "preact/hooks";
+import { AddRemoteModal } from "../components/Modals/AddRemote";
+import { Modal } from "../components/Modal";
+import { useModal } from "../hooks/useModal";
 
 export function Devices() {
-  const [devices, setDevices] = useState<Device[]>([]);
-  const [activeCount, setActiveCount] = useState(0);
 
-  const { t } = useI18n();
-
-  const deviceApi = useApi<Device[]>({
-    endpoint: "/api/devices",
-    method: "GET",
-  });
-
-  const remotesApi = useApi<Remote[]>({
-    endpoint: "/api/remotes",
-    method: "GET",
-  });
-
-  useEffect(() => {
-    const list: Device[] =
-      deviceApi.loaded && deviceApi.data != null ? deviceApi.data : [];
-
-    const active = list.filter((d: Device) => !d.inactive);
-    const inactive = list.filter((d: Device) => d.inactive);
-
-    const ordered = [...active, ...inactive];
-    setDevices(ordered);
-    setActiveCount(active.length);
-  }, [deviceApi.data]);
-
-  const countText = useMemo(
-    () => `${activeCount} ${t ? t("nav.devices") : "devices"}`,
-    [activeCount],
-  );
+  const modal = useModal();
 
   return (
-    <section className="view active">
-      <div className="view-header">
-        <h2 className="view-title" data-i18n="nav.devices">
+    <section class="view active" id="view-devices">
+      <div class="view-header">
+        <h2 class="view-title" data-i18n="nav.devices">
           Devices
         </h2>
-
         <span
-          style={{
-            fontSize: "11px",
-            color: "var(--text3)",
-            marginRight: "auto",
-            paddingLeft: "8px",
-          }}
+          id="count-pill"
+          style="font-size:11px;color:var(--text3);margin-right:auto;padding-left:8px;"
+        ></span>
+        <button
+          class="view-add-btn"
+          id="pair-device-btn"
+          title="Pair new device"
         >
-          {!deviceApi.loaded ? "Loading…" : countText}
-        </span>
-
-        <button className="view-add-btn" title="Pair new device">
           +
         </button>
       </div>
+      <ul id="device-list"></ul>
 
-      <ul id="device-list">
-        {!deviceApi.loaded ? (
-          <li
-            style={{
-              padding: "20px",
-              color: "var(--text3)",
-              textAlign: "center",
-              gridColumn: "1 / -1",
-            }}
-          >
-            {t ? t("popup.loading", "Loading…") : "Loading…"}
-          </li>
-        ) : devices.length === 0 ? (
-          <li
-            style={{
-              padding: "20px",
-              color: "var(--text3)",
-              textAlign: "center",
-              gridColumn: "1 / -1",
-            }}
-          >
-            {t
-              ? t("list.no_devices_available", "No devices available.")
-              : "No devices available."}
-          </li>
-        ) : (
-          devices.map((device) => <DeviceCard device={device} />)
-        )}
-      </ul>
+      <div id="remotes-section">
+        <div id="remotes-section-hdr">
+          <span id="remotes-section-title" data-i18n="section.remotes">
+            Remotes
+          </span>
+          <div class="acc-summary" style="gap:8px;">
+            <span id="remotes-count"></span>
+            <button
+              class="s-btn"
+              id="remote-popup"
+              onClick={() => modal.open()}
+            >
+              + Add
+            </button>
+          </div>
+          <div class="acc-chevron" id="remotes-chevron">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </div>
+        </div>
+        <div id="remotes-body">
+          <div class="remotes-panel">
+            <table id="remote-table">
+              <thead>
+                <tr>
+                  <th data-i18n="table.remote_id">ID</th>
+                  <th data-i18n="table.linked_devices">Devices</th>
+                  <th data-i18n="table.edit">Edit</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-      <RemoteWizardProvider remotes={remotesApi.data} devices={deviceApi.data}>
-        <Remotes remotes={remotesApi.data} />
-      </RemoteWizardProvider>
+      <Modal isOpen={modal.isOpen} onClose={modal.close}>
+        <AddRemoteModal modal={modal} />
+      </Modal>
     </section>
   );
 }

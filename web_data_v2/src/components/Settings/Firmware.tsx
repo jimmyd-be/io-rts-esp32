@@ -1,16 +1,11 @@
-import { InfoResponse } from "../../models/Types";
-
-//TODO: Implement FirmwareSettings
-export function FirmwareSettings({ data }: { data: InfoResponse | undefined }) {
+export function FirmwareSettings() {
   return (
     <div class="settings-row">
       <span class="row-label" data-i18n="settings.row.firmware">
         Firmware
       </span>
       <div class="row-right">
-        <span class="row-value">
-          {data?.version} · {data?.compile_date}
-        </span>
+        <span class="row-value" id="firmware-version"></span>
       </div>
     </div>
   );

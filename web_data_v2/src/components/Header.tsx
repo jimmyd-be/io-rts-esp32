@@ -1,5 +1,4 @@
 import { useEffect, useState } from "preact/hooks";
-import useI18n from "../hooks/useI18n";
 
 const LANGUAGE_STORAGE_KEY = "io-homecontrol-language";
 const THEME_STORAGE_KEY = "io-homecontrol-theme";
@@ -17,7 +16,6 @@ function getStoredValue(key: string, fallback: string) {
 }
 
 export function Header() {
-  const t = useI18n();
   const [language, setLanguage] = useState<string>(() =>
     getStoredValue(LANGUAGE_STORAGE_KEY, "en"),
   );
@@ -27,7 +25,6 @@ export function Header() {
 
   useEffect(() => {
     try {
-      t.setLang(language);
       window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     } catch {
       // Ignore storage failures (e.g. private mode or disabled storage).
@@ -49,12 +46,12 @@ export function Header() {
   return (
     <header class="app-header">
       <div class="header-left">
-        <div class="app-dot"></div>
+        <div class="app-dot" id="conn-dot"></div>
         <span class="app-wordmark">io-homecontrol</span>
       </div>
       <div class="header-right">
         <div id="pairing-badge" style="display:none"></div>
-        <span class="pill amber hidden"></span>
+        <span class="pill amber hidden" id="moving-pill"></span>
         <select
           class="hdr-btn"
           id="lang"
@@ -69,15 +66,16 @@ export function Header() {
         </select>
         <select
           class="hdr-btn"
+          id="theme-select"
           aria-label="Theme"
           style="border:none;cursor:pointer;"
           onChange={(e) => setTheme(e.currentTarget.value)}
           value={theme}
         >
-          <option value="charcoal">● Charcoal</option>
-          <option value="navy">◑ Navy</option>
-          <option value="light">○ Light</option>
-          <option value="purple">◆ Purple</option>
+          <option value="charcoal">Charcoal</option>
+          <option value="navy">Navy</option>
+          <option value="light">Light</option>
+          <option value="purple">Purple</option>
         </select>
       </div>
     </header>

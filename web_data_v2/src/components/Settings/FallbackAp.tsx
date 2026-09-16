@@ -1,76 +1,17 @@
 import { AccordionHead } from "../AccordionHead";
-import { useEffect, useState } from "preact/hooks";
-import { JSX } from "preact";
-import { useFallBackConfig } from "../../hooks/api/useFallBackConfig";
 
-export function FallbackApSettings(): JSX.Element {
-  const api = useFallBackConfig();
-
-  const [formValues, setFormValues] = useState({
-    enabled: false,
-    retries_boot: 0,
-    retries_running: 0,
-    ap_timeout_s: 0,
-    ap_ssid: "",
-    ap_running: false,
-    connected: false,
-  });
-
-  useEffect(() => {
-    if (api.loaded && api.data) {
-      setFormValues({
-        enabled: api.data.enabled,
-        retries_boot: api.data.retries_boot,
-        retries_running: api.data.retries_running,
-        ap_timeout_s: api.data.ap_timeout_s,
-        ap_ssid: api.data.ap_ssid,
-        ap_running: api.data.ap_running,
-        connected: api.data.connected,
-      });
-    }
-  }, [api.loaded, api.data]);
-
-  const handleFieldChange = (
-    field: keyof typeof formValues,
-    value: string | boolean | number,
-  ) => {
-    setFormValues((current) => ({
-      ...current,
-      [field]: value,
-    }));
-  };
-
+export function FallbackApSettings() {
   return (
-    <form
-      class="acc-row"
-      data-help="fallback-ap"
-      onSubmit={(e) => {
-        e.preventDefault();
-
-        fetch("/api/wifi/fallback", {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            enabled: formValues.enabled,
-            retries_boot: formValues.retries_boot,
-            retries_running: formValues.retries_running,
-            ap_timeout_s: formValues.ap_timeout_s,
-            ap_ssid: formValues.ap_ssid,
-          }),
-        }).then((r) => {
-          // TODO handle save status
-        });
-      }}
-    >
+    <div class="acc-row" data-help="fallback-ap">
       <AccordionHead
         title="Fallback AP"
         titleI18n="settings.row.fallback-ap"
         helpLabel="Help for fallback-ap"
-        helpKey={"fallback-ap"}
-        summary={<span class="acc-sum-val">{formValues.ap_ssid}</span>}
+        summary={
+          <span class="acc-sum-val" id="acc-fap-val">
+            off
+          </span>
+        }
       >
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
           <span
@@ -79,33 +20,20 @@ export function FallbackApSettings(): JSX.Element {
           >
             Enable fallback hotspot
           </span>
-          <input
-            type="checkbox"
-            name="enabled"
-            checked={formValues.enabled}
-            onChange={(e) =>
-              handleFieldChange(
-                "enabled",
-                (e.currentTarget as HTMLInputElement).checked,
-              )
-            }
-          />
+          <div class="s-toggle on" id="fallback-toggle"></div>
+          <input type="checkbox" id="fallback-enabled" style="display:none" />
         </div>
         <div style="display:flex;gap:8px;">
           <div style="flex:2">
-            <label class={"label-title"} data-i18n="label.hotspot-name">
+            <label
+              style="font-size:11px;color:var(--text3);"
+              data-i18n="label.hotspot-name"
+            >
               Hotspot name (SSID)
             </label>
             <input
               type="text"
-              name="ap_ssid"
-              value={formValues.ap_ssid}
-              onInput={(e) =>
-                handleFieldChange(
-                  "ap_ssid",
-                  (e.currentTarget as HTMLInputElement).value,
-                )
-              }
+              id="fallback-ap-ssid"
               class="s-input"
               maxLength={32}
               placeholder="io-rts-setup"
@@ -113,19 +41,15 @@ export function FallbackApSettings(): JSX.Element {
             />
           </div>
           <div style="flex:1">
-            <label class={"label-title"} data-i18n="label.timeout-s">
+            <label
+              style="font-size:11px;color:var(--text3);"
+              data-i18n="label.timeout-s"
+            >
               Timeout (s)
             </label>
             <input
               type="number"
-              name="ap_timeout_s"
-              value={formValues.ap_timeout_s}
-              onInput={(e) =>
-                handleFieldChange(
-                  "ap_timeout_s",
-                  Number((e.currentTarget as HTMLInputElement).value),
-                )
-              }
+              id="fallback-timeout"
               class="s-input"
               min={0}
               max={3600}
@@ -136,19 +60,15 @@ export function FallbackApSettings(): JSX.Element {
         </div>
         <div style="display:flex;gap:8px;">
           <div style="flex:1">
-            <label class={"label-title"} data-i18n="label.retries-boot">
+            <label
+              style="font-size:11px;color:var(--text3);"
+              data-i18n="label.retries-boot"
+            >
               Retries (boot)
             </label>
             <input
               type="number"
-              name="retries_boot"
-              value={formValues.retries_boot}
-              onInput={(e) =>
-                handleFieldChange(
-                  "retries_boot",
-                  Number((e.currentTarget as HTMLInputElement).value),
-                )
-              }
+              id="fallback-retries-boot"
               class="s-input"
               min={1}
               max={20}
@@ -157,19 +77,15 @@ export function FallbackApSettings(): JSX.Element {
             />
           </div>
           <div style="flex:1">
-            <label class={"label-title"} data-i18n="label.retries-running">
+            <label
+              style="font-size:11px;color:var(--text3);"
+              data-i18n="label.retries-running"
+            >
               Retries (running)
             </label>
             <input
               type="number"
-              name="retries_running"
-              value={formValues.retries_running}
-              onInput={(e) =>
-                handleFieldChange(
-                  "retries_running",
-                  Number((e.currentTarget as HTMLInputElement).value),
-                )
-              }
+              id="fallback-retries-running"
               class="s-input"
               min={1}
               max={20}
@@ -180,39 +96,45 @@ export function FallbackApSettings(): JSX.Element {
         </div>
         <div style="display:flex;gap:8px;">
           <div style="flex:1">
-            <label class={"label-title"} data-i18n="label.hotspot-password">
+            <label
+              style="font-size:11px;color:var(--text3);"
+              data-i18n="label.hotspot-password"
+            >
               Hotspot password (min 8 chars, blank = open)
             </label>
             <input
               type="password"
-              name="password"
+              id="fallback-ap-password-new"
               class="s-input"
               placeholder="Blank = clear password"
               style="margin-top:4px;"
             />
           </div>
           <div style="flex:1">
-            <label class={"label-title"} data-i18n="label.confirm-password">
+            <label
+              style="font-size:11px;color:var(--text3);"
+              data-i18n="label.confirm-password"
+            >
               Confirm password
             </label>
             <input
               type="password"
-              name="password_confirm"
+              id="fallback-ap-password-confirm"
               class="s-input"
               placeholder="Confirm"
               style="margin-top:4px;"
             />
           </div>
         </div>
-        <div class="field-status"></div>
+        <div class="field-status" id="fallback-save-status"></div>
         <button
           class="s-btn primary"
-          type="submit"
+          id="fallback-save"
           data-i18n="button.save-fallback-ap"
         >
           Save Fallback AP
         </button>
       </AccordionHead>
-    </form>
+    </div>
   );
 }
