@@ -1,7 +1,40 @@
 import { AccordionHead } from "../AccordionHead";
+import useApi from "../../hooks/useApi";
+import { otaKeyResponse, SomfyConfig } from "../../models/Types";
 
 export function SomfySettings() {
+
+  const otaData = useApi<otaKeyResponse>({
+    endpoint: "/api/ota/key",
+    method: "GET",
+  });
+
+  const api = useApi<SomfyConfig>({
+    endpoint: "/api/somfy/credentials",
+    method: "GET",
+  });
+
   return (
+    <form onSubmit={(e) => {
+      e.preventDefault(); // Prevent the default form submission
+      const formValues = e.currentTarget.elements;
+
+      const fd = new FormData(e.currentTarget);
+      const data = Object.fromEntries(fd.entries());
+      console.log();
+
+      fetch("/api/somfy/credentials", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          "X-OTA-Key": otaData.data?.key || "",
+        },
+      }).then((r) => {
+        //TODO handle Response
+      });
+
+    }}>
     <div class="acc-row" data-help="somfy">
       <AccordionHead
         title="Somfy / Overkiz"
@@ -17,7 +50,8 @@ export function SomfySettings() {
           </label>
           <input
             type="text"
-            id="somfy-email"
+            name="email"
+            value={api.data?.email}
             class="s-input"
             placeholder="your@somfy.com"
             style="margin-top:4px;"
@@ -33,7 +67,7 @@ export function SomfySettings() {
           </label>
           <input
             type="password"
-            id="somfy-password"
+            name="password"
             class="s-input"
             placeholder="••••••••"
             style="margin-top:4px;"
@@ -49,6 +83,7 @@ export function SomfySettings() {
             Save credentials
           </button>
           <button
+            type={"submit"}
             class="s-btn"
             id="somfy-import-btn"
             data-i18n="button.import-devices-btn"
@@ -61,6 +96,6 @@ export function SomfySettings() {
           style="font-size:11px;color:var(--text3);min-height:16px;"
         ></span>
       </AccordionHead>
-    </div>
+    </div></form>
   );
 }
