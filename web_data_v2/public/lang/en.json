@@ -396,5 +396,6 @@
   "popup.transit_saved": "Transition time saved.",
   "popup.transit_done": "Calibration done: {s} s",
   "popup.transit_failed": "Calibration failed.",
-  "popup.transit_cancelled": "Calibration cancelled."
+  "popup.transit_cancelled": "Calibration cancelled.",
+  "label.enable-fallback-ap": "Enable fallback AP"
 }
