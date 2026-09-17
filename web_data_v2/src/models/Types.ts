@@ -44,6 +44,12 @@ export interface MqttConfig {
   status: string;
 }
 
+export interface WifiScanResult {
+  ssid: string;
+  rssi: number;
+  auth: number;
+}
+
 export interface SomfyConfig {
   email: string;
   password: string;

@@ -1,11 +1,14 @@
 import { AccordionHead } from "../AccordionHead";
 import useApi from "../../hooks/useApi";
-import { otaKeyResponse, Types } from "../../models/Types";
+import { otaKeyResponse, Types, WifiScanResult } from "../../models/Types";
 import { useEffect, useState } from "preact/hooks";
 import useI18n from "../../hooks/useI18n";
 import { JSX } from "preact";
 
 export function WifiSettings(): JSX.Element {
+
+  const [scan, setScan] = useState(false);
+
   const wifiData = useApi<Types>({ endpoint: "/api/wifi/config", method: "GET" });
   const otaData = useApi<otaKeyResponse>({
     endpoint: "/api/ota/key",
@@ -26,6 +29,21 @@ export function WifiSettings(): JSX.Element {
       }));
     }
   }, [wifiData.loaded, wifiData.data]);
+
+  // useEffect(() => {
+  //   if (scan) {
+  //     // Perform scan logic here
+  //
+  //     await fetch("/api/wifi/scan", {
+  //       method: "GET"}).then((r) => {
+  //       if (r.ok) {
+  //         const data = await r.json() as WifiScanResult;
+  //
+  //     }
+  //
+  //     setScan(false);
+  //   }
+  // }, [scan]);
 
   const handleFieldChange = (field: "ssid" | "password", value: string) => {
     setFormValues((current) => ({
@@ -108,7 +126,7 @@ export function WifiSettings(): JSX.Element {
                 type="button"
                 id="wifi-scan-btn"
                 data-i18n="button.scan"
-                onClick={() => scan()}
+                onClick={() => setScan(true)}
               >
                 Scan
               </button>
