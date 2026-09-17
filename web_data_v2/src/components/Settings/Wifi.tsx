@@ -22,26 +22,27 @@ export function WifiSettings(): JSX.Element {
   }, [wifiData.data])
 
   return (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      // Handle form submission
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        // Handle form submission
 
-      const formData = new FormData(e.currentTarget);
+        const formData = new FormData(e.currentTarget);
 
-      fetch("/api/wifi/config", {
-        method: "POST",
-        headers: {
-          "X-OTA-Key": otaData.data?.key,
-        },
-        body: JSON.stringify({
-          ssid: formData.get("wifi-ssid") as string,
-          password: formData.get("wifi-password") as string,
-        }),
-      }).then((r) => {
-        //TODo handle Response status: restarting
-      });
-
-    }}>
+        fetch("/api/wifi/config", {
+          method: "POST",
+          headers: {
+            "X-OTA-Key": otaData.data?.key,
+          },
+          body: JSON.stringify({
+            ssid: formData.get("wifi-ssid") as string,
+            password: formData.get("wifi-password") as string,
+          }),
+        }).then((r) => {
+          //TODo handle Response status: restarting
+        });
+      }}
+    >
       <div class="acc-row" data-help="wifi">
         <AccordionHead
           title="WiFi"
@@ -62,7 +63,7 @@ export function WifiSettings(): JSX.Element {
               >
                 {wifiData.loaded && wifiData.data
                   ? t.t("status.wifi.connected")
-                  : t.t("status.wifi.disconnected")}
+                  : t.t("status.wifi.not-connected")}
               </span>
             </>
           }
