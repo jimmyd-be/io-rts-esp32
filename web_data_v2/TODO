@@ -12,14 +12,13 @@ web UI update
 Firmware update
 bakup and restore
 import iohomecontrol
+Syslog
 Devices
 Remotes
 pairing feature
-wifi scanning
 
+i18n
 Cleanup html code
 Cleanup css
 Warning messages on form submit
 Toast messages on form submit
-styling checkbox
-styling disabled fields
