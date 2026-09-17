@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 
+// Modern, robust i18n hook for this project.
+// - reads preferred language from localStorage key 'io-homecontrol-language'
+// - fetches translation JSON from the server (tries several locations)
+// - caches fetched languages
+// - provides t(key, params) that returns translated value if present, else fallback, else key
+
 type I18nDict = Record<string, string>;
 
 export interface UseI18nResult {
@@ -12,24 +18,38 @@ export interface UseI18nResult {
 }
 
 const DEFAULT_SUPPORTED = ['nl', 'en', 'de', 'fr'];
+const STORAGE_KEY = 'io-homecontrol-language';
 
 export default function useI18n(supported: string[] = DEFAULT_SUPPORTED): UseI18nResult {
-  const I18N = useRef<I18nDict>({});
-  const FALLBACK = useRef<I18nDict>({});
-  const cache = useRef<Record<string, I18nDict>>({});
   const [currentLang, setCurrentLang] = useState<string>('en');
+  const [i18nState, setI18nState] = useState<I18nDict>({});
+  const [fallbackState, setFallbackState] = useState<I18nDict>({});
+  const cache = useRef<Record<string, I18nDict>>({});
 
-  const _loadLang = useCallback(async (lang: string): Promise<I18nDict> => {
+  const candidatesFor = (lang: string) => [
+    `/lang/${lang}.json`,
+  ];
+
+  const loadLang = useCallback(async (lang: string): Promise<I18nDict> => {
     if (cache.current[lang]) return cache.current[lang];
-    try {
-      const res = await fetch(`/lang/${lang}.json`);
-      const data = res.ok ? await res.json() : {};
-      cache.current[lang] = data;
-      return data;
-    } catch (e) {
-      cache.current[lang] = {};
-      return {};
+
+    for (const url of candidatesFor(lang)) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) continue;
+        const json = await res.json();
+        if (json && typeof json === 'object') {
+          cache.current[lang] = json as I18nDict;
+          return cache.current[lang];
+        }
+      } catch (e) {
+        // try next
+        continue;
+      }
     }
+
+    cache.current[lang] = {};
+    return {};
   }, []);
 
   const interpolate = useCallback((text: any, params: Record<string, any> = {}) => {
@@ -40,9 +60,15 @@ export default function useI18n(supported: string[] = DEFAULT_SUPPORTED): UseI18
   }, []);
 
   const t = useCallback((key: string, params: Record<string, any> = {}) => {
-    const value = I18N.current[key] ?? FALLBACK.current[key] ?? key;
-    return interpolate(value, params);
-  }, [interpolate]);
+    // Prefer exact presence in current language, then fallback; otherwise return key
+    if (Object.prototype.hasOwnProperty.call(i18nState, key)) {
+      return interpolate(i18nState[key], params);
+    }
+    if (Object.prototype.hasOwnProperty.call(fallbackState, key)) {
+      return interpolate(fallbackState[key], params);
+    }
+    return key;
+  }, [i18nState, fallbackState, interpolate]);
 
   const apply = useCallback(() => {
     if (typeof document === 'undefined') return;
@@ -52,7 +78,7 @@ export default function useI18n(supported: string[] = DEFAULT_SUPPORTED): UseI18
       if (!k) return;
       const text = t(k);
 
-      // find first text node child
+      // preserve children except first text node
       let textNode: ChildNode | null = null;
       for (let i = 0; i < el.childNodes.length; i++) {
         if (el.childNodes[i].nodeType === Node.TEXT_NODE) {
@@ -67,71 +93,62 @@ export default function useI18n(supported: string[] = DEFAULT_SUPPORTED): UseI18
     document.querySelectorAll<HTMLElement>('[data-i18n-placeholder]').forEach((el) => {
       const k = (el.dataset as any).i18nPlaceholder as string | undefined;
       if (!k) return;
-      // @ts-ignore - many elements have placeholder
-      (el as any).placeholder = t(k);
+      try { (el as any).placeholder = t(k); } catch (e) { /* ignore */ }
     });
 
-    try {
-      document.title = t('page.title');
-    } catch (e) {
-      // ignore
-    }
+    try { document.title = t('page.title'); } catch (e) { /* ignore */ }
   }, [t]);
 
   const setLang = useCallback(async (lang: string) => {
-    const nextLang = supported.includes(lang) ? lang : 'en';
-    const data = await _loadLang(nextLang);
-    I18N.current = data;
-    setCurrentLang(nextLang);
-    localStorage.setItem("io-homecontrol-language", nextLang);
+    const next = supported.includes(lang) ? lang : 'en';
+    const dict = await loadLang(next);
+    setI18nState(dict || {});
+    setCurrentLang(next);
+    try { localStorage.setItem(STORAGE_KEY, next); } catch (e) { /* ignore */ }
     apply();
-    window.dispatchEvent(new CustomEvent('i18n:changed', { detail: { lang: nextLang } }));
-  }, [supported, _loadLang, apply]);
+    window.dispatchEvent(new CustomEvent('i18n:changed', { detail: { lang: next } }));
+  }, [supported, loadLang, apply]);
 
   const getLang = useCallback(() => currentLang, [currentLang]);
 
-  // initial load
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const saved = localStorage.getItem("io-homecontrol-language");
-      const auto = (typeof navigator !== 'undefined' ? (navigator.language || 'en') : 'en').slice(0, 2).toLowerCase();
+      let saved: string | null = null;
+      try { saved = localStorage.getItem(STORAGE_KEY); } catch (e) { saved = null; }
+      const auto = (typeof navigator !== 'undefined' ? (navigator.language || 'en') : 'en').slice(0,2).toLowerCase();
       const initial = saved || auto;
       const lang = supported.includes(initial) ? initial : 'en';
 
-      // try set select element if present
       try {
         const select = document.getElementById('lang') as HTMLSelectElement | null;
         if (select) select.value = lang;
-      } catch (e) {
-        // ignore
-      }
+      } catch (e) { /* ignore */ }
 
       if (!mounted) return;
 
       if (lang === 'en') {
-        FALLBACK.current = await _loadLang('en');
-        I18N.current = FALLBACK.current;
+        const en = await loadLang('en');
+        setFallbackState(en || {});
+        setI18nState(en || {});
         setCurrentLang('en');
-        localStorage.setItem("io-homecontrol-language", 'en');
+        try { localStorage.setItem(STORAGE_KEY, 'en'); } catch (e) { /* ignore */ }
         apply();
         window.dispatchEvent(new CustomEvent('i18n:changed', { detail: { lang: 'en' } }));
       } else {
-        const [enData, langData] = await Promise.all([_loadLang('en'), _loadLang(lang)]);
-        FALLBACK.current = enData;
-        I18N.current = langData;
+        const [en, langDict] = await Promise.all([loadLang('en'), loadLang(lang)]);
+        if (!mounted) return;
+        setFallbackState(en || {});
+        setI18nState(langDict || {});
         setCurrentLang(lang);
-        localStorage.setItem("io-homecontrol-language", lang);
+        try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) { /* ignore */ }
         apply();
         window.dispatchEvent(new CustomEvent('i18n:changed', { detail: { lang } }));
       }
     })();
 
-    return () => {
-      mounted = false;
-    };
-  }, [_loadLang, supported, apply]);
+    return () => { mounted = false; };
+  }, [loadLang, supported, apply]);
 
-
-  return { t, setLang, getLang, currentLang, supported } as UseI18nResult;
+  return { t, setLang, getLang, currentLang, supported, apply } as UseI18nResult;
 }
