@@ -1,7 +1,25 @@
 import { AccordionHead } from "../AccordionHead";
+import useApi from "../../hooks/useApi";
+import { FallBackConfig } from "../../models/Types";
+import { Formik } from "formik";
 
 export function FallbackApSettings() {
+
+  const api = useApi<FallBackConfig>({
+    endpoint: "/api/wifi/fallback",
+    method: "GET",
+  });
+
   return (
+    <Formik initialValues={{
+      enabled: api.data?.enabled,
+      retries_boot: api.data?.retries_boot,
+      retries_running: api.data?.retries_running,
+      ap_timeout_s: api.data?.ap_timeout_s,
+      ap_ssid: api.data?.ap_ssid,
+      ap_running: api.data?.ap_running,
+      connected: api.data?.connected
+      }} onSubmit={(values) => {}}>
     <div class="acc-row" data-help="fallback-ap">
       <AccordionHead
         title="Fallback AP"
@@ -9,7 +27,7 @@ export function FallbackApSettings() {
         helpLabel="Help for fallback-ap"
         summary={
           <span class="acc-sum-val" id="acc-fap-val">
-            off
+            {api.data?.ap_ssid}
           </span>
         }
       >
@@ -136,5 +154,6 @@ export function FallbackApSettings() {
         </button>
       </AccordionHead>
     </div>
+    </Formik>
   );
 }

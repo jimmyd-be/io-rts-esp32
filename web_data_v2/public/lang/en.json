@@ -1,6 +1,6 @@
 {
-  "page.title": "io-control",
-  "header.title": "io-control",
+  "page.title": "io-homecontrol",
+  "header.title": "io-homecontrol",
   "nav.devices": "Devices",
   "nav.help": "Log",
   "nav.settings": "Settings",
@@ -137,7 +137,6 @@
   "settings.row.firmware-update": "Firmware Update",
   "settings.row.web-update": "Web UI Update",
   "settings.row.backup": "Backup / Restore",
-  "settings.row.pairing-log": "Pairing Log",
   "settings.row.reboot": "Reboot Device",
   "settings.row.software-updates": "Software updates",
   "label.network-name-ssid": "Network name (SSID)",
@@ -182,7 +181,6 @@
   "button.import-devices-btn": "Import devices",
   "button.upload-firmware": "Upload Firmware",
   "button.upload-web-ui": "Upload Web UI",
-  "button.download": "Download",
   "button.export-backup": "Export Backup",
   "button.import-backup": "Import Backup",
   "button.factory-reset": "Factory Reset",
@@ -397,7 +395,5 @@
   "popup.transit_done": "Calibration done: {s} s",
   "popup.transit_failed": "Calibration failed.",
   "popup.transit_cancelled": "Calibration cancelled.",
-  "label.enable-fallback-ap": "Enable fallback AP",
-  "button.capture_remote": "Capture",
-  "button.enter_manually": "Enter manually"
+  "label.enable-fallback-ap": "Enable fallback AP"
 }
