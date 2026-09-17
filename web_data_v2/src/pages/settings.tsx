@@ -14,6 +14,7 @@ import { BackupSettings } from "../components/Settings/Backup";
 import { ImportSettings } from "../components/Settings/Import";
 import { RebootSettings } from "../components/Settings/Reboot";
 import { SoftwareUpdateSettings } from "../components/Settings/SoftwareUpdate";
+import { FirmwareUpdateSettings } from "../components/Settings/FirmwareUpdate";
 
 export function Settings() {
   return (
@@ -68,6 +69,7 @@ export function Settings() {
           <FirmwareSettings />
           <WebUISettings />
           <WebUIUpdateSettings />
+          <FirmwareUpdateSettings />
           <BackupSettings />
           <ImportSettings />
           <RebootSettings />
