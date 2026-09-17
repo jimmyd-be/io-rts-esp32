@@ -44,6 +44,21 @@ export interface MqttConfig {
   status: string;
 }
 
+export interface SomfyConfig {
+  email: string;
+  password: string;
+}
+
+export interface SyslogConfig {
+  enabled: boolean;
+  server: string;
+  port: number;
+  facility: number;
+  min_level: number;
+  id: string;
+  format: string;
+}
+
 
 export interface InfoResponse {
   version: string;

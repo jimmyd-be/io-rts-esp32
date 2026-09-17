@@ -9,7 +9,6 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "formik": "^2.4.9",
     "preact": "^10.26.9",
     "preact-iso": "^2.12.2"
   },
