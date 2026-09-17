@@ -1,6 +1,16 @@
 import { AccordionHead } from "../AccordionHead";
+import useApi from "../../hooks/useApi";
+import { MqttConfig } from "../../models/Types";
+import useI18n from "../../hooks/useI18n";
 
 export function MqttSettings() {
+
+  const t = useI18n();
+
+  const api = useApi<MqttConfig>({
+    endpoint: "/api/mqtt",
+    method: "GET"
+  });
   return (
     <div class="acc-row" data-help="mqtt">
       <AccordionHead
@@ -10,9 +20,11 @@ export function MqttSettings() {
         summary={
           <>
             <span class="acc-sum-val" id="acc-mqtt-val">
-              off
+              {api.data?.server}
             </span>
-            <span class="row-status" id="mqtt-conn-status"></span>
+            <span class="row-status" id="mqtt-conn-status">
+              {api.data?.status}
+            </span>
           </>
         }
       >

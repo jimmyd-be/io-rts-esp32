@@ -20,3 +20,26 @@ export interface NetworkConfig {
   actual_gateway: string;
   actual_dns1: string;
 }
+
+export interface FallBackConfig {
+  enabled: boolean;
+  retries_boot: number;
+  retries_running: number;
+  ap_timeout_s: number;
+  ap_ssid: string;
+  ap_running: boolean;
+  connected: boolean;
+}
+
+export interface MqttConfig {
+  user: string;
+  server: string;
+  port: number;
+  password: string;
+  client_id: string;
+  topic: string;
+  discovery: string;
+  connected: boolean;
+  enabled: boolean;
+  status: string;
+}
