@@ -18,7 +18,6 @@ export function AccordionHead({
   children,
 }: AccordionHeadProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const {t} = useI18n();
 
   return (
     <>
@@ -27,7 +26,7 @@ export function AccordionHead({
         onClick={() => setIsOpen((value) => !value)}
       >
         <span class="row-label" data-i18n={titleI18n}>
-          {t(titleI18n)}
+          {title}
           {helpLabel ? (
             <button class="help-btn" aria-label={helpLabel}>
               ?
