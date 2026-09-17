@@ -1,4 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
+import useI18n from "../hooks/useI18n";
 
 const LANGUAGE_STORAGE_KEY = "io-homecontrol-language";
 const THEME_STORAGE_KEY = "io-homecontrol-theme";

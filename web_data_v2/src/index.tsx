@@ -1,4 +1,5 @@
 import { render } from "preact";
+import { useEffect } from "preact/hooks";
 import { LocationProvider, Router, Route } from "preact-iso";
 
 import { Header } from "./components/Header.tsx";
@@ -10,6 +11,7 @@ import { Log } from "./pages/log";
 import { Settings } from "./pages/settings";
 
 export function App() {
+
   return (
     <LocationProvider>
       <Header />
