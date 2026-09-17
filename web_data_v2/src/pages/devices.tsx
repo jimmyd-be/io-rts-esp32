@@ -1,11 +1,9 @@
 import { useState } from "preact/hooks";
 import { AddRemoteModal } from "../components/Modals/AddRemote";
 import { Modal } from "../components/Modal";
-import { useModal } from "../hooks/useModal";
 
 export function Devices() {
 
-  const modal = useModal();
 
   return (
     <section class="view active" id="view-devices">
@@ -37,7 +35,7 @@ export function Devices() {
             <button
               class="s-btn"
               id="remote-popup"
-              onClick={() => modal.open()}
+              // onClick={() => modal.open()}
             >
               + Add
             </button>
@@ -71,9 +69,9 @@ export function Devices() {
         </div>
       </div>
 
-      <Modal isOpen={modal.isOpen} onClose={modal.close}>
-        <AddRemoteModal modal={modal} />
-      </Modal>
+      {/*<Modal isOpen={modal.isOpen} onClose={modal.close}>*/}
+      {/*  <AddRemoteModal modal={modal} />*/}
+      {/*</Modal>*/}
     </section>
   );
 }
