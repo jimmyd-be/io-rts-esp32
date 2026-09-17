@@ -339,6 +339,14 @@ main::-webkit-scrollbar {
   border-color: var(--amber-glow);
 }
 
+.success-text {
+  color: var(--green);
+}
+
+.error-text {
+  color: var(--red);
+}
+
 #device-list li.inactive {
   opacity: 0.38;
   filter: grayscale(1);
