@@ -1,9 +1,10 @@
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
+import useI18n from "../hooks/useI18n";
 
 type AccordionHeadProps = {
   title: ComponentChildren;
-  titleI18n?: string;
+  titleI18n: string;
   helpLabel?: string;
   summary?: ComponentChildren;
   children?: ComponentChildren;
@@ -17,12 +18,16 @@ export function AccordionHead({
   children,
 }: AccordionHeadProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const {t} = useI18n();
 
   return (
     <>
-      <div class={isOpen ? "acc-head open" : "acc-head"} onClick={() => setIsOpen((value) => !value)}>
+      <div
+        class={isOpen ? "acc-head open" : "acc-head"}
+        onClick={() => setIsOpen((value) => !value)}
+      >
         <span class="row-label" data-i18n={titleI18n}>
-          {title}
+          {t(titleI18n)}
           {helpLabel ? (
             <button class="help-btn" aria-label={helpLabel}>
               ?
