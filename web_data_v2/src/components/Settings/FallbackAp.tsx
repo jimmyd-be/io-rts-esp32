@@ -1,33 +1,81 @@
 import { AccordionHead } from "../AccordionHead";
 import useApi from "../../hooks/useApi";
 import { FallBackConfig } from "../../models/Types";
-import { Formik } from "formik";
+import { useEffect, useState } from "preact/hooks";
+import { JSX } from "preact";
 
-export function FallbackApSettings() {
-
+export function FallbackApSettings(): JSX.Element {
   const api = useApi<FallBackConfig>({
     endpoint: "/api/wifi/fallback",
     method: "GET",
   });
 
+  const [formValues, setFormValues] = useState({
+    enabled: false,
+    retries_boot: 0,
+    retries_running: 0,
+    ap_timeout_s: 0,
+    ap_ssid: "",
+    ap_running: false,
+    connected: false,
+  });
+
+  useEffect(() => {
+    if (api.loaded && api.data) {
+      setFormValues({
+        enabled: api.data.enabled,
+        retries_boot: api.data.retries_boot,
+        retries_running: api.data.retries_running,
+        ap_timeout_s: api.data.ap_timeout_s,
+        ap_ssid: api.data.ap_ssid,
+        ap_running: api.data.ap_running,
+        connected: api.data.connected,
+      });
+    }
+  }, [api.loaded, api.data]);
+
+  const handleFieldChange = (
+    field: keyof typeof formValues,
+    value: string | boolean | number,
+  ) => {
+    setFormValues((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
   return (
-    <Formik initialValues={{
-      enabled: api.data?.enabled,
-      retries_boot: api.data?.retries_boot,
-      retries_running: api.data?.retries_running,
-      ap_timeout_s: api.data?.ap_timeout_s,
-      ap_ssid: api.data?.ap_ssid,
-      ap_running: api.data?.ap_running,
-      connected: api.data?.connected
-      }} onSubmit={(values) => {}}>
-    <div class="acc-row" data-help="fallback-ap">
+    <form
+      class="acc-row"
+      data-help="fallback-ap"
+      onSubmit={(e) => {
+        e.preventDefault();
+
+        fetch("/api/wifi/fallback", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            enabled: formValues.enabled,
+            retries_boot: formValues.retries_boot,
+            retries_running: formValues.retries_running,
+            ap_timeout_s: formValues.ap_timeout_s,
+            ap_ssid: formValues.ap_ssid,
+          }),
+        }).then((r) => {
+          // TODO handle save status
+        });
+      }}
+    >
       <AccordionHead
         title="Fallback AP"
         titleI18n="settings.row.fallback-ap"
         helpLabel="Help for fallback-ap"
         summary={
           <span class="acc-sum-val" id="acc-fap-val">
-            {api.data?.ap_ssid}
+            {formValues.ap_ssid}
           </span>
         }
       >
@@ -38,8 +86,15 @@ export function FallbackApSettings() {
           >
             Enable fallback hotspot
           </span>
-          <div class="s-toggle on" id="fallback-toggle"></div>
-          <input type="checkbox" id="fallback-enabled" style="display:none" />
+          <input
+            type="checkbox"
+            id="fallback-enabled"
+            name="enabled"
+            checked={formValues.enabled}
+            onChange={(e) =>
+              handleFieldChange("enabled", (e.currentTarget as HTMLInputElement).checked)
+            }
+          />
         </div>
         <div style="display:flex;gap:8px;">
           <div style="flex:2">
@@ -52,6 +107,11 @@ export function FallbackApSettings() {
             <input
               type="text"
               id="fallback-ap-ssid"
+              name="ap_ssid"
+              value={formValues.ap_ssid}
+              onInput={(e) =>
+                handleFieldChange("ap_ssid", (e.currentTarget as HTMLInputElement).value)
+              }
               class="s-input"
               maxLength={32}
               placeholder="io-rts-setup"
@@ -68,6 +128,11 @@ export function FallbackApSettings() {
             <input
               type="number"
               id="fallback-timeout"
+              name="ap_timeout_s"
+              value={formValues.ap_timeout_s}
+              onInput={(e) =>
+                handleFieldChange("ap_timeout_s", Number((e.currentTarget as HTMLInputElement).value))
+              }
               class="s-input"
               min={0}
               max={3600}
@@ -87,6 +152,11 @@ export function FallbackApSettings() {
             <input
               type="number"
               id="fallback-retries-boot"
+              name="retries_boot"
+              value={formValues.retries_boot}
+              onInput={(e) =>
+                handleFieldChange("retries_boot", Number((e.currentTarget as HTMLInputElement).value))
+              }
               class="s-input"
               min={1}
               max={20}
@@ -104,6 +174,11 @@ export function FallbackApSettings() {
             <input
               type="number"
               id="fallback-retries-running"
+              name="retries_running"
+              value={formValues.retries_running}
+              onInput={(e) =>
+                handleFieldChange("retries_running", Number((e.currentTarget as HTMLInputElement).value))
+              }
               class="s-input"
               min={1}
               max={20}
@@ -123,6 +198,7 @@ export function FallbackApSettings() {
             <input
               type="password"
               id="fallback-ap-password-new"
+              name="password"
               class="s-input"
               placeholder="Blank = clear password"
               style="margin-top:4px;"
@@ -138,6 +214,7 @@ export function FallbackApSettings() {
             <input
               type="password"
               id="fallback-ap-password-confirm"
+              name="password_confirm"
               class="s-input"
               placeholder="Confirm"
               style="margin-top:4px;"
@@ -147,13 +224,13 @@ export function FallbackApSettings() {
         <div class="field-status" id="fallback-save-status"></div>
         <button
           class="s-btn primary"
+          type="submit"
           id="fallback-save"
           data-i18n="button.save-fallback-ap"
         >
           Save Fallback AP
         </button>
       </AccordionHead>
-    </div>
-    </Formik>
+    </form>
   );
 }

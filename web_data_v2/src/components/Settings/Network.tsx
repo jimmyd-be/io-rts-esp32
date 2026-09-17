@@ -1,9 +1,14 @@
 import { AccordionHead } from "../AccordionHead";
 import useApi from "../../hooks/useApi";
-import { NetworkConfig } from "../../models/Types";
+import { NetworkConfig, otaKeyResponse } from "../../models/Types";
 import { useState } from "preact/hooks";
 
 export function NetworkSettings() {
+
+  const otaData = useApi<otaKeyResponse>({
+    endpoint: "/api/ota/key",
+    method: "GET",
+  });
 
   const api = useApi<NetworkConfig>({
     endpoint: "/api/network/config",
@@ -13,6 +18,25 @@ export function NetworkSettings() {
   const [dhcpEnabled, setDhcpEnabled] = useState(api.data ? api.data.dhcp : true);
 
   return (
+    <form onSubmit={(e) => {
+      e.preventDefault(); // Prevent the default form submission
+      const formValues = e.currentTarget.elements;
+
+      const fd = new FormData(e.currentTarget);
+      const data = Object.fromEntries(fd.entries());
+      console.log();
+
+      fetch("//api/network/config", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+          "X-OTA-Key": otaData.data?.key || "",
+        },
+      }).then((r) => {
+        //TODO handle Response
+      });
+    }}>
     <div class="acc-row" data-help="network">
       <AccordionHead
         title="Network"
@@ -154,6 +178,7 @@ export function NetworkSettings() {
           </div>
         </div>
         <button
+          type={"submit"}
           class="s-btn primary"
           id="net-config-save"
           data-i18n="button.save-network"
@@ -164,6 +189,6 @@ export function NetworkSettings() {
           ⚠ Device will restart after saving.
         </p>
       </AccordionHead>
-    </div>
+    </div></form>
   );
 }
