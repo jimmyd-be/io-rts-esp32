@@ -17,6 +17,8 @@ function getStoredValue(key: string, fallback: string) {
 }
 
 export function Header() {
+
+  const t = useI18n();
   const [language, setLanguage] = useState<string>(() =>
     getStoredValue(LANGUAGE_STORAGE_KEY, "en"),
   );
@@ -26,6 +28,7 @@ export function Header() {
 
   useEffect(() => {
     try {
+      t.setLang(language);
       window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     } catch {
       // Ignore storage failures (e.g. private mode or disabled storage).

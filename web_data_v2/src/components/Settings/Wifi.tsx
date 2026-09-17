@@ -4,6 +4,7 @@ import useApi from "../../hooks/useApi";
 import { otaKeyResponse, Types } from "../../models/Types";
 import { useEffect, useState } from "preact/hooks";
 import useI18n from "../../hooks/useI18n";
+import { Formik } from "formik";
 
 export function WifiSettings(): JSX.Element {
   const wifiData = useApi<Types>({endpoint: "/api/wifi/config",  method: "GET" });
@@ -22,21 +23,20 @@ export function WifiSettings(): JSX.Element {
   }, [wifiData.data])
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        // Handle form submission
-
-        const formData = new FormData(e.currentTarget);
-
+    <Formik
+      initialValues={{
+        ssid: wifiData.data?.ssid,
+        password: "",
+      }}
+      onSubmit={(values) => {
         fetch("/api/wifi/config", {
           method: "POST",
           headers: {
             "X-OTA-Key": otaData.data?.key,
           },
           body: JSON.stringify({
-            ssid: formData.get("wifi-ssid") as string,
-            password: formData.get("wifi-password") as string,
+            ssid: values.ssid,
+            password: values.password,
           }),
         }).then((r) => {
           //TODo handle Response status: restarting
@@ -80,7 +80,7 @@ export function WifiSettings(): JSX.Element {
                 <input
                   type="text"
                   id="wifi-ssid"
-                  name="wifi-ssid"
+                  name="ssid"
                   value={ssid}
                   class="s-input"
                   placeholder="Network name"
@@ -121,7 +121,7 @@ export function WifiSettings(): JSX.Element {
             <input
               type="password"
               id="wifi-password"
-              name="wifi-password"
+              name="password"
               class="s-input"
               placeholder="Leave blank to keep current"
               data-i18n-placeholder="label.wifi-password-hint"
@@ -142,7 +142,7 @@ export function WifiSettings(): JSX.Element {
           </p>
         </AccordionHead>
       </div>
-    </form>
+    </Formik>
   );
 }
 
