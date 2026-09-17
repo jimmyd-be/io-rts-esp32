@@ -43,3 +43,14 @@ export interface MqttConfig {
   enabled: boolean;
   status: string;
 }
+
+
+export interface InfoResponse {
+  version: string;
+  project: string;
+  compile_date: string;
+  compile_time: string;
+  idf_ver: string;
+  board: string;
+  web_version: string;
+}
