@@ -1,12 +1,30 @@
 import { AccordionHead } from "../AccordionHead";
+import useApi from "../../hooks/useApi";
+import { NetworkConfig } from "../../models/Types";
+import { useState } from "preact/hooks";
 
 export function NetworkSettings() {
+
+  const api = useApi<NetworkConfig>({
+    endpoint: "/api/network/config",
+    method: "GET",
+  });
+
+  const [dhcpEnabled, setDhcpEnabled] = useState(api.data ? api.data.dhcp : true);
+
   return (
     <div class="acc-row" data-help="network">
       <AccordionHead
         title="Network"
         titleI18n="settings.row.network"
         helpLabel="Help for network"
+        summary={
+          <div class="acc-summary">
+            <span class="acc-sum-val" id="acc-net-val">
+              {api.data ? api.data.hostname : undefined}
+            </span>
+          </div>
+        }
       >
         <div style="display:flex;gap:6px;align-items:flex-end;">
           <div style="flex:2">
@@ -19,6 +37,7 @@ export function NetworkSettings() {
             <input
               type="text"
               id="net-hostname"
+              value={api.data ? api.data.hostname : undefined}
               class="s-input"
               placeholder="io-rts-esp32"
               maxLength={32}
@@ -33,7 +52,11 @@ export function NetworkSettings() {
               DHCP
             </span>
             <div class="s-toggle" id="net-dhcp-toggle"></div>
-            <input type="checkbox" id="net-dhcp" style="display:none" />
+            <input
+              type="checkbox"
+              id="net-dhcp"
+              checked={api.data ? api.data.dhcp : undefined}
+            />
           </div>
         </div>
         <div
@@ -50,6 +73,8 @@ export function NetworkSettings() {
               </label>
               <input
                 type="text"
+                value={api.data ? api.data.ip : undefined}
+                disabled={dhcpEnabled}
                 id="net-ip"
                 class="s-input"
                 placeholder="192.168.1.100"
@@ -65,7 +90,9 @@ export function NetworkSettings() {
               </label>
               <input
                 type="text"
+                value={api.data ? api.data.mask : undefined}
                 id="net-mask"
+                disabled={dhcpEnabled}
                 class="s-input"
                 placeholder="255.255.255.0"
                 style="margin-top:4px;"
@@ -83,9 +110,11 @@ export function NetworkSettings() {
               <input
                 type="text"
                 id="net-gateway"
+                disabled={dhcpEnabled}
                 class="s-input"
                 placeholder="192.168.1.1"
                 style="margin-top:4px;"
+                value={api.data ? api.data.gateway : undefined}
               />
             </div>
             <div style="flex:1">
@@ -99,8 +128,10 @@ export function NetworkSettings() {
                 type="text"
                 id="net-dns1"
                 class="s-input"
+                disabled={dhcpEnabled}
                 placeholder="8.8.8.8"
                 style="margin-top:4px;"
+                value={api.data ? api.data.dns1 : undefined}
               />
             </div>
           </div>
@@ -114,9 +145,11 @@ export function NetworkSettings() {
             <input
               type="text"
               id="net-sntp"
+              disabled={dhcpEnabled}
               class="s-input"
               placeholder="pool.ntp.org"
               style="margin-top:4px;"
+              value={api.data ? api.data.sntp : undefined}
             />
           </div>
         </div>
