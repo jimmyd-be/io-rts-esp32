@@ -1,5 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
-import { otaKeyResponse } from "../models/Types";
+import { useEffect, useState } from 'preact/hooks';
 
 export interface ApiResponse<Type> {
   data: Type | undefined;
@@ -28,24 +27,16 @@ export default function useApi<Type>({
       setLoaded(false);
       setIsError(false);
 
-      const otaKey = await fetch("/api/ota/key", {});
-
       try {
         const res = await fetch(endpoint, {
           method,
           headers: {
-            Accept: "application/json",
-            "Content-Type": body ? "application/json" : "text/plain",
-            "X-OTA-Key": otaKey.ok
-              ? ((await otaKey.json()) as otaKeyResponse).key
-              : "",
+            'Accept': 'application/json',
+            'Content-Type': body ? 'application/json' : 'text/plain',
           },
-          body:
-            method === "POST" && body !== undefined
-              ? JSON.stringify(body)
-              : undefined,
+          body: method === 'POST' && body !== undefined ? JSON.stringify(body) : undefined,
           signal: controller.signal,
-          credentials: "same-origin",
+          credentials: 'same-origin',
         });
 
         if (controller.signal.aborted) return;
@@ -74,7 +65,7 @@ export default function useApi<Type>({
           setLoaded(true);
         }
       } catch (err: any) {
-        if (err.name === "AbortError") return;
+        if (err.name === 'AbortError') return;
         if (!cancelled) {
           setIsError(true);
           setData(undefined);

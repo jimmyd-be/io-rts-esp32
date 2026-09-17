@@ -368,8 +368,7 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  { key: { type: string, description: "32-char hex" } }
+                properties: { key: { type: string, description: "32-char hex" } }
     post:
       tags: [IO-homecontrol Radio]
       summary: Set the IO-homecontrol system key (requires reboot)
@@ -381,14 +380,7 @@ paths:
             schema:
               type: object
               required: [key]
-              properties:
-                {
-                  key:
-                    {
-                      type: string,
-                      description: "must be exactly 32 hex chars",
-                    },
-                }
+              properties: { key: { type: string, description: "must be exactly 32 hex chars" } }
       responses:
         "200": { $ref: "#/components/responses/ApiResultResponse" }
 
@@ -446,8 +438,7 @@ paths:
             schema:
               type: object
               properties:
-                node_id:
-                  { type: string, description: "must be exactly 6 hex chars" }
+                node_id: { type: string, description: "must be exactly 6 hex chars" }
                 tx_power: { type: integer, minimum: 0, maximum: 20 }
                 passive_mode: { type: boolean }
       responses:
@@ -540,11 +531,7 @@ paths:
               required: [ssid]
               properties:
                 ssid: { type: string }
-                password:
-                  {
-                    type: string,
-                    description: "omit to keep existing password",
-                  }
+                password: { type: string, description: "omit to keep existing password" }
       responses:
         "200":
           description: Restart acknowledgement
@@ -606,11 +593,7 @@ paths:
                   properties:
                     ssid: { type: string }
                     rssi: { type: integer }
-                    auth:
-                      {
-                        type: integer,
-                        description: "wifi_auth_mode_t enum value",
-                      }
+                    auth: { type: integer, description: "wifi_auth_mode_t enum value" }
 
   /api/syslog:
     get:
@@ -661,13 +644,7 @@ paths:
               type: object
               required: [password]
               properties:
-                password:
-                  {
-                    type: string,
-                    minLength: 0,
-                    maxLength: 32,
-                    description: "empty string clears the password; 1-7 chars is rejected",
-                  }
+                password: { type: string, minLength: 0, maxLength: 32, description: "empty string clears the password; 1-7 chars is rejected" }
       responses:
         "200": { $ref: "#/components/responses/ApiResultResponse" }
 
@@ -739,8 +716,7 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:
-                  { key: { type: string, description: "32-char key" } }
+                properties: { key: { type: string, description: "32-char key" } }
     post:
       tags: [OTA & Firmware]
       summary: Set a new OTA/API key
@@ -902,8 +878,7 @@ components:
       type: object
       properties:
         success: { type: boolean }
-        deviceId:
-          { type: string, description: "id of the newly paired 1W device" }
+        deviceId: { type: string, description: "id of the newly paired 1W device" }
 
     StatusResponse:
       type: object
@@ -923,8 +898,7 @@ components:
         somfy_name: { type: string, description: "2W devices only" }
         inactive: { type: boolean }
         position: { type: integer, description: "0-100, or -1 if unknown" }
-        tilt:
-          { type: integer, description: "0-100, or -1 if unknown/unsupported" }
+        tilt: { type: integer, description: "0-100, or -1 if unknown/unsupported" }
         type: { type: integer, description: "IO-homecontrol device type enum" }
         type_name: { type: string }
         subtype: { type: integer }
@@ -937,11 +911,7 @@ components:
         tilt_supported: { type: boolean }
         transit_time_ms: { type: integer }
         protocol: { type: string, enum: ["1w", "2w"] }
-        position_estimated:
-          {
-            type: boolean,
-            description: "true for 1W devices (no position feedback)",
-          }
+        position_estimated: { type: boolean, description: "true for 1W devices (no position feedback)" }
         info1_hex: { type: string, description: "2W devices only" }
         info2_hex: { type: string, description: "2W devices only" }
         info1_serial: { $ref: "#/components/schemas/DeviceSerial" }
@@ -1019,8 +989,7 @@ components:
             - type: boolean
         name: { type: string, description: "device name, used by `pair1w`" }
         deviceType: { type: integer, description: "used by `pair1w`" }
-        manufacturer:
-          { type: integer, description: "used by `pair1w`, default SOMFY" }
+        manufacturer: { type: integer, description: "used by `pair1w`, default SOMFY" }
 
     MqttConfig:
       type: object
@@ -1083,11 +1052,7 @@ components:
         firmware_version: { type: string }
         devices:
           type: array
-          items:
-            {
-              type: object,
-              description: "StoredIoDevice JSON (device + linked_remotes)",
-            }
+          items: { type: object, description: "StoredIoDevice JSON (device + linked_remotes)" }
         credentials:
           type: object
           properties:
