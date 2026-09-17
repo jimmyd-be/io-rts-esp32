@@ -15,8 +15,12 @@ import { ImportSettings } from "../components/Settings/Import";
 import { RebootSettings } from "../components/Settings/Reboot";
 import { SoftwareUpdateSettings } from "../components/Settings/SoftwareUpdate";
 import { FirmwareUpdateSettings } from "../components/Settings/FirmwareUpdate";
+import useApi from "../hooks/useApi";
+import { InfoResponse } from "../models/Types";
 
 export function Settings() {
+
+  const infoData = useApi<InfoResponse>({endpoint: "/api/info", method: "GET"});
   return (
     <section class="view active" id="view-settings">
       <div class="view-header">
@@ -66,8 +70,8 @@ export function Settings() {
           System
         </div>
         <div class="settings-card">
-          <FirmwareSettings />
-          <WebUISettings />
+          <FirmwareSettings data={infoData.data} />
+          <WebUISettings data={infoData.data} />
           <WebUIUpdateSettings />
           <FirmwareUpdateSettings />
           <BackupSettings />
