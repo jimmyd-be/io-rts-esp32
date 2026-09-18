@@ -1,21 +1,15 @@
 import { AccordionHead } from "../AccordionHead";
-import useApi from "../../hooks/useApi";
-import { otaKeyResponse, Types, WifiScanResult } from "../../models/Types";
 import { useEffect, useState } from "preact/hooks";
 import useI18n from "../../hooks/useI18n";
 import { JSX } from "preact";
+import { useOtaKey } from "../../hooks/api/useOtaKey";
+import { useWifiConfig } from "../../hooks/api/useWifiConfig";
 
 export function WifiSettings(): JSX.Element {
   const [scan, setScan] = useState(false);
 
-  const wifiData = useApi<Types>({
-    endpoint: "/api/wifi/config",
-    method: "GET",
-  });
-  const otaData = useApi<otaKeyResponse>({
-    endpoint: "/api/ota/key",
-    method: "GET",
-  });
+  const wifiData = useWifiConfig();
+  const otaData = useOtaKey();
   const t = useI18n();
 
   const [formValues, setFormValues] = useState({
@@ -84,9 +78,7 @@ export function WifiSettings(): JSX.Element {
         helpKey={"wifi"}
         summary={
           <>
-            <span class="acc-sum-val">
-              {formValues.ssid}
-            </span>
+            <span class="acc-sum-val">{formValues.ssid}</span>
             <span
               class={
                 wifiData.loaded && wifiData.data != null
@@ -153,7 +145,11 @@ export function WifiSettings(): JSX.Element {
             style="margin-top:4px;"
           />
         </div>
-        <button class="s-btn primary" type="submit" data-i18n="button.save-wifi">
+        <button
+          class="s-btn primary"
+          type="submit"
+          data-i18n="button.save-wifi"
+        >
           Save WiFi
         </button>
         <div class="field-status"></div>

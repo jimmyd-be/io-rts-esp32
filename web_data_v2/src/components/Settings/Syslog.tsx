@@ -1,16 +1,10 @@
 import { AccordionHead } from "../AccordionHead";
-import useApi from "../../hooks/useApi";
-import { MqttConfig, otaKeyResponse, SyslogConfig } from "../../models/Types";
+import { useOtaKey } from "../../hooks/api/useOtaKey";
+import { useSyslogConfig } from "../../hooks/api/useSyslogConfig";
 
 export function SyslogSettings() {
-  const otaData = useApi<otaKeyResponse>({
-    endpoint: "/api/ota/key",
-    method: "GET",
-  });
-  const api = useApi<SyslogConfig>({
-    endpoint: "/api/syslog",
-    method: "GET",
-  });
+  const otaData = useOtaKey();
+  const api = useSyslogConfig();
 
   return (
     <form
@@ -42,9 +36,7 @@ export function SyslogSettings() {
           helpKey={"syslog"}
           summary={
             <>
-              <span class="acc-sum-val">
-                {api.data?.server || "Off"}
-              </span>
+              <span class="acc-sum-val">{api.data?.server || "Off"}</span>
               <span class="row-status"></span>
             </>
           }
@@ -57,7 +49,11 @@ export function SyslogSettings() {
               Enable syslog
             </span>
             <div class="s-toggle"></div>
-            <input type="checkbox" style="display:none" checked={api.data?.enabled} />
+            <input
+              type="checkbox"
+              style="display:none"
+              checked={api.data?.enabled}
+            />
           </div>
           <div style="display:flex;gap:6px;">
             <div style="flex:2;">

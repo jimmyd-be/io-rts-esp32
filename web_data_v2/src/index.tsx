@@ -1,6 +1,5 @@
 import { render } from "preact";
-import { useEffect } from "preact/hooks";
-import { LocationProvider, Router, Route } from "preact-iso";
+import { LocationProvider, Route, Router } from "preact-iso";
 
 import { Header } from "./components/Header.tsx";
 import { Footer } from "./components/Footer.tsx";
