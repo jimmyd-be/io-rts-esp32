@@ -1,20 +1,25 @@
+import useApi from "../hooks/useApi";
+import { Remote } from "../models/Types";
 import { useState } from "preact/hooks";
-import { useRemoteWizard } from "./Modals/remoteWizard.tsx";
 
-export function Remotes(remotesApi) {
-  const [droppedDown, setOpen] = useState(true);
-  const { open } = useRemoteWizard();
+export function Remotes() {
 
+  const [open, setOpen] = useState(false);
+
+  const remotesApi = useApi<Remote[]>({
+    endpoint: "/api/remotes",
+    method: "GET",
+  });
   return (
-    <div id="remotes-section" class={droppedDown ? "open" : ""}>
-      <div id="remotes-section-hdr">
+    <div id="remotes-section" class={open ? "open" : ""}>
+      <div id="remotes-section-hdr" onClick={() => setOpen(!open)}>
         <span id="remotes-section-title" data-i18n="section.remotes">
           Remotes
         </span>
 
         <div className="acc-summary" style={{ gap: 8 }}>
           <span id="remotes-count" />
-          <button className="s-btn" onClick={() => open()}>
+          <button className="s-btn" id="remote-popup">
             + Add
           </button>
         </div>
