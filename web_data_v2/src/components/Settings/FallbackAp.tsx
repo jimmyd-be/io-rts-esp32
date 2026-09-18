@@ -99,7 +99,7 @@ export function FallbackApSettings(): JSX.Element {
         <div style="display:flex;gap:8px;">
           <div style="flex:2">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.hotspot-name"
             >
               Hotspot name (SSID)
@@ -120,7 +120,7 @@ export function FallbackApSettings(): JSX.Element {
           </div>
           <div style="flex:1">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.timeout-s"
             >
               Timeout (s)
@@ -144,7 +144,7 @@ export function FallbackApSettings(): JSX.Element {
         <div style="display:flex;gap:8px;">
           <div style="flex:1">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.retries-boot"
             >
               Retries (boot)
@@ -166,7 +166,7 @@ export function FallbackApSettings(): JSX.Element {
           </div>
           <div style="flex:1">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.retries-running"
             >
               Retries (running)
@@ -190,7 +190,7 @@ export function FallbackApSettings(): JSX.Element {
         <div style="display:flex;gap:8px;">
           <div style="flex:1">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.hotspot-password"
             >
               Hotspot password (min 8 chars, blank = open)
@@ -206,7 +206,7 @@ export function FallbackApSettings(): JSX.Element {
           </div>
           <div style="flex:1">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.confirm-password"
             >
               Confirm password
