@@ -7,7 +7,7 @@ export function FirmwareSettings({ data }: { data: InfoResponse | undefined }) {
         Firmware
       </span>
       <div class="row-right">
-        <span class="row-value" id="firmware-version">
+        <span class="row-value">
           {data?.version} · {data?.compile_date}
         </span>
       </div>

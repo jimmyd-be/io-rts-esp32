@@ -15,17 +15,12 @@ export function FirmwareUpdateSettings() {
           </label>
           <input
             type="file"
-            id="ota-file"
             accept=".bin"
             class="s-input"
             style="padding:5px 10px;margin-top:4px;"
           />
         </div>
-        <button
-          class="s-btn primary"
-          id="ota-upload"
-          data-i18n="button.upload-firmware"
-        >
+        <button class="s-btn primary" data-i18n="button.upload-firmware">
           Upload Firmware
         </button>
         <progress id="ota-progress" max={100} value={0} style="display:none;" />

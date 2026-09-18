@@ -1,11 +1,8 @@
 import { AccordionHead } from "../AccordionHead";
 import useApi from "../../hooks/useApi";
 import { MqttConfig, otaKeyResponse } from "../../models/Types";
-import useI18n from "../../hooks/useI18n";
 
 export function MqttSettings() {
-  const t = useI18n();
-
   const otaData = useApi<otaKeyResponse>({
     endpoint: "/api/ota/key",
     method: "GET",
@@ -15,15 +12,14 @@ export function MqttSettings() {
     endpoint: "/api/mqtt",
     method: "GET",
   });
+
   return (
     <form
       onSubmit={(e) => {
-        e.preventDefault(); // Prevent the default form submission
-        const formValues = e.currentTarget.elements;
+        e.preventDefault();
 
         const fd = new FormData(e.currentTarget);
         const data = Object.fromEntries(fd.entries());
-        console.log();
 
         fetch("/api/mqtt", {
           method: "POST",
@@ -32,8 +28,8 @@ export function MqttSettings() {
             "Content-Type": "application/json",
             "X-OTA-Key": otaData.data?.key || "",
           },
-        }).then((r) => {
-          //TODO handle Response
+        }).then(() => {
+          // TODO handle response
         });
       }}
     >
@@ -45,12 +41,8 @@ export function MqttSettings() {
           helpKey={"mqtt"}
           summary={
             <>
-              <span class="acc-sum-val" id="acc-mqtt-val">
-                {api.data?.server}
-              </span>
-              <span class="row-status" id="mqtt-conn-status">
-                {api.data?.status}
-              </span>
+              <span class="acc-sum-val">{api.data?.server}</span>
+              <span class="row-status">{api.data?.status}</span>
             </>
           }
         >
@@ -61,7 +53,7 @@ export function MqttSettings() {
             >
               Enable MQTT
             </span>
-            <div class="s-toggle" id="mqtt-enabled-toggle"></div>
+            <div class="s-toggle" />
             <input
               type="checkbox"
               name="enabled"
@@ -78,7 +70,6 @@ export function MqttSettings() {
                 type="text"
                 name="server"
                 value={api.data?.server}
-                id="server"
                 class="s-input"
                 placeholder="192.168.1.x or hostname"
                 style="margin-top:4px;"
@@ -92,7 +83,6 @@ export function MqttSettings() {
                 type="text"
                 name="port"
                 value={api.data?.port}
-                id={"port"}
                 class="s-input"
                 placeholder="1883 / 8883 (TLS)"
                 style="margin-top:4px;"
@@ -168,12 +158,7 @@ export function MqttSettings() {
               style="margin-top:4px;"
             />
           </div>
-          <button
-            type={"submit"}
-            class="s-btn primary"
-            id="mqtt-update"
-            data-i18n="button.save-mqtt"
-          >
+          <button type={"submit"} class="s-btn primary" data-i18n="button.save-mqtt">
             Save MQTT
           </button>
         </AccordionHead>

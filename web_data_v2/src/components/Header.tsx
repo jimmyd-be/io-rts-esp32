@@ -49,12 +49,12 @@ export function Header() {
   return (
     <header class="app-header">
       <div class="header-left">
-        <div class="app-dot" id="conn-dot"></div>
+        <div class="app-dot"></div>
         <span class="app-wordmark">io-homecontrol</span>
       </div>
       <div class="header-right">
         <div id="pairing-badge" style="display:none"></div>
-        <span class="pill amber hidden" id="moving-pill"></span>
+        <span class="pill amber hidden"></span>
         <select
           class="hdr-btn"
           id="lang"
@@ -69,7 +69,6 @@ export function Header() {
         </select>
         <select
           class="hdr-btn"
-          id="theme-select"
           aria-label="Theme"
           style="border:none;cursor:pointer;"
           onChange={(e) => setTheme(e.currentTarget.value)}
