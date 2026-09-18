@@ -73,6 +73,7 @@ export function FallbackApSettings(): JSX.Element {
         title="Fallback AP"
         titleI18n="settings.row.fallback-ap"
         helpLabel="Help for fallback-ap"
+        helpKey={"fallback-ap"}
         summary={
           <span class="acc-sum-val" id="acc-fap-val">
             {formValues.ap_ssid}
@@ -92,16 +93,16 @@ export function FallbackApSettings(): JSX.Element {
             name="enabled"
             checked={formValues.enabled}
             onChange={(e) =>
-              handleFieldChange("enabled", (e.currentTarget as HTMLInputElement).checked)
+              handleFieldChange(
+                "enabled",
+                (e.currentTarget as HTMLInputElement).checked,
+              )
             }
           />
         </div>
         <div style="display:flex;gap:8px;">
           <div style="flex:2">
-            <label
-              class={"label-title"}
-              data-i18n="label.hotspot-name"
-            >
+            <label class={"label-title"} data-i18n="label.hotspot-name">
               Hotspot name (SSID)
             </label>
             <input
@@ -110,7 +111,10 @@ export function FallbackApSettings(): JSX.Element {
               name="ap_ssid"
               value={formValues.ap_ssid}
               onInput={(e) =>
-                handleFieldChange("ap_ssid", (e.currentTarget as HTMLInputElement).value)
+                handleFieldChange(
+                  "ap_ssid",
+                  (e.currentTarget as HTMLInputElement).value,
+                )
               }
               class="s-input"
               maxLength={32}
@@ -119,10 +123,7 @@ export function FallbackApSettings(): JSX.Element {
             />
           </div>
           <div style="flex:1">
-            <label
-              class={"label-title"}
-              data-i18n="label.timeout-s"
-            >
+            <label class={"label-title"} data-i18n="label.timeout-s">
               Timeout (s)
             </label>
             <input
@@ -131,7 +132,10 @@ export function FallbackApSettings(): JSX.Element {
               name="ap_timeout_s"
               value={formValues.ap_timeout_s}
               onInput={(e) =>
-                handleFieldChange("ap_timeout_s", Number((e.currentTarget as HTMLInputElement).value))
+                handleFieldChange(
+                  "ap_timeout_s",
+                  Number((e.currentTarget as HTMLInputElement).value),
+                )
               }
               class="s-input"
               min={0}
@@ -143,10 +147,7 @@ export function FallbackApSettings(): JSX.Element {
         </div>
         <div style="display:flex;gap:8px;">
           <div style="flex:1">
-            <label
-              class={"label-title"}
-              data-i18n="label.retries-boot"
-            >
+            <label class={"label-title"} data-i18n="label.retries-boot">
               Retries (boot)
             </label>
             <input
@@ -155,7 +156,10 @@ export function FallbackApSettings(): JSX.Element {
               name="retries_boot"
               value={formValues.retries_boot}
               onInput={(e) =>
-                handleFieldChange("retries_boot", Number((e.currentTarget as HTMLInputElement).value))
+                handleFieldChange(
+                  "retries_boot",
+                  Number((e.currentTarget as HTMLInputElement).value),
+                )
               }
               class="s-input"
               min={1}
@@ -165,10 +169,7 @@ export function FallbackApSettings(): JSX.Element {
             />
           </div>
           <div style="flex:1">
-            <label
-              class={"label-title"}
-              data-i18n="label.retries-running"
-            >
+            <label class={"label-title"} data-i18n="label.retries-running">
               Retries (running)
             </label>
             <input
@@ -177,7 +178,10 @@ export function FallbackApSettings(): JSX.Element {
               name="retries_running"
               value={formValues.retries_running}
               onInput={(e) =>
-                handleFieldChange("retries_running", Number((e.currentTarget as HTMLInputElement).value))
+                handleFieldChange(
+                  "retries_running",
+                  Number((e.currentTarget as HTMLInputElement).value),
+                )
               }
               class="s-input"
               min={1}
@@ -189,10 +193,7 @@ export function FallbackApSettings(): JSX.Element {
         </div>
         <div style="display:flex;gap:8px;">
           <div style="flex:1">
-            <label
-              class={"label-title"}
-              data-i18n="label.hotspot-password"
-            >
+            <label class={"label-title"} data-i18n="label.hotspot-password">
               Hotspot password (min 8 chars, blank = open)
             </label>
             <input
@@ -205,10 +206,7 @@ export function FallbackApSettings(): JSX.Element {
             />
           </div>
           <div style="flex:1">
-            <label
-              class={"label-title"}
-              data-i18n="label.confirm-password"
-            >
+            <label class={"label-title"} data-i18n="label.confirm-password">
               Confirm password
             </label>
             <input

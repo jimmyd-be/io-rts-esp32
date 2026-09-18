@@ -1,6 +1,3 @@
-import { useState } from "preact/hooks";
-import { AddRemoteModal } from "../components/Modals/AddRemote";
-import { Modal } from "../components/Modal";
 
 export function Devices() {
 
@@ -14,7 +11,7 @@ export function Devices() {
         <span
           id="count-pill"
           style="font-size:11px;color:var(--text3);margin-right:auto;padding-left:8px;"
-        ></span>
+         />
         <button
           class="view-add-btn"
           id="pair-device-btn"
@@ -23,7 +20,7 @@ export function Devices() {
           +
         </button>
       </div>
-      <ul id="device-list"></ul>
+      <ul id="device-list" />
 
       <div id="remotes-section">
         <div id="remotes-section-hdr">
@@ -31,7 +28,7 @@ export function Devices() {
             Remotes
           </span>
           <div class="acc-summary" style="gap:8px;">
-            <span id="remotes-count"></span>
+            <span id="remotes-count" />
             <button
               class="s-btn"
               id="remote-popup"

@@ -33,8 +33,8 @@ export function FirmwareUpdateSettings() {
           max={100}
           value={0}
           style="display:none;"
-        ></progress>
-        <span id="ota-status" class="field-status"></span>
+         />
+        <span id="ota-status" class="field-status" />
       </AccordionHead>
     </div>
   );
