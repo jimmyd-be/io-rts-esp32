@@ -2,7 +2,7 @@ import { AccordionHead } from "../AccordionHead";
 
 export function ImportSettings() {
   return (
-    <div class="acc-row" id="iohc-import-row">
+    <div class="acc-row">
       <AccordionHead
         title="Import iohomecontrol"
         summary={
@@ -14,33 +14,28 @@ export function ImportSettings() {
           Existing devices with the same ID are overwritten.
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px;">
-          <button class="s-btn" id="iohc-devices-btn">
+          <button class="s-btn">
             Import Devices JSON
           </button>
           <input
             type="file"
-            id="iohc-devices-file"
             accept=".json"
             style="display:none"
           />
-          <span id="iohc-devices-status" class="field-status"></span>
+          <span class="field-status"></span>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-          <button class="s-btn" id="iohc-remotes-btn">
+          <button class="s-btn">
             Import Remotes JSON
           </button>
           <input
             type="file"
-            id="iohc-remotes-file"
             accept=".json"
             style="display:none"
           />
-          <span id="iohc-remotes-status" class="field-status"></span>
+          <span class="field-status"></span>
         </div>
-        <div
-          id="iohc-remotes-table"
-          style="margin-top:10px;display:none;"
-        ></div>
+        <div style="margin-top:10px;display:none;"></div>
       </AccordionHead>
     </div>
   );

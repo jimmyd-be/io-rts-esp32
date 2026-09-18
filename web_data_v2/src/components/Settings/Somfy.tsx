@@ -16,12 +16,10 @@ export function SomfySettings() {
   return (
     <form
       onSubmit={(e) => {
-        e.preventDefault(); // Prevent the default form submission
-        const formValues = e.currentTarget.elements;
+        e.preventDefault();
 
         const fd = new FormData(e.currentTarget);
         const data = Object.fromEntries(fd.entries());
-        console.log();
 
         fetch("/api/somfy/credentials", {
           method: "POST",
@@ -30,8 +28,8 @@ export function SomfySettings() {
             "Content-Type": "application/json",
             "X-OTA-Key": otaData.data?.key || "",
           },
-        }).then((r) => {
-          //TODO handle Response
+        }).then(() => {
+          // TODO handle response
         });
       }}
     >
@@ -70,26 +68,18 @@ export function SomfySettings() {
             />
           </div>
           <div style="display:flex;gap:8px;">
-            <button
-              class="s-btn primary"
-              id="somfy-save"
-              data-i18n="button.save-credentials"
-            >
+            <button class="s-btn primary" data-i18n="button.save-credentials">
               Save credentials
             </button>
             <button
-              type={"submit"}
+              type="submit"
               class="s-btn"
-              id="somfy-import-btn"
               data-i18n="button.import-devices-btn"
             >
               Import devices
             </button>
           </div>
-          <span
-            id="somfy-status"
-            style="font-size:11px;color:var(--text3);min-height:16px;"
-          ></span>
+          <span style="font-size:11px;color:var(--text3);min-height:16px;" />
         </AccordionHead>
       </div>
     </form>

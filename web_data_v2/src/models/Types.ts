@@ -49,6 +49,11 @@ export interface Remote {
   devices: string[];
 }
 
+export interface ActionResult {
+  success?: boolean;
+  message?: string;
+}
+
 export interface Device {
   id: string;
   name: string;
