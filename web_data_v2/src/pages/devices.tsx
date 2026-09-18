@@ -4,6 +4,7 @@ import useI18n from "../hooks/useI18n";
 import { Device, Remote } from "../models/Types";
 import { Remotes } from "../components/Remotes";
 import { DeviceCard } from "../components/DeviceCard";
+import { RemoteWizardProvider } from "../components/Modals/remoteWizard";
 
 export function Devices() {
   const [devices, setDevices] = useState<Device[]>([]);
@@ -16,9 +17,14 @@ export function Devices() {
     method: "GET",
   });
 
+  const remotesApi = useApi<Remote[]>({
+    endpoint: "/api/remotes",
+    method: "GET",
+  });
+
   useEffect(() => {
     const list: Device[] =
-      deviceApi.loaded && deviceApi.data ? deviceApi.data : [];
+      deviceApi.loaded && deviceApi.data != null ? deviceApi.data : [];
 
     const active = list.filter((d: Device) => !d.inactive);
     const inactive = list.filter((d: Device) => d.inactive);
@@ -86,7 +92,9 @@ export function Devices() {
         )}
       </ul>
 
-      <Remotes />
+      <RemoteWizardProvider remotes={remotesApi.data} devices={deviceApi.data}>
+        <Remotes remotes={remotesApi.data} />
+      </RemoteWizardProvider>
     </section>
   );
 }
