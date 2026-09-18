@@ -10,15 +10,13 @@ import React, {
 import {
   cancelCaptureRequest,
   deleteRemote,
-  Device,
-  fetchRemotes,
   linkRemote,
-  Remote,
   REMOTE_ID_RE,
   startCaptureRequest,
   unlinkRemote,
-} from "./remotesApi";
+} from "../api/RemoteApi";
 import useI18n from "../../hooks/useI18n";
+import { Device, Remote } from "../../models/Types";
 
 export type WizardMode = "add" | "edit";
 type Step = "choose" | "capture" | "manual" | "devices";
@@ -53,12 +51,13 @@ export function useRemoteWizard(): RemoteWizardApi {
 
 export interface RemoteWizardProviderProps {
   devices: Device[];
+  remotes: Remote[];
   onSaved?: () => void | Promise<void>;
   children?: React.ReactNode;
 }
 
 export function RemoteWizardProvider({
-  devices,
+  devices, remotes,
   onSaved,
   children,
 }: RemoteWizardProviderProps) {
@@ -67,7 +66,6 @@ export function RemoteWizardProvider({
   const [step, setStep] = useState<Step>("choose");
   const [remoteId, setRemoteId] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [remotes, setRemotes] = useState<Remote[]>([]);
 
   const [manualInput, setManualInput] = useState("");
   const [manualError, setManualError] = useState("");
@@ -196,9 +194,6 @@ export function RemoteWizardProvider({
       }
 
       setIsOpen(true);
-      fetchRemotes()
-        .then(setRemotes)
-        .catch(() => undefined);
     },
     [selectedForDevices],
   );
