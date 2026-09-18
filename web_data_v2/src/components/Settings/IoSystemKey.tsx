@@ -6,6 +6,7 @@ export function IoSystemKeySettings() {
       <AccordionHead
         title="IO System Key"
         titleI18n="settings.row.io-key"
+        helpKey={"io-key"}
         helpLabel="Help for io-key"
         summary={
           <span class="acc-sum-val" id="acc-iokey-val">
@@ -38,7 +39,7 @@ export function IoSystemKeySettings() {
             Learn
           </button>
         </div>
-        <span class="field-status" id="io-key-status"></span>
+        <span class="field-status" id="io-key-status" />
       </AccordionHead>
     </div>
   );

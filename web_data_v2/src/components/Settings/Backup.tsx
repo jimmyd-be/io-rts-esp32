@@ -7,6 +7,7 @@ export function BackupSettings() {
         title="Backup / Restore"
         titleI18n="settings.row.backup"
         helpLabel="Help for backup"
+        helpKey="backup"
         summary={<span class="acc-sum-hint">Export · Import · Reset</span>}
       >
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
