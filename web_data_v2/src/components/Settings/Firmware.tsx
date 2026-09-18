@@ -1,6 +1,6 @@
 import { InfoResponse } from "../../models/Types";
 
-export function FirmwareSettings({data}: {data: InfoResponse | undefined}) {
+export function FirmwareSettings({ data }: { data: InfoResponse | undefined }) {
   return (
     <div class="settings-row">
       <span class="row-label" data-i18n="settings.row.firmware">

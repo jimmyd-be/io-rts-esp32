@@ -11,6 +11,9 @@ export default [
   eslintJS.configs.recommended,
   {
     languageOptions: {
+      parserOptions: {
+        parser: "@typescript-eslint/parser",
+      },
       globals: {
         ...globals.node,
       },

@@ -28,12 +28,7 @@ export function FirmwareUpdateSettings() {
         >
           Upload Firmware
         </button>
-        <progress
-          id="ota-progress"
-          max={100}
-          value={0}
-          style="display:none;"
-         />
+        <progress id="ota-progress" max={100} value={0} style="display:none;" />
         <span id="ota-status" class="field-status" />
       </AccordionHead>
     </div>

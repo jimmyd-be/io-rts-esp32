@@ -17,7 +17,6 @@ function getStoredValue(key: string, fallback: string) {
 }
 
 export function Header() {
-
   const t = useI18n();
   const [language, setLanguage] = useState<string>(() =>
     getStoredValue(LANGUAGE_STORAGE_KEY, "en"),
@@ -76,10 +75,10 @@ export function Header() {
           onChange={(e) => setTheme(e.currentTarget.value)}
           value={theme}
         >
-          <option value="charcoal">Charcoal</option>
-          <option value="navy">Navy</option>
-          <option value="light">Light</option>
-          <option value="purple">Purple</option>
+            <option value="charcoal">● Charcoal</option>
+            <option value="navy">◑ Navy</option>
+            <option value="light">○ Light</option>
+            <option value="purple">◆ Purple</option>
         </select>
       </div>
     </header>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from "preact/hooks";
 import { otaKeyResponse } from "../models/Types";
 
 export interface ApiResponse<Type> {
@@ -74,7 +74,7 @@ export default function useApi<Type>({
           setLoaded(true);
         }
       } catch (err: any) {
-        if (err.name === 'AbortError') return;
+        if (err.name === "AbortError") return;
         if (!cancelled) {
           setIsError(true);
           setData(undefined);

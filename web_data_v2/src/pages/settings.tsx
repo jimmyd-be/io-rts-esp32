@@ -19,8 +19,10 @@ import useApi from "../hooks/useApi";
 import { InfoResponse } from "../models/Types";
 
 export function Settings() {
-
-  const infoData = useApi<InfoResponse>({endpoint: "/api/info", method: "GET"});
+  const infoData = useApi<InfoResponse>({
+    endpoint: "/api/info",
+    method: "GET",
+  });
   return (
     <section class="view active" id="view-settings">
       <div class="view-header">
