@@ -18,7 +18,7 @@ export function Remotes() {
 
         <div className="acc-summary" style={{ gap: 8 }}>
           <span id="remotes-count" />
-          <button className="s-btn" id="remote-popup">
+          <button className="s-btn">
             + Add
           </button>
         </div>

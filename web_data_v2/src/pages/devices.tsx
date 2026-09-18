@@ -34,14 +34,13 @@ export function Devices() {
   );
 
   return (
-    <section className="view active" id="view-devices">
+    <section className="view active">
       <div className="view-header">
         <h2 className="view-title" data-i18n="nav.devices">
           Devices
         </h2>
 
         <span
-          id="count-pill"
           style={{
             fontSize: "11px",
             color: "var(--text3)",
@@ -52,11 +51,7 @@ export function Devices() {
           {!deviceApi.loaded ? "Loading…" : countText}
         </span>
 
-        <button
-          className="view-add-btn"
-          id="pair-device-btn"
-          title="Pair new device"
-        >
+        <button className="view-add-btn" title="Pair new device">
           +
         </button>
       </div>
@@ -64,7 +59,6 @@ export function Devices() {
       <ul id="device-list">
         {!deviceApi.loaded ? (
           <li
-            id="device-loading"
             style={{
               padding: "20px",
               color: "var(--text3)",

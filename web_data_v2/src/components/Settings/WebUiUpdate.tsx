@@ -14,17 +14,12 @@ export function WebUIUpdateSettings() {
           </label>
           <input
             type="file"
-            id="ota-web-file"
             accept=".bin"
             class="s-input"
             style="padding:5px 10px;margin-top:4px;"
           />
         </div>
-        <button
-          class="s-btn primary"
-          id="ota-web-upload"
-          data-i18n="button.upload-web-ui"
-        >
+        <button class="s-btn primary" data-i18n="button.upload-web-ui">
           Upload Web UI
         </button>
         <progress
@@ -32,8 +27,8 @@ export function WebUIUpdateSettings() {
           max={100}
           value={0}
           style="display:none;"
-        ></progress>
-        <span id="ota-web-status" class="field-status"></span>
+        />
+        <span id="ota-web-status" class="field-status" />
       </AccordionHead>
     </div>
   );

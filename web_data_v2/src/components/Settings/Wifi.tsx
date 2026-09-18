@@ -84,7 +84,7 @@ export function WifiSettings(): JSX.Element {
         helpKey={"wifi"}
         summary={
           <>
-            <span class="acc-sum-val" id="acc-wifi-val">
+            <span class="acc-sum-val">
               {formValues.ssid}
             </span>
             <span
@@ -93,7 +93,6 @@ export function WifiSettings(): JSX.Element {
                   ? "success-text row-status"
                   : "error-text row-status"
               }
-              id="fallback-status"
             >
               {wifiData.loaded && wifiData.data
                 ? t.t("status.wifi.connected")
@@ -110,7 +109,6 @@ export function WifiSettings(): JSX.Element {
             <div style="display:flex;gap:6px;margin-top:4px;">
               <input
                 type="text"
-                id="wifi-ssid"
                 name="ssid"
                 value={formValues.ssid}
                 onInput={(e) =>
@@ -127,7 +125,6 @@ export function WifiSettings(): JSX.Element {
               <button
                 class="s-btn"
                 type="button"
-                id="wifi-scan-btn"
                 data-i18n="button.scan"
                 onClick={() => setScan(true)}
               >
@@ -142,7 +139,6 @@ export function WifiSettings(): JSX.Element {
           </label>
           <input
             type="password"
-            id="wifi-password"
             name="password"
             value={formValues.password}
             onInput={(e) =>
@@ -157,15 +153,10 @@ export function WifiSettings(): JSX.Element {
             style="margin-top:4px;"
           />
         </div>
-        <button
-          class="s-btn primary"
-          type="submit"
-          id="wifi-config-save"
-          data-i18n="button.save-wifi"
-        >
+        <button class="s-btn primary" type="submit" data-i18n="button.save-wifi">
           Save WiFi
         </button>
-        <div class="field-status" id="wifi-config-status"></div>
+        <div class="field-status"></div>
         <p class="restart-notice" data-i18n="label.restart-notice">
           ⚠ Device will restart after saving.
         </p>

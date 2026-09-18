@@ -14,18 +14,15 @@ export function NetworkSettings() {
     method: "GET",
   });
 
-  const [dhcpEnabled, setDhcpEnabled] = useState(
-    api.data ? api.data.dhcp : true,
-  );
+  const [dhcpEnabled] = useState(api.data ? api.data.dhcp : true);
 
   return (
     <form
       onSubmit={(e) => {
-        e.preventDefault(); // Prevent the default form submission
+        e.preventDefault();
 
         const fd = new FormData(e.currentTarget);
         const data = Object.fromEntries(fd.entries());
-        console.log();
 
         fetch("//api/network/config", {
           method: "POST",
@@ -34,8 +31,8 @@ export function NetworkSettings() {
             "Content-Type": "application/json",
             "X-OTA-Key": otaData.data?.key || "",
           },
-        }).then((r) => {
-          //TODO handle Response
+        }).then(() => {
+          // TODO handle response
         });
       }}
     >
@@ -47,7 +44,7 @@ export function NetworkSettings() {
           helpKey={"network"}
           summary={
             <div class="acc-summary">
-              <span class="acc-sum-val" id="acc-net-val">
+              <span class="acc-sum-val">
                 {api.data ? api.data.hostname : undefined}
               </span>
             </div>
@@ -60,7 +57,6 @@ export function NetworkSettings() {
               </label>
               <input
                 type="text"
-                id="net-hostname"
                 value={api.data ? api.data.hostname : undefined}
                 class="s-input"
                 placeholder="io-rts-esp32"
@@ -75,18 +71,11 @@ export function NetworkSettings() {
               >
                 DHCP
               </span>
-              <div class="s-toggle" id="net-dhcp-toggle"></div>
-              <input
-                type="checkbox"
-                id="net-dhcp"
-                checked={api.data ? api.data.dhcp : undefined}
-              />
+              <div class="s-toggle" />
+              <input type="checkbox" checked={api.data ? api.data.dhcp : undefined} />
             </div>
           </div>
-          <div
-            id="net-static-fields"
-            style="flex-direction:column;gap:6px;display:flex;"
-          >
+          <div style="flex-direction:column;gap:6px;display:flex;">
             <div style="display:flex;gap:6px;">
               <div style="flex:2">
                 <label class={"label-title"} data-i18n="label.ip-address">
@@ -96,7 +85,6 @@ export function NetworkSettings() {
                   type="text"
                   value={api.data ? api.data.ip : undefined}
                   disabled={dhcpEnabled}
-                  id="net-ip"
                   class="s-input"
                   placeholder="192.168.1.100"
                   style="margin-top:4px;"
@@ -109,7 +97,6 @@ export function NetworkSettings() {
                 <input
                   type="text"
                   value={api.data ? api.data.mask : undefined}
-                  id="net-mask"
                   disabled={dhcpEnabled}
                   class="s-input"
                   placeholder="255.255.255.0"
@@ -124,7 +111,6 @@ export function NetworkSettings() {
                 </label>
                 <input
                   type="text"
-                  id="net-gateway"
                   disabled={dhcpEnabled}
                   class="s-input"
                   placeholder="192.168.1.1"
@@ -138,7 +124,6 @@ export function NetworkSettings() {
                 </label>
                 <input
                   type="text"
-                  id="net-dns1"
                   class="s-input"
                   disabled={dhcpEnabled}
                   placeholder="8.8.8.8"
@@ -153,7 +138,6 @@ export function NetworkSettings() {
               </label>
               <input
                 type="text"
-                id="net-sntp"
                 disabled={dhcpEnabled}
                 class="s-input"
                 placeholder="pool.ntp.org"
@@ -162,12 +146,7 @@ export function NetworkSettings() {
               />
             </div>
           </div>
-          <button
-            type={"submit"}
-            class="s-btn primary"
-            id="net-config-save"
-            data-i18n="button.save-network"
-          >
+          <button type={"submit"} class="s-btn primary" data-i18n="button.save-network">
             Save Network
           </button>
           <p class="restart-notice" data-i18n="label.restart-notice">

@@ -55,7 +55,7 @@ export function Log() {
           ...prev,
           { id: Date.now() + Math.random(), message, level: normalizedLevel },
         ];
-        return next.slice(-100); // same cap as app.js
+        return next.slice(-100);
       });
     },
     [filter],
@@ -73,7 +73,7 @@ export function Log() {
   }, [visibleMessages.length, filter]);
 
   return (
-    <section className="view active" id="view-log">
+    <section className="view active">
       <div className="view-header">
         <h2 className="view-title" data-i18n="nav.help">
           Log

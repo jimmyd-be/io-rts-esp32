@@ -9,7 +9,7 @@ export function IoSystemKeySettings() {
         helpKey={"io-key"}
         helpLabel="Help for io-key"
         summary={
-          <span class="acc-sum-val" id="acc-iokey-val">
+          <span class="acc-sum-val">
             (not set)
           </span>
         }
@@ -18,28 +18,27 @@ export function IoSystemKeySettings() {
           Changing this key makes all paired devices unreachable until reboot.
         </div>
         <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-          <input
-            type="password"
-            id="io-key-display"
-            class="s-input key-display"
+            <input
+              type="password"
+              class="s-input key-display"
             placeholder="(not set)"
             readOnly
             style="flex:1;min-width:140px;"
           />
-          <button class="s-btn" id="io-key-show" data-i18n="button.show">
+          <button class="s-btn" data-i18n="button.show">
             Show
           </button>
-          <button class="s-btn" id="io-key-edit">
+          <button class="s-btn">
             Edit
           </button>
-          <button class="s-btn" id="io-key-sniff">
+          <button class="s-btn">
             Sniff
           </button>
-          <button class="s-btn" id="io-key-learn">
+          <button class="s-btn">
             Learn
           </button>
         </div>
-        <span class="field-status" id="io-key-status" />
+        <span class="field-status" />
       </AccordionHead>
     </div>
   );
