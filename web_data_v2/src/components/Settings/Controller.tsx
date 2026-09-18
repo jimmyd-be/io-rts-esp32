@@ -11,10 +11,7 @@ export function ControllerSettings() {
       >
         <div style="display:flex;gap:6px;align-items:center;">
           <div style="flex:1;">
-            <label
-              class={"label-title"}
-              data-i18n="label.node-address"
-            >
+            <label class={"label-title"} data-i18n="label.node-address">
               Node Address (3 bytes hex)
             </label>
             <input
@@ -27,10 +24,7 @@ export function ControllerSettings() {
             />
           </div>
           <div style="flex:1;">
-            <label
-              class={"label-title"}
-              data-i18n="label.tx-power"
-            >
+            <label class={"label-title"} data-i18n="label.tx-power">
               TX Power (0–20 dBm)
             </label>
             <input

@@ -6,10 +6,12 @@ import useI18n from "../../hooks/useI18n";
 import { JSX } from "preact";
 
 export function WifiSettings(): JSX.Element {
-
   const [scan, setScan] = useState(false);
 
-  const wifiData = useApi<Types>({ endpoint: "/api/wifi/config", method: "GET" });
+  const wifiData = useApi<Types>({
+    endpoint: "/api/wifi/config",
+    method: "GET",
+  });
   const otaData = useApi<otaKeyResponse>({
     endpoint: "/api/ota/key",
     method: "GET",
@@ -102,10 +104,7 @@ export function WifiSettings(): JSX.Element {
       >
         <div style="display:flex;gap:6px;">
           <div style="flex:1;">
-            <label
-              class={"label-title"}
-              data-i18n="label.network-name-ssid"
-            >
+            <label class={"label-title"} data-i18n="label.network-name-ssid">
               Network name (SSID)
             </label>
             <div style="display:flex;gap:6px;margin-top:4px;">
@@ -138,10 +137,7 @@ export function WifiSettings(): JSX.Element {
           </div>
         </div>
         <div>
-          <label
-            class={"label-title"}
-            data-i18n="label.password"
-          >
+          <label class={"label-title"} data-i18n="label.password">
             Password
           </label>
           <input

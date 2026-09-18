@@ -1,3 +1,11 @@
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
 *,
 *::before,
 *::after {
@@ -553,8 +561,8 @@ main::-webkit-scrollbar {
 }
 
 .card-slider-row {
-  display: flex;
   align-items: center;
+  width: 100%;
   gap: 6px;
 }
 
@@ -1610,8 +1618,8 @@ small.field-hint {
 }
 
 .label-title {
-  font-size:11px;
-  color:var(--text3);
+  font-size: 11px;
+  color: var(--text3);
 }
 
 .warn-dot::after {

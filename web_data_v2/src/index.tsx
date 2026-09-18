@@ -11,7 +11,6 @@ import { Log } from "./pages/log";
 import { Settings } from "./pages/settings";
 
 export function App() {
-
   return (
     <LocationProvider>
       <Header />

@@ -4,7 +4,6 @@ import { NetworkConfig, otaKeyResponse } from "../../models/Types";
 import { useState } from "preact/hooks";
 
 export function NetworkSettings() {
-
   const otaData = useApi<otaKeyResponse>({
     endpoint: "/api/ota/key",
     method: "GET",
@@ -15,7 +14,9 @@ export function NetworkSettings() {
     method: "GET",
   });
 
-  const [dhcpEnabled, setDhcpEnabled] = useState(api.data ? api.data.dhcp : true);
+  const [dhcpEnabled, setDhcpEnabled] = useState(
+    api.data ? api.data.dhcp : true,
+  );
 
   return (
     <form
