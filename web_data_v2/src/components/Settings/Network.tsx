@@ -20,7 +20,6 @@ export function NetworkSettings() {
   return (
     <form onSubmit={(e) => {
       e.preventDefault(); // Prevent the default form submission
-      const formValues = e.currentTarget.elements;
 
       const fd = new FormData(e.currentTarget);
       const data = Object.fromEntries(fd.entries());
@@ -53,7 +52,7 @@ export function NetworkSettings() {
         <div style="display:flex;gap:6px;align-items:flex-end;">
           <div style="flex:2">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.hostname"
             >
               Hostname
@@ -90,7 +89,7 @@ export function NetworkSettings() {
           <div style="display:flex;gap:6px;">
             <div style="flex:2">
               <label
-                style="font-size:11px;color:var(--text3);"
+                class={"label-title"}
                 data-i18n="label.ip-address"
               >
                 IP Address
@@ -107,7 +106,7 @@ export function NetworkSettings() {
             </div>
             <div style="flex:1">
               <label
-                style="font-size:11px;color:var(--text3);"
+                class={"label-title"}
                 data-i18n="label.subnet-mask"
               >
                 Subnet mask
@@ -126,7 +125,7 @@ export function NetworkSettings() {
           <div style="display:flex;gap:6px;">
             <div style="flex:1">
               <label
-                style="font-size:11px;color:var(--text3);"
+                class={"label-title"}
                 data-i18n="label.gateway"
               >
                 Gateway
@@ -143,7 +142,7 @@ export function NetworkSettings() {
             </div>
             <div style="flex:1">
               <label
-                style="font-size:11px;color:var(--text3);"
+                class={"label-title"}
                 data-i18n="label.dns"
               >
                 DNS
@@ -161,7 +160,7 @@ export function NetworkSettings() {
           </div>
           <div>
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.sntp-server"
             >
               SNTP server
