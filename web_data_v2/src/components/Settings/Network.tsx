@@ -150,7 +150,7 @@ export function NetworkSettings() {
           >
             Save Network
           </button>
-          <p class="restart-notice" data-i18n="label.restart-notice">
+          <p class="warning-notive" data-i18n="label.restart-notice">
             ⚠ Device will restart after saving.
           </p>
         </AccordionHead>
