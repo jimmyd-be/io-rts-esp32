@@ -1,8 +1,11 @@
 import eslintJS from "@eslint/js";
 import globals from "globals";
+import preact from "eslint-config-preact";
 
 export default [
+  ...preact,
   {
+    files: ["**/*.ts", "**/*.tsx"],
     ignores: ["dist/**/*", "test/fixtures/**", "test/__snapshots__/**"],
   },
   eslintJS.configs.recommended,
@@ -14,6 +17,7 @@ export default [
     },
     rules: {
       "no-empty": "off",
+      "no-unused-vars": "error",
     },
   },
 ];

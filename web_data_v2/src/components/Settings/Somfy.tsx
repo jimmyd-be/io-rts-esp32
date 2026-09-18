@@ -39,6 +39,7 @@ export function SomfySettings() {
       <AccordionHead
         title="Somfy / Overkiz"
         titleI18n="settings.row.somfy"
+        helpKey="somfy"
         helpLabel="Help for somfy"
       >
         <div>

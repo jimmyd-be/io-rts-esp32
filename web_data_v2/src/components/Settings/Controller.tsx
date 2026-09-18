@@ -7,6 +7,7 @@ export function ControllerSettings() {
         title="Controller Identity"
         titleI18n="settings.row.controller"
         helpLabel="Help for controller"
+        helpKey={"controller"}
       >
         <div style="display:flex;gap:6px;align-items:center;">
           <div style="flex:1;">

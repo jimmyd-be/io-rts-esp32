@@ -7,6 +7,7 @@ export function OtaKeySettings() {
         title="OTA Key"
         titleI18n="settings.row.ota-key"
         helpLabel="Help for ota-key"
+        helpKey="ota-key"
       >
         <div style="display:flex;gap:6px;align-items:center;">
           <input
