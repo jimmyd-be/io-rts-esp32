@@ -4,7 +4,6 @@ import { MqttConfig, otaKeyResponse } from "../../models/Types";
 import useI18n from "../../hooks/useI18n";
 
 export function MqttSettings() {
-
   const t = useI18n();
 
   const otaData = useApi<otaKeyResponse>({
@@ -14,8 +13,7 @@ export function MqttSettings() {
 
   const api = useApi<MqttConfig>({
     endpoint: "/api/mqtt",
-    method: "GET"
-
+    method: "GET",
   });
   return (
     <form

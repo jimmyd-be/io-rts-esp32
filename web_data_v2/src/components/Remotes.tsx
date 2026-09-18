@@ -3,7 +3,6 @@ import { Remote } from "../models/Types";
 import { useState } from "preact/hooks";
 
 export function Remotes() {
-
   const [open, setOpen] = useState(false);
 
   const remotesApi = useApi<Remote[]>({

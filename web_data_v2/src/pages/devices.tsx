@@ -9,20 +9,23 @@ export function Devices() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [activeCount, setActiveCount] = useState(0);
 
-  const {t} = useI18n();
+  const { t } = useI18n();
 
-  const deviceApi = useApi<Device[]>({ endpoint: "/api/devices", method: "GET" });
+  const deviceApi = useApi<Device[]>({
+    endpoint: "/api/devices",
+    method: "GET",
+  });
 
   useEffect(() => {
+    const list: Device[] =
+      deviceApi.loaded && deviceApi.data ? deviceApi.data : [];
 
-      const list: Device[] = deviceApi.loaded && deviceApi.data ? deviceApi.data : [];
+    const active = list.filter((d: Device) => !d.inactive);
+    const inactive = list.filter((d: Device) => d.inactive);
 
-      const active = list.filter((d: Device) => !d.inactive);
-      const inactive = list.filter((d: Device) => d.inactive);
-
-      const ordered = [...active, ...inactive];
-      setDevices(ordered);
-      setActiveCount(active.length);
+    const ordered = [...active, ...inactive];
+    setDevices(ordered);
+    setActiveCount(active.length);
   }, [deviceApi.data]);
 
   const countText = useMemo(
