@@ -43,6 +43,25 @@ export interface MqttConfig {
   enabled: boolean;
   status: string;
 }
+export interface Remote {
+  id: string;
+  name: string;
+  devices: string[];
+}
+
+export interface Device {
+  id: string;
+  name: string;
+  inactive?: boolean;
+  protocol?: string;
+  type_name?: string;
+  manufacturer?: string;
+  position?: number;
+  is_inverted?: boolean;
+  position_estimated?: boolean;
+  is_stopped?: boolean;
+  device?: Device;
+}
 
 export interface WifiScanResult {
   ssid: string;
@@ -64,7 +83,6 @@ export interface SyslogConfig {
   id: string;
   format: string;
 }
-
 
 export interface InfoResponse {
   version: string;
