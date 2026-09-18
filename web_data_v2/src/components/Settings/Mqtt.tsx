@@ -67,7 +67,7 @@ export function MqttSettings() {
         <div style="display:flex;gap:6px;">
           <div style="flex:2;">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.broker-address"
             >
               Broker address
@@ -84,7 +84,7 @@ export function MqttSettings() {
           </div>
           <div style="flex:1;">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.port"
             >
               Port
@@ -103,7 +103,7 @@ export function MqttSettings() {
         <div style="display:flex;gap:6px;">
           <div style="flex:1;">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.username"
             >
               Username
@@ -119,7 +119,7 @@ export function MqttSettings() {
           </div>
           <div style="flex:1;">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.password"
             >
               Password
@@ -137,7 +137,7 @@ export function MqttSettings() {
         <div style="display:flex;gap:6px;">
           <div style="flex:1;">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.client-id"
             >
               Client ID
@@ -153,7 +153,7 @@ export function MqttSettings() {
           </div>
           <div style="flex:1;">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.topic-prefix"
             >
               Topic prefix
@@ -170,7 +170,7 @@ export function MqttSettings() {
         </div>
         <div>
           <label
-            style="font-size:11px;color:var(--text3);"
+            class={"label-title"}
             data-i18n="label.ha-discovery"
           >
             Home Assistant discovery prefix

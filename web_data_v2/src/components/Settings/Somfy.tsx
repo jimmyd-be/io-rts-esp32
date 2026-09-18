@@ -43,7 +43,7 @@ export function SomfySettings() {
       >
         <div>
           <label
-            style="font-size:11px;color:var(--text3);"
+            class={"label-title"}
             data-i18n="label.somfy-email"
           >
             Somfy account email
@@ -60,7 +60,7 @@ export function SomfySettings() {
         </div>
         <div>
           <label
-            style="font-size:11px;color:var(--text3);"
+            class={"label-title"}
             data-i18n="label.somfy-password"
           >
             Somfy account password
