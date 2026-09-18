@@ -16,8 +16,8 @@ import {
   unlinkRemote,
 } from "../api/RemoteApi";
 import useI18n from "../../hooks/useI18n";
-import { Device, otaKeyResponse, Remote } from "../../models/Types";
-import useApi from "../../hooks/useApi";
+import { Device, Remote } from "../../models/Types";
+import { useOtaKey } from "../../hooks/api/useOtaKey";
 
 export type WizardMode = "add" | "edit";
 type Step = "choose" | "capture" | "manual" | "devices";
@@ -58,14 +58,12 @@ export interface RemoteWizardProviderProps {
 }
 
 export function RemoteWizardProvider({
-  devices, remotes,
+  devices,
+  remotes,
   onSaved,
   children,
 }: RemoteWizardProviderProps) {
-  const otaData = useApi<otaKeyResponse>({
-    endpoint: "/api/ota/key",
-    method: "GET",
-  });
+  const otaData = useOtaKey();
 
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<WizardMode>("add");
@@ -79,7 +77,7 @@ export function RemoteWizardProvider({
   const [devicesErrorMuted, setDevicesErrorMuted] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const {t} = useI18n();
+  const { t } = useI18n();
 
   const [captureActive, setCaptureActive] = useState(false);
   const [captureStatus, setCaptureStatus] = useState<{

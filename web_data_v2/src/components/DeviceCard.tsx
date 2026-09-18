@@ -59,15 +59,15 @@ export function DeviceCard({ device }: { device: Device }) {
         </span>
       ) : (
         <>
-            <div class="pos-indicator">
-              <div class="pos-top-row">
-                <span class="pos-value">0%</span>
-                <span class="pos-state">Open</span>
-              </div>
-              <div class="light-strip">
-                <div class="light-fill" style="width: 100%;"></div>
-              </div>
+          <div class="pos-indicator">
+            <div class="pos-top-row">
+              <span class="pos-value">0%</span>
+              <span class="pos-state">Open</span>
             </div>
+            <div class="light-strip">
+              <div class="light-fill" style="width: 100%;"></div>
+            </div>
+          </div>
 
           <div className="card-spacer" />
 

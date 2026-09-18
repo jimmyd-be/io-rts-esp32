@@ -1,5 +1,6 @@
-export interface Types {
+export interface WifiConfig {
   ssid: string;
+  password: string;
 }
 
 export interface otaKeyResponse {

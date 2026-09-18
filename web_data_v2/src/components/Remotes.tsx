@@ -1,8 +1,5 @@
-
 import { useState } from "preact/hooks";
-import {
-  useRemoteWizard,
-} from "./Modals/remoteWizard.tsx";
+import { useRemoteWizard } from "./Modals/remoteWizard.tsx";
 
 export function Remotes(remotesApi) {
   const [droppedDown, setOpen] = useState(true);
