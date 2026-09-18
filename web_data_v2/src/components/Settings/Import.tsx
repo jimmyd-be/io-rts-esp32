@@ -1,5 +1,6 @@
 import { AccordionHead } from "../AccordionHead";
 
+//TODO: Implement import functionality
 export function ImportSettings() {
   return (
     <div class="acc-row">

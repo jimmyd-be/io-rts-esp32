@@ -5,6 +5,8 @@ import { JSX } from "preact";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useWifiConfig } from "../../hooks/api/useWifiConfig";
 
+
+//TODO : Implement WiFi scan functionality and display results in a dropdown for selection.
 export function WifiSettings(): JSX.Element {
   const [scan, setScan] = useState(false);
 
@@ -153,7 +155,7 @@ export function WifiSettings(): JSX.Element {
           Save WiFi
         </button>
         <div class="field-status"></div>
-        <p class="restart-notice" data-i18n="label.restart-notice">
+        <p class="restart-notice" data-i18n="label.warning-notive">
           ⚠ Device will restart after saving.
         </p>
       </AccordionHead>

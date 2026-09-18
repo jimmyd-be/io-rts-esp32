@@ -10,7 +10,6 @@ export function SyslogSettings() {
     <form
       onSubmit={(e) => {
         e.preventDefault(); // Prevent the default form submission
-        const formValues = e.currentTarget.elements;
 
         const fd = new FormData(e.currentTarget);
         const data = Object.fromEntries(fd.entries());
