@@ -1,5 +1,7 @@
 import { AccordionHead } from "../AccordionHead";
 
+
+//TODO: implement web ui update functionality
 export function WebUIUpdateSettings() {
   return (
     <div class="acc-row">

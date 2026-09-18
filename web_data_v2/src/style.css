@@ -1588,7 +1588,7 @@ button.danger:hover {
   line-height: 1.5;
 }
 
-.restart-notice {
+.warning-notive {
   font-size: 12px;
   color: var(--amber);
   opacity: 0.8;

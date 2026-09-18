@@ -1,5 +1,7 @@
 import { AccordionHead } from "../AccordionHead";
 
+//TODO: implement firmware update functionality
+
 export function FirmwareUpdateSettings() {
   return (
     <div class="acc-row">
