@@ -1,3 +1,5 @@
+
+//TODO: Implement reboot functionality
 export function RebootSettings() {
   return (
     <div class="settings-row">

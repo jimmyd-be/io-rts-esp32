@@ -1,5 +1,6 @@
 import { AccordionHead } from "../AccordionHead";
 
+//TODO : Implement controller settings functionality
 export function ControllerSettings() {
   return (
     <div class="acc-row" data-help="controller">
