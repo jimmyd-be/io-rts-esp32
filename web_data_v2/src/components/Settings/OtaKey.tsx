@@ -16,9 +16,7 @@ export function OtaKeySettings() {
             readOnly
             style="flex:1;font-size:11px;"
           />
-          <button class="s-btn">
-            Edit
-          </button>
+          <button class="s-btn">Edit</button>
         </div>
       </AccordionHead>
     </div>

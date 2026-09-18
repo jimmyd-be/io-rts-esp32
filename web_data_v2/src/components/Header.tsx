@@ -74,10 +74,10 @@ export function Header() {
           onChange={(e) => setTheme(e.currentTarget.value)}
           value={theme}
         >
-            <option value="charcoal">● Charcoal</option>
-            <option value="navy">◑ Navy</option>
-            <option value="light">○ Light</option>
-            <option value="purple">◆ Purple</option>
+          <option value="charcoal">● Charcoal</option>
+          <option value="navy">◑ Navy</option>
+          <option value="light">○ Light</option>
+          <option value="purple">◆ Purple</option>
         </select>
       </div>
     </header>
