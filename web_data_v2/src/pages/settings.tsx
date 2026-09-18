@@ -24,7 +24,7 @@ export function Settings() {
     method: "GET",
   });
   return (
-    <section class="view active" id="view-settings">
+    <section class="view active">
       <div class="view-header">
         <h2 class="view-title" data-i18n="nav.settings">
           Settings

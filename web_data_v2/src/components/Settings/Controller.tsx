@@ -16,7 +16,6 @@ export function ControllerSettings() {
             </label>
             <input
               type="text"
-              id="io-node-id"
               class="s-input"
               placeholder="A1B1C3"
               maxLength={6}
@@ -29,7 +28,6 @@ export function ControllerSettings() {
             </label>
             <input
               type="number"
-              id="io-tx-power"
               class="s-input"
               min={0}
               max={20}
@@ -45,14 +43,10 @@ export function ControllerSettings() {
           >
             Passive mode (listen only)
           </span>
-          <div class="s-toggle" id="io-passive-toggle"></div>
-          <input type="checkbox" id="io-passive-mode" style="display:none" />
+          <div class="s-toggle"></div>
+          <input type="checkbox" style="display:none" />
         </div>
-        <button
-          class="s-btn primary"
-          id="io-config-save"
-          data-i18n="button.save-controller"
-        >
+        <button class="s-btn primary" data-i18n="button.save-controller">
           Save Controller Settings
         </button>
       </AccordionHead>

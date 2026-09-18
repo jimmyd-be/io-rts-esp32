@@ -42,10 +42,10 @@ export function SyslogSettings() {
           helpKey={"syslog"}
           summary={
             <>
-              <span class="acc-sum-val" id="acc-syslog-val">
+              <span class="acc-sum-val">
                 {api.data?.server || "Off"}
               </span>
-              <span class="row-status" id="syslog-conn-status"></span>
+              <span class="row-status"></span>
             </>
           }
         >
@@ -56,13 +56,8 @@ export function SyslogSettings() {
             >
               Enable syslog
             </span>
-            <div class="s-toggle" id="syslog-toggle"></div>
-            <input
-              type="checkbox"
-              id="syslog-enabled"
-              style="display:none"
-              checked={api.data?.enabled}
-            />
+            <div class="s-toggle"></div>
+            <input type="checkbox" style="display:none" checked={api.data?.enabled} />
           </div>
           <div style="display:flex;gap:6px;">
             <div style="flex:2;">
@@ -72,7 +67,6 @@ export function SyslogSettings() {
               <input
                 value={api.data?.server}
                 type="text"
-                id="syslog-server"
                 class="s-input"
                 placeholder="192.168.1.x"
                 style="margin-top:4px;"
@@ -85,7 +79,6 @@ export function SyslogSettings() {
               <input
                 value={api.data?.port}
                 type="text"
-                id="syslog-port"
                 class="s-input"
                 placeholder="514"
                 style="margin-top:4px;"
@@ -100,7 +93,6 @@ export function SyslogSettings() {
               <input
                 type="number"
                 value={api.data?.facility}
-                id="syslog-facility"
                 class="s-input"
                 min={0}
                 max={23}
@@ -113,7 +105,6 @@ export function SyslogSettings() {
                 Min level
               </label>
               <select
-                id="syslog-min-level"
                 class="s-select"
                 style="margin-top:4px;"
                 value={api.data?.min_level}
@@ -131,7 +122,6 @@ export function SyslogSettings() {
             </label>
             <input
               type="text"
-              id="syslog-id"
               class="s-input"
               placeholder="auto-generated"
               maxLength={15}
@@ -140,20 +130,12 @@ export function SyslogSettings() {
           </div>
           <div style="display:flex;flex-direction:column;gap:4px;">
             <label class={"label-title"}>Format</label>
-            <select
-              id="syslog-format"
-              class="s-select"
-              value={api.data?.format}
-            >
+            <select class="s-select" value={api.data?.format}>
               <option value="5424">RFC 5424</option>
               <option value="3164">RFC 3164 (Graylog)</option>
             </select>
           </div>
-          <button
-            class="s-btn primary"
-            id="syslog-update"
-            data-i18n="button.save-syslog"
-          >
+          <button class="s-btn primary" data-i18n="button.save-syslog">
             Save Syslog
           </button>
         </AccordionHead>

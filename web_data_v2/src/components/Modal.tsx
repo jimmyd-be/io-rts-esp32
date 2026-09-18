@@ -28,7 +28,7 @@ export function Modal({
   }
 
   return (
-    <div id="arm-modal" class="key-modal open">
+    <div class="key-modal open">
       <div class={className} onClick={(e) => e.stopPropagation()}>
         {children}
       </div>

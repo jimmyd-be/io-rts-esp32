@@ -75,7 +75,7 @@ export function FallbackApSettings(): JSX.Element {
         helpLabel="Help for fallback-ap"
         helpKey={"fallback-ap"}
         summary={
-          <span class="acc-sum-val" id="acc-fap-val">
+          <span class="acc-sum-val">
             {formValues.ap_ssid}
           </span>
         }
@@ -89,7 +89,6 @@ export function FallbackApSettings(): JSX.Element {
           </span>
           <input
             type="checkbox"
-            id="fallback-enabled"
             name="enabled"
             checked={formValues.enabled}
             onChange={(e) =>
@@ -107,7 +106,6 @@ export function FallbackApSettings(): JSX.Element {
             </label>
             <input
               type="text"
-              id="fallback-ap-ssid"
               name="ap_ssid"
               value={formValues.ap_ssid}
               onInput={(e) =>
@@ -128,7 +126,6 @@ export function FallbackApSettings(): JSX.Element {
             </label>
             <input
               type="number"
-              id="fallback-timeout"
               name="ap_timeout_s"
               value={formValues.ap_timeout_s}
               onInput={(e) =>
@@ -152,7 +149,6 @@ export function FallbackApSettings(): JSX.Element {
             </label>
             <input
               type="number"
-              id="fallback-retries-boot"
               name="retries_boot"
               value={formValues.retries_boot}
               onInput={(e) =>
@@ -174,7 +170,6 @@ export function FallbackApSettings(): JSX.Element {
             </label>
             <input
               type="number"
-              id="fallback-retries-running"
               name="retries_running"
               value={formValues.retries_running}
               onInput={(e) =>
@@ -198,7 +193,6 @@ export function FallbackApSettings(): JSX.Element {
             </label>
             <input
               type="password"
-              id="fallback-ap-password-new"
               name="password"
               class="s-input"
               placeholder="Blank = clear password"
@@ -211,7 +205,6 @@ export function FallbackApSettings(): JSX.Element {
             </label>
             <input
               type="password"
-              id="fallback-ap-password-confirm"
               name="password_confirm"
               class="s-input"
               placeholder="Confirm"
@@ -219,11 +212,10 @@ export function FallbackApSettings(): JSX.Element {
             />
           </div>
         </div>
-        <div class="field-status" id="fallback-save-status"></div>
+        <div class="field-status"></div>
         <button
           class="s-btn primary"
           type="submit"
-          id="fallback-save"
           data-i18n="button.save-fallback-ap"
         >
           Save Fallback AP

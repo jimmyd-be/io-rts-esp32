@@ -12,12 +12,11 @@ export function OtaKeySettings() {
         <div style="display:flex;gap:6px;align-items:center;">
           <input
             type="text"
-            id="ota-key-display"
             class="s-input key-display"
             readOnly
             style="flex:1;font-size:11px;"
           />
-          <button class="s-btn" id="ota-key-edit">
+          <button class="s-btn">
             Edit
           </button>
         </div>
