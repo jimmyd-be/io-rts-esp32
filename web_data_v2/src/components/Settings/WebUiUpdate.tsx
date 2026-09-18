@@ -9,10 +9,7 @@ export function WebUIUpdateSettings() {
         summary={<span class="acc-sum-hint">Upload .bin file</span>}
       >
         <div>
-          <label
-            class={"label-title"}
-            data-i18n="label.web-ui-file"
-          >
+          <label class={"label-title"} data-i18n="label.web-ui-file">
             Web UI file (.bin)
           </label>
           <input

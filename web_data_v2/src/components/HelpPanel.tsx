@@ -23,11 +23,7 @@ type HelpPanelProps = {
 };
 
 const SECTION_KEYS: Record<string, Array<{ key: string; warn?: boolean }>> = {
-  wifi: [
-    { key: "what-it-does" },
-    { key: "after-saving" },
-    { key: "scan" },
-  ],
+  wifi: [{ key: "what-it-does" }, { key: "after-saving" }, { key: "scan" }],
   "fallback-ap": [
     { key: "what-it-does" },
     { key: "hotspot-name" },
@@ -72,15 +68,8 @@ const SECTION_KEYS: Record<string, Array<{ key: string; warn?: boolean }>> = {
     { key: "pair" },
     { key: "sniff" },
   ],
-  "ota-key": [
-    { key: "what-it-is" },
-    { key: "usage" },
-    { key: "rotation" },
-  ],
-  backup: [
-    { key: "backup" },
-    { key: "restore" },
-  ],
+  "ota-key": [{ key: "what-it-is" }, { key: "usage" }, { key: "rotation" }],
+  backup: [{ key: "backup" }, { key: "restore" }],
 };
 
 function translated(t: TranslateFn, key: string): string | null {
@@ -203,7 +192,10 @@ export default function HelpPanel({
           aria-labelledby={`help-panel-title-${helpKey}`}
           onClick={closePanel}
         >
-          <div class="help-panel-inner" onClick={(event) => event.stopPropagation()}>
+          <div
+            class="help-panel-inner"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div class="help-sheet-handle" />
 
             <div class="help-panel-header">
@@ -224,7 +216,9 @@ export default function HelpPanel({
             <div class="help-panel-body">
               {data.sections.map((section, index) => (
                 <div
-                  class={section.warn ? "help-block help-block-warn" : "help-block"}
+                  class={
+                    section.warn ? "help-block help-block-warn" : "help-block"
+                  }
                   key={`${helpKey}-${index}`}
                 >
                   <div class="help-block-label">{section.label}</div>

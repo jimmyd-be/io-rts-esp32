@@ -6,11 +6,11 @@ export default defineConfig({
   plugins: [preact()],
   server: {
     proxy: {
-      '/api': {
-        target: 'http://192.168.0.78',
+      "/api": {
+        target: "http://192.168.0.78",
         changeOrigin: true,
         secure: false,
-      }
-    }
-  }
+      },
+    },
+  },
 });

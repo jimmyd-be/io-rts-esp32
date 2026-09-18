@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 
-export function AddRemoteModal({modal}) {
+export function AddRemoteModal({ modal }) {
   const [type, setType] = useState<string>("");
 
   return (
@@ -95,49 +95,59 @@ export function AddRemoteModal({modal}) {
               >
                 Cancel
               </button>
-              <button id="arm-manual-back" class="btn-ghost" onClick={() => setType("")}>
+              <button
+                id="arm-manual-back"
+                class="btn-ghost"
+                onClick={() => setType("")}
+              >
                 Back
               </button>
-              <button id="arm-manual-next" class="btn-danger-confirm" onClick={() => setType("link")}>
+              <button
+                id="arm-manual-next"
+                class="btn-danger-confirm"
+                onClick={() => setType("link")}
+              >
                 Next
               </button>
             </div>
           </div>
         )}
 
-        {type === "link" &&  <div id="arm-step-devices">
-          <p
-            id="arm-remote-id-label"
-            class="key-modal-warning-text"
-            style="display:none;margin-bottom:10px;font-weight:600;"
-          ></p>
-          <label class="key-modal-label">Link to devices:</label>
-          <div id="arm-device-list" class="arm-device-list"></div>
-          <p
-            id="arm-devices-error"
-            class="key-modal-status"
-            style="color:var(--red);min-height:18px;"
-          ></p>
-          <div class="key-modal-actions">
-            <button
-              id="arm-delete-btn"
-              class="btn-ghost arm-delete-btn"
-              style="display:none;"
-            >
-              Delete
-            </button>
-            <button
-              id="arm-devices-back"
-              class="btn-ghost"
-              onClick={() => setType("")}
-            >
-              Back
-            </button>
-            <button id="arm-save-btn" class="btn-danger-confirm">
-              Save
-            </button>
+        {type === "link" && (
+          <div id="arm-step-devices">
+            <p
+              id="arm-remote-id-label"
+              class="key-modal-warning-text"
+              style="display:none;margin-bottom:10px;font-weight:600;"
+            ></p>
+            <label class="key-modal-label">Link to devices:</label>
+            <div id="arm-device-list" class="arm-device-list"></div>
+            <p
+              id="arm-devices-error"
+              class="key-modal-status"
+              style="color:var(--red);min-height:18px;"
+            ></p>
+            <div class="key-modal-actions">
+              <button
+                id="arm-delete-btn"
+                class="btn-ghost arm-delete-btn"
+                style="display:none;"
+              >
+                Delete
+              </button>
+              <button
+                id="arm-devices-back"
+                class="btn-ghost"
+                onClick={() => setType("")}
+              >
+                Back
+              </button>
+              <button id="arm-save-btn" class="btn-danger-confirm">
+                Save
+              </button>
+            </div>
           </div>
-        </div> }
+        )}
       </div>
     </div>
   );

@@ -59,28 +59,40 @@ export function DeviceCard({ device }: { device: Device }) {
         </span>
       ) : (
         <>
-          {hasPos && (
-            <div className="pos-indicator">
-              <div
-                className="pos-fill"
-                style={{
-                  width: `${Math.max(0, Math.min(100, Number(device.position ?? 0)))}%`,
-                  opacity: device.position_estimated ? 0.7 : 1,
-                }}
-              />
+            <div class="pos-indicator">
+              <div class="pos-top-row">
+                <span class="pos-value">0%</span>
+                <span class="pos-state">Open</span>
+              </div>
+              <div class="light-strip">
+                <div class="light-fill" style="width: 100%;"></div>
+              </div>
             </div>
-          )}
 
           <div className="card-spacer" />
 
-          <div className="card-controls">
-            {/* keep your device buttons here, or replace with a small action block */}
-            <button type="button" className="card-btn">
-              Open
+          <div class="card-btn-row">
+            <button class="card-btn">↑</button>
+            <button class="card-btn">■</button>
+            <button class="card-btn">↓</button>
+            <button
+              className="card-btn card-fav"
+              aria-label="Favorite"
+              title="No favorite set — use Edit to set one."
+              data-fav-device="1c611a"
+            >
+              ★
             </button>
-            <button type="button" className="card-btn">
-              Close
-            </button>
+          </div>
+          <div class="card-slider-row">
+            <span class="card-slider-label">Pos</span>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              class="card-slider"
+              data-slider="position"
+            />
           </div>
         </>
       )}

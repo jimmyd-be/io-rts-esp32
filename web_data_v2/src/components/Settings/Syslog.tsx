@@ -3,7 +3,6 @@ import useApi from "../../hooks/useApi";
 import { MqttConfig, otaKeyResponse, SyslogConfig } from "../../models/Types";
 
 export function SyslogSettings() {
-
   const otaData = useApi<otaKeyResponse>({
     endpoint: "/api/ota/key",
     method: "GET",
