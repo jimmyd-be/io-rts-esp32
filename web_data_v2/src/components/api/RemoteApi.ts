@@ -1,11 +1,12 @@
 import { ActionResult } from "../../models/Types";
 
-async function postJson<T>(url: string, payload: unknown): Promise<T> {
+async function postJson<T>(url: string, otaKey: string, payload: unknown): Promise<T> {
   const response = await fetch(url, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      "X-OTA-Key": otaKey,
     },
     body: JSON.stringify(payload),
   });
@@ -26,34 +27,35 @@ async function postJson<T>(url: string, payload: unknown): Promise<T> {
 }
 
 export const REMOTE_ID_RE = /^[0-9A-F]{6}$/;
-export function startCaptureRequest(): Promise<unknown> {
-  return postJson("/api/remote/capture/start", {});
+export function startCaptureRequest(otaKey: string): Promise<unknown> {
+  return postJson("/api/remote/capture/start", otaKey, {});
 }
 
-export function cancelCaptureRequest(): Promise<unknown> {
-  return postJson("/api/remote/capture/cancel", {});
+export function cancelCaptureRequest(otaKey: string): Promise<unknown> {
+  return postJson("/api/remote/capture/cancel", otaKey, {});
 }
 
 export function linkRemote(
   remoteId: string,
   deviceId: string,
+  otaKey: string
 ): Promise<ActionResult> {
-  return postJson<ActionResult>("/api/action", {
+  return postJson<ActionResult>("/api/action", otaKey, {
     action: "linkRemote",
     remoteId,
     deviceId,
   });
 }
 
-export function unlinkRemote(remoteId: string): Promise<ActionResult> {
-  return postJson<ActionResult>("/api/action", {
+export function unlinkRemote(remoteId: string, otaKey: string): Promise<ActionResult> {
+  return postJson<ActionResult>("/api/action", otaKey, {
     action: "unlinkRemote",
     remoteId,
   });
 }
 
-export function deleteRemote(remoteId: string): Promise<ActionResult> {
-  return postJson<ActionResult>("/api/action", {
+export function deleteRemote(remoteId: string, otaKey: string): Promise<ActionResult> {
+  return postJson<ActionResult>("/api/action", otaKey, {
     action: "deleteRemote",
     remoteId,
   });
