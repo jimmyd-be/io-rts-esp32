@@ -61,7 +61,7 @@ export function SyslogSettings() {
         <div style="display:flex;gap:6px;">
           <div style="flex:2;">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.server-address"
             >
               Server address
@@ -77,7 +77,7 @@ export function SyslogSettings() {
           </div>
           <div style="flex:1;">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.port"
             >
               Port
@@ -95,7 +95,7 @@ export function SyslogSettings() {
         <div style="display:flex;gap:6px;">
           <div style="flex:1">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.facility"
             >
               Facility
@@ -113,7 +113,7 @@ export function SyslogSettings() {
           </div>
           <div style="flex:1">
             <label
-              style="font-size:11px;color:var(--text3);"
+              class={"label-title"}
               data-i18n="label.min-level"
             >
               Min level
@@ -133,7 +133,7 @@ export function SyslogSettings() {
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;">
           <label
-            style="font-size:11px;color:var(--text3);"
+            class={"label-title"}
             data-i18n="label.device-identifier"
           >
             Device identifier (shown in log)
@@ -148,7 +148,7 @@ export function SyslogSettings() {
           />
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;">
-          <label style="font-size:11px;color:var(--text3);">Format</label>
+          <label class={"label-title"}>Format</label>
           <select id="syslog-format" class="s-select" value={api.data?.format}>
             <option value="5424">RFC 5424</option>
             <option value="3164">RFC 3164 (Graylog)</option>

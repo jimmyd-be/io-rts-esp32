@@ -1609,6 +1609,11 @@ small.field-hint {
   z-index: 2;
 }
 
+.label-title {
+  font-size:11px;
+  color:var(--text3);
+}
+
 .warn-dot::after {
   content: "!";
 }

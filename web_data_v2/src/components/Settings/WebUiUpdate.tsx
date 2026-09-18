@@ -10,7 +10,7 @@ export function WebUIUpdateSettings() {
       >
         <div>
           <label
-            style="font-size:11px;color:var(--text3);"
+            class={"label-title"}
             data-i18n="label.web-ui-file"
           >
             Web UI file (.bin)

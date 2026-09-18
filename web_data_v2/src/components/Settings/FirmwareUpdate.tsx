@@ -9,7 +9,7 @@ export function FirmwareUpdateSettings() {
         summary={<span class="acc-sum-hint">Upload .bin file</span>}
       >
         <div>
-          <label style="font-size:11px;color:var(--text3);">
+          <label class={"label-title"}>
             Firmware file — use <strong>heltec-vX.X.X-firmware.bin</strong> from
             the GitHub release, not full.bin or web.bin
           </label>
