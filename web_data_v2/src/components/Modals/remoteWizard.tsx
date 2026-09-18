@@ -16,7 +16,8 @@ import {
   unlinkRemote,
 } from "../api/RemoteApi";
 import useI18n from "../../hooks/useI18n";
-import { Device, Remote } from "../../models/Types";
+import { Device, otaKeyResponse, Remote } from "../../models/Types";
+import useApi from "../../hooks/useApi";
 
 export type WizardMode = "add" | "edit";
 type Step = "choose" | "capture" | "manual" | "devices";
@@ -61,6 +62,11 @@ export function RemoteWizardProvider({
   onSaved,
   children,
 }: RemoteWizardProviderProps) {
+  const otaData = useApi<otaKeyResponse>({
+    endpoint: "/api/ota/key",
+    method: "GET",
+  });
+
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<WizardMode>("add");
   const [step, setStep] = useState<Step>("choose");
@@ -86,11 +92,6 @@ export function RemoteWizardProvider({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const captureActiveRef = useRef(false);
 
-  const availableDevices = useMemo(
-    () => devices.filter((d) => !d.inactive),
-    [devices],
-  );
-
   const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {
       clearInterval(timerRef.current);
@@ -102,8 +103,8 @@ export function RemoteWizardProvider({
     captureActiveRef.current = false;
     setCaptureActive(false);
     clearTimer();
-    cancelCaptureRequest().catch(() => undefined);
-  }, [clearTimer]);
+    cancelCaptureRequest(otaData.data?.key).catch(() => undefined);
+  }, [clearTimer, otaData.data?.key]);
 
   const startCapture = useCallback(() => {
     setShowRetry(false);
@@ -131,7 +132,7 @@ export function RemoteWizardProvider({
       });
     }, 1000);
 
-    startCaptureRequest().catch((e: Error) => {
+    startCaptureRequest(otaData.data?.key).catch((e: Error) => {
       clearTimer();
       captureActiveRef.current = false;
       setCaptureActive(false);
@@ -145,12 +146,13 @@ export function RemoteWizardProvider({
 
   const selectedForDevices = useCallback(
     (linked: string[]) =>
-      availableDevices
+      devices
+        .filter((d) => !d.inactive)
         .filter(
           (d) => linked.indexOf(d.id) !== -1 || linked.indexOf(d.name) !== -1,
         )
         .map((d) => d.id),
-    [availableDevices],
+    [devices],
   );
 
   const goToDeviceStep = useCallback(
@@ -255,7 +257,11 @@ export function RemoteWizardProvider({
     try {
       if (mode === "add") {
         for (const deviceId of selectedIds) {
-          const result = await linkRemote(remoteId, deviceId);
+          const result = await linkRemote(
+            remoteId,
+            deviceId,
+            otaData.data?.key,
+          );
           if (!result.success)
             throw new Error(result.message || "Link failed for " + deviceId);
         }
@@ -265,7 +271,7 @@ export function RemoteWizardProvider({
         const failed: string[] = [];
         for (const deviceId of selectedIds) {
           try {
-            await linkRemote(remoteId, deviceId);
+            await linkRemote(remoteId, deviceId, otaData.data?.key);
           } catch {
             failed.push(deviceId);
           }
@@ -292,7 +298,7 @@ export function RemoteWizardProvider({
   const remove = useCallback(async () => {
     if (!confirm(t("confirm.delete_remote", { id: remoteId }))) return;
     try {
-      await deleteRemote(remoteId);
+      await deleteRemote(remoteId, otaData.data?.key);
       // showToast(t("toast.remote_removed"), "success");
       close();
       await onSaved?.();
@@ -311,152 +317,186 @@ export function RemoteWizardProvider({
       {children}
       {isOpen && (
         <div
-          className="modal open"
+          className="key-modal open"
           onClick={(e) => {
             if (e.target === e.currentTarget) close();
           }}
         >
           <div className="modal-content">
-            <h3>
-              {mode === "edit" ? t("popup.edit_remote") : t("popup.add_remote")}
-            </h3>
+            <div class="key-modal-inner arm-inner">
+              <h3>
+                {mode === "edit"
+                  ? t("popup.edit_remote")
+                  : t("popup.add_remote")}
+              </h3>
 
-            {step === "choose" && (
-              <div className="arm-step">
-                <button
-                  className="btn"
-                  onClick={() => {
-                    setStep("capture");
-                    startCapture();
-                  }}
-                >
-                  {t("button.capture_remote")}
-                </button>
-                <button
-                  className="btn bg"
-                  onClick={() => {
-                    setManualInput("");
-                    setManualError("");
-                    setStep("manual");
-                  }}
-                >
-                  {t("button.enter_manually")}
-                </button>
-                <button className="btn bg" onClick={close}>
-                  {t("button.cancel")}
-                </button>
-              </div>
-            )}
-
-            {step === "capture" && (
-              <div className="arm-step">
-                <p
-                  style={{
-                    color: captureStatus.tone
-                      ? `var(--${captureStatus.tone})`
-                      : undefined,
-                  }}
-                >
-                  {captureStatus.text}
-                </p>
-                {captureActive && (
-                  <div className="arm-countdown">{seconds}s</div>
-                )}
-                {showRetry && (
-                  <button className="btn" onClick={startCapture}>
-                    {t("button.retry")}
-                  </button>
-                )}
-                <button
-                  className="btn bg"
-                  onClick={() => {
-                    cancelCapture();
-                    setManualInput("");
-                    setManualError("");
-                    setStep("manual");
-                  }}
-                >
-                  {t("button.skip")}
-                </button>
-                <button className="btn bg" onClick={close}>
-                  {t("button.cancel")}
-                </button>
-              </div>
-            )}
-
-            {step === "manual" && (
-              <div className="arm-step">
-                <input
-                  value={manualInput}
-                  maxLength={6}
-                  onChange={(e) => setManualInput(e.currentTarget.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") submitManualId();
-                  }}
-                />
-                {manualError && (
-                  <div className="error" style={{ color: "var(--red)" }}>
-                    {manualError}
-                  </div>
-                )}
-                <button className="btn" onClick={submitManualId}>
-                  {t("button.next")}
-                </button>
-                <button className="btn bg" onClick={() => setStep("choose")}>
-                  {t("button.back")}
-                </button>
-                <button className="btn bg" onClick={close}>
-                  {t("button.cancel")}
-                </button>
-              </div>
-            )}
-
-            {step === "devices" && (
-              <div className="arm-step">
-                {remoteId && (
-                  <div className="arm-remote-id">
-                    {t("status.remote_label", { id: remoteId })}
-                  </div>
-                )}
-                <div id="arm-device-list">
-                  {availableDevices.length === 0
-                    ? t("status.no_devices_paired")
-                    : availableDevices.map((device) => (
-                        <label className="arm-device-item" key={device.id}>
-                          <input
-                            type="checkbox"
-                            className="arm-device-cb"
-                            value={device.id}
-                            checked={selectedIds.indexOf(device.id) !== -1}
-                            onChange={() => toggleDevice(device.id)}
-                          />
-                          <span>{device.name}</span>
-                        </label>
-                      ))}
-                </div>
-                {devicesError && (
-                  <div
-                    style={{
-                      color: devicesErrorMuted ? "var(--text3)" : undefined,
+              {step === "choose" && (
+                <div className="arm-step">
+                  <p class="key-modal-warning-text" style="margin-bottom:16px;">
+                    How do you want to add the remote?
+                  </p>
+                  <button
+                    className="btn-danger-confirm"
+                    onClick={() => {
+                      setStep("capture");
+                      startCapture();
                     }}
                   >
-                    {devicesError}
+                    {t("button.capture_remote")}
+                  </button>
+                  <button
+                    className="btn-ghost"
+                    onClick={() => {
+                      setManualInput("");
+                      setManualError("");
+                      setStep("manual");
+                    }}
+                  >
+                    {t("button.enter_manually")}
+                  </button>
+                  <button className="btn-ghost" onClick={close}>
+                    {t("button.cancel")}
+                  </button>
+                </div>
+              )}
+
+              {step === "capture" && (
+                <div id="arm-step-capture">
+                  <div class="arm-capture-row">
+                    <p id="arm-capture-status" class="key-modal-warning-text">
+                      Press any button on the remote…
+                    </p>
+                    <span id="arm-countdown" class="arm-countdown">
+                      30s
+                    </span>
                   </div>
-                )}
-                {mode === "edit" ? (
-                  <button className="btn bg" onClick={remove}>
-                    {t("button.delete")}
+                  <div class="key-modal-actions">
+                    <button
+                      id="arm-capture-cancel"
+                      class="btn-ghost"
+                      onClick={close}
+                    >
+                      {t("button.cancel")}
+                    </button>
+                    <button id="arm-skip-btn" class="btn-ghost">
+                      Enter manually
+                    </button>
+                    <button
+                      id="arm-retry-btn"
+                      class="btn-ghost"
+                      style="display:none;"
+                    >
+                      Retry
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {step === "manual" && (
+                <div className="arm-step">
+                  <label class="key-modal-label">
+                    Remote ID (6 hex characters):
+                  </label>
+                  <input
+                    value={manualInput}
+                    class="key-modal-input"
+                    placeholder="A1B2C3"
+                    autocomplete="off"
+                    style="font-family:var(--mono);text-transform:uppercase;letter-spacing:0.1em;"
+                    maxLength={6}
+                    onChange={(e) => setManualInput(e.currentTarget.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") submitManualId();
+                    }}
+                  />
+                  {manualError && (
+                    <p
+                      id="arm-manual-error"
+                      class="key-modal-status"
+                      style="color:var(--red);min-height:18px;"
+                    >
+                      {manualError}
+                    </p>
+                  )}
+
+                  <div class="key-modal-actions">
+                    <button
+                      id="arm-manual-cancel"
+                      class="btn-ghost"
+                      onClick={close}
+                    >
+                      {t("button.cancel")}
+                    </button>
+                    <button
+                      id="arm-manual-back"
+                      class="btn-ghost"
+                      onClick={() => setStep("choose")}
+                    >
+                      {t("button.back")}
+                    </button>
+                    <button
+                      id="arm-manual-next"
+                      class="btn-danger-confirm"
+                      onClick={submitManualId}
+                    >
+                      {t("button.next")}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {step === "devices" && (
+                <div className="arm-step">
+                  {remoteId && (
+                    <div className="arm-remote-id">
+                      {t("status.remote_label", { id: remoteId })}
+                    </div>
+                  )}
+                  <div id="arm-device-list">
+                    {devices.filter((d) => !d.inactive).length === 0
+                      ? t("status.no_devices_paired")
+                      : devices
+                          .filter((d) => !d.inactive)
+                          .map((device) => (
+                            <label className="arm-device-item" key={device.id}>
+                              <input
+                                type="checkbox"
+                                className="arm-device-cb"
+                                value={device.id}
+                                checked={selectedIds.indexOf(device.id) !== -1}
+                                onChange={() => toggleDevice(device.id)}
+                              />
+                              <span>{device.name}</span>
+                            </label>
+                          ))}
+                  </div>
+                  {devicesError && (
+                    <div
+                      style={{
+                        color: devicesErrorMuted ? "var(--text3)" : undefined,
+                      }}
+                    >
+                      {devicesError}
+                    </div>
+                  )}
+                  {mode === "edit" ? (
+                    <button className="btn bg" onClick={remove}>
+                      {t("button.delete")}
+                    </button>
+                  ) : (
+                    <button
+                      className="btn bg"
+                      onClick={() => setStep("choose")}
+                    >
+                      {t("button.back")}
+                    </button>
+                  )}
+                  <button className="btn" disabled={saving} onClick={save}>
+                    {t("button.save")}
                   </button>
-                ) : (
-                  <button className="btn bg" onClick={() => setStep("choose")}>
-                    {t("button.back")}
-                  </button>
-                )}
-                <button className="btn" disabled={saving} onClick={save}>
-                  {t("button.save")}
-                </button>
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -395,5 +395,7 @@
   "popup.transit_done": "Calibration done: {s} s",
   "popup.transit_failed": "Calibration failed.",
   "popup.transit_cancelled": "Calibration cancelled.",
-  "label.enable-fallback-ap": "Enable fallback AP"
+  "label.enable-fallback-ap": "Enable fallback AP",
+  "button.capture_remote": "Capture",
+  "button.enter_manually": "Enter manually"
 }
