@@ -1,14 +1,10 @@
 import { AccordionHead } from "../AccordionHead";
-import useApi from "../../hooks/useApi";
-import { FallBackConfig } from "../../models/Types";
 import { useEffect, useState } from "preact/hooks";
 import { JSX } from "preact";
+import { useFallBackConfig } from "../../hooks/api/useFallBackConfig";
 
 export function FallbackApSettings(): JSX.Element {
-  const api = useApi<FallBackConfig>({
-    endpoint: "/api/wifi/fallback",
-    method: "GET",
-  });
+  const api = useFallBackConfig();
 
   const [formValues, setFormValues] = useState({
     enabled: false,
@@ -74,11 +70,7 @@ export function FallbackApSettings(): JSX.Element {
         titleI18n="settings.row.fallback-ap"
         helpLabel="Help for fallback-ap"
         helpKey={"fallback-ap"}
-        summary={
-          <span class="acc-sum-val">
-            {formValues.ap_ssid}
-          </span>
-        }
+        summary={<span class="acc-sum-val">{formValues.ap_ssid}</span>}
       >
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
           <span

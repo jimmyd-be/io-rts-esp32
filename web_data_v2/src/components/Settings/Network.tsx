@@ -1,18 +1,12 @@
 import { AccordionHead } from "../AccordionHead";
-import useApi from "../../hooks/useApi";
-import { NetworkConfig, otaKeyResponse } from "../../models/Types";
 import { useState } from "preact/hooks";
+import { useOtaKey } from "../../hooks/api/useOtaKey";
+import { useNetworkConfig } from "../../hooks/api/useNetworkConfig";
 
 export function NetworkSettings() {
-  const otaData = useApi<otaKeyResponse>({
-    endpoint: "/api/ota/key",
-    method: "GET",
-  });
+  const otaData = useOtaKey();
 
-  const api = useApi<NetworkConfig>({
-    endpoint: "/api/network/config",
-    method: "GET",
-  });
+  const api = useNetworkConfig();
 
   const [dhcpEnabled] = useState(api.data ? api.data.dhcp : true);
 
@@ -24,7 +18,7 @@ export function NetworkSettings() {
         const fd = new FormData(e.currentTarget);
         const data = Object.fromEntries(fd.entries());
 
-        fetch("//api/network/config", {
+        fetch("/api/network/config", {
           method: "POST",
           body: JSON.stringify(data),
           headers: {
@@ -72,7 +66,10 @@ export function NetworkSettings() {
                 DHCP
               </span>
               <div class="s-toggle" />
-              <input type="checkbox" checked={api.data ? api.data.dhcp : undefined} />
+              <input
+                type="checkbox"
+                checked={api.data ? api.data.dhcp : undefined}
+              />
             </div>
           </div>
           <div style="flex-direction:column;gap:6px;display:flex;">
@@ -146,7 +143,11 @@ export function NetworkSettings() {
               />
             </div>
           </div>
-          <button type={"submit"} class="s-btn primary" data-i18n="button.save-network">
+          <button
+            type={"submit"}
+            class="s-btn primary"
+            data-i18n="button.save-network"
+          >
             Save Network
           </button>
           <p class="restart-notice" data-i18n="label.restart-notice">

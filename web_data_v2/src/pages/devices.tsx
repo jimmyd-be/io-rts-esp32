@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useApi from "../hooks/useApi";
 import useI18n from "../hooks/useI18n";
 import { Device, Remote } from "../models/Types";

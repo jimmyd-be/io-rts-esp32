@@ -1,7 +1,11 @@
 export function RebootSettings() {
   return (
     <div class="settings-row">
-      <span class="row-label danger" data-i18n="settings.row.reboot" style="cursor:pointer;">
+      <span
+        class="row-label danger"
+        data-i18n="settings.row.reboot"
+        style="cursor:pointer;"
+      >
         Reboot Device
       </span>
       <div class="row-right">

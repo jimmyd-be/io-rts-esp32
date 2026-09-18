@@ -1,6 +1,10 @@
 import { ActionResult } from "../../models/Types";
 
-async function postJson<T>(url: string, otaKey: string, payload: unknown): Promise<T> {
+async function postJson<T>(
+  url: string,
+  otaKey: string,
+  payload: unknown,
+): Promise<T> {
   const response = await fetch(url, {
     method: "POST",
     headers: {
@@ -38,7 +42,7 @@ export function cancelCaptureRequest(otaKey: string): Promise<unknown> {
 export function linkRemote(
   remoteId: string,
   deviceId: string,
-  otaKey: string
+  otaKey: string,
 ): Promise<ActionResult> {
   return postJson<ActionResult>("/api/action", otaKey, {
     action: "linkRemote",
@@ -47,14 +51,20 @@ export function linkRemote(
   });
 }
 
-export function unlinkRemote(remoteId: string, otaKey: string): Promise<ActionResult> {
+export function unlinkRemote(
+  remoteId: string,
+  otaKey: string,
+): Promise<ActionResult> {
   return postJson<ActionResult>("/api/action", otaKey, {
     action: "unlinkRemote",
     remoteId,
   });
 }
 
-export function deleteRemote(remoteId: string, otaKey: string): Promise<ActionResult> {
+export function deleteRemote(
+  remoteId: string,
+  otaKey: string,
+): Promise<ActionResult> {
   return postJson<ActionResult>("/api/action", otaKey, {
     action: "deleteRemote",
     remoteId,

@@ -1,17 +1,11 @@
 import { AccordionHead } from "../AccordionHead";
-import useApi from "../../hooks/useApi";
-import { MqttConfig, otaKeyResponse } from "../../models/Types";
+import { useOtaKey } from "../../hooks/api/useOtaKey";
+import { useMqttConfig } from "../../hooks/api/useMqttConfig";
 
 export function MqttSettings() {
-  const otaData = useApi<otaKeyResponse>({
-    endpoint: "/api/ota/key",
-    method: "GET",
-  });
+  const otaData = useOtaKey();
 
-  const api = useApi<MqttConfig>({
-    endpoint: "/api/mqtt",
-    method: "GET",
-  });
+  const api = useMqttConfig();
 
   return (
     <form
@@ -158,7 +152,11 @@ export function MqttSettings() {
               style="margin-top:4px;"
             />
           </div>
-          <button type={"submit"} class="s-btn primary" data-i18n="button.save-mqtt">
+          <button
+            type={"submit"}
+            class="s-btn primary"
+            data-i18n="button.save-mqtt"
+          >
             Save MQTT
           </button>
         </AccordionHead>

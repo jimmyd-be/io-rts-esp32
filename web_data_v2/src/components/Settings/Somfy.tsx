@@ -1,17 +1,11 @@
 import { AccordionHead } from "../AccordionHead";
-import useApi from "../../hooks/useApi";
-import { otaKeyResponse, SomfyConfig } from "../../models/Types";
+import { useOtaKey } from "../../hooks/api/useOtaKey";
+import { useSomfyConfig } from "../../hooks/api/useSomfyConfig";
 
 export function SomfySettings() {
-  const otaData = useApi<otaKeyResponse>({
-    endpoint: "/api/ota/key",
-    method: "GET",
-  });
+  const otaData = useOtaKey();
 
-  const api = useApi<SomfyConfig>({
-    endpoint: "/api/somfy/credentials",
-    method: "GET",
-  });
+  const api = useSomfyConfig();
 
   return (
     <form
