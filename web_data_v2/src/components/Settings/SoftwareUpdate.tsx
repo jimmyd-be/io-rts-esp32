@@ -1,5 +1,7 @@
 
 //TODO: Implement this
+import { Checkbox } from "../Checkbox";
+
 export function SoftwareUpdateSettings() {
   return (
     <div class="settings-row">
@@ -10,8 +12,7 @@ export function SoftwareUpdateSettings() {
         <span style="font-size:12px;color:var(--text2);">
           button.stable-only
         </span>
-        <div class="s-toggle"></div>
-        <input type="checkbox" style="display:none" />
+        <Checkbox />
         <button class="s-btn" data-i18n="button.check">
           Check
         </button>

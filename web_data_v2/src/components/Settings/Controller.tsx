@@ -1,4 +1,5 @@
 import { AccordionHead } from "../AccordionHead";
+import { Checkbox } from "../Checkbox";
 
 //TODO : Implement controller settings functionality
 export function ControllerSettings() {
@@ -44,8 +45,7 @@ export function ControllerSettings() {
           >
             Passive mode (listen only)
           </span>
-          <div class="s-toggle"></div>
-          <input type="checkbox" style="display:none" />
+          <Checkbox />
         </div>
         <button class="s-btn primary" data-i18n="button.save-controller">
           Save Controller Settings

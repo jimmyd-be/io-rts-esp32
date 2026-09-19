@@ -1060,6 +1060,24 @@ main::-webkit-scrollbar {
   transform: translateX(18px);
 }
 
+.s-checkbox {
+  display: inline-flex;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.s-checkbox input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.s-checkbox input:focus-visible + .s-toggle {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
 #wifi-scan-results {
   background: var(--surface2);
   border: 1px solid var(--border);
