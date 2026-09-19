@@ -1,6 +1,7 @@
 import { AccordionHead } from "../AccordionHead";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useSyslogConfig } from "../../hooks/api/useSyslogConfig";
+import { Checkbox } from "../Checkbox";
 
 export function SyslogSettings() {
   const otaData = useOtaKey();
@@ -47,12 +48,7 @@ export function SyslogSettings() {
             >
               Enable syslog
             </span>
-            <div class="s-toggle"></div>
-            <input
-              type="checkbox"
-              style="display:none"
-              checked={api.data?.enabled}
-            />
+            <Checkbox />
           </div>
           <div style="display:flex;gap:6px;">
             <div style="flex:2;">

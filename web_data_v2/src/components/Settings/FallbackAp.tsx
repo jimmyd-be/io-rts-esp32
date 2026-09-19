@@ -2,6 +2,7 @@ import { AccordionHead } from "../AccordionHead";
 import { useEffect, useState } from "preact/hooks";
 import { JSX } from "preact";
 import { useFallBackConfig } from "../../hooks/api/useFallBackConfig";
+import { Checkbox } from "../Checkbox";
 
 export function FallbackApSettings(): JSX.Element {
   const api = useFallBackConfig();
@@ -79,16 +80,10 @@ export function FallbackApSettings(): JSX.Element {
           >
             Enable fallback hotspot
           </span>
-          <input
-            type="checkbox"
-            name="enabled"
+          <Checkbox
+            name={"enabled"}
             checked={formValues.enabled}
-            onChange={(e) =>
-              handleFieldChange(
-                "enabled",
-                (e.currentTarget as HTMLInputElement).checked,
-              )
-            }
+            ariaLabel="Enable fallback hotspot"
           />
         </div>
         <div style="display:flex;gap:8px;">

@@ -2,6 +2,7 @@ import { AccordionHead } from "../AccordionHead";
 import { useState } from "preact/hooks";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useNetworkConfig } from "../../hooks/api/useNetworkConfig";
+import { Checkbox } from "../Checkbox";
 
 export function NetworkSettings() {
   const otaData = useOtaKey();
@@ -65,11 +66,7 @@ export function NetworkSettings() {
               >
                 DHCP
               </span>
-              <div class="s-toggle" />
-              <input
-                type="checkbox"
-                checked={api.data ? api.data.dhcp : undefined}
-              />
+              <Checkbox checked={dhcpEnabled} />
             </div>
           </div>
           <div style="flex-direction:column;gap:6px;display:flex;">

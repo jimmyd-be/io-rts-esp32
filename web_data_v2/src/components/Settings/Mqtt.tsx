@@ -1,4 +1,5 @@
 import { AccordionHead } from "../AccordionHead";
+import { Checkbox } from "../Checkbox";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useMqttConfig } from "../../hooks/api/useMqttConfig";
 
@@ -47,12 +48,10 @@ export function MqttSettings() {
             >
               Enable MQTT
             </span>
-            <div class="s-toggle" />
-            <input
-              type="checkbox"
+            <Checkbox
               name="enabled"
-              style="display:none"
-              checked={api.data?.enabled}
+              checked={api.data?.enabled ?? false}
+              ariaLabel="Enable MQTT"
             />
           </div>
           <div style="display:flex;gap:6px;">
