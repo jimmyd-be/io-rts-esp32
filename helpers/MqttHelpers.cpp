@@ -109,6 +109,7 @@ namespace Helpers
     {
         ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%" PRIi32, base, event_id);
         MqttHelpers *mqttHelper = static_cast<MqttHelpers *>(handler_args);
+        IoRts::IoRtsManager *mgr = mqttHelper->GetIoRtsManager();
         esp_mqtt_event_handle_t event = static_cast<esp_mqtt_event_handle_t>(event_data);
         esp_mqtt_client_handle_t client = event->client;
         int msg_id;
@@ -147,8 +148,8 @@ namespace Helpers
             {
                 std::vector<std::string> activeIDs;
                 {
-                    std::lock_guard<std::mutex> guard(mqttHelper->GetIoRtsManager()->mIoDevicesMutex);
-                    for (const auto &[id, dev] : mqttHelper->GetIoRtsManager()->mIoDevices)
+                    std::lock_guard<std::mutex> guard(mgr->mIoDevicesMutex);
+                    for (const auto &[id, dev] : mgr->mIoDevices)
                         if (!dev.is_deleted)
                             activeIDs.push_back(id);
                 }
@@ -167,8 +168,8 @@ namespace Helpers
             {
                 std::vector<std::string> activeIDs;
                 {
-                    std::lock_guard<std::mutex> guard(mqttHelper->GetIoRtsManager()->mIoDevicesMutex);
-                    for (const auto &[id, dev] : mqttHelper->GetIoRtsManager()->mIoDevices)
+                    std::lock_guard<std::mutex> guard(mgr->mIoDevicesMutex);
+                    for (const auto &[id, dev] : mgr->mIoDevices)
                         if (!dev.is_deleted)
                             activeIDs.push_back(id);
                 }
@@ -226,7 +227,7 @@ namespace Helpers
                     if (entity_id.compare(MQTT_CLIENT_REBOOT_ID) == 0)
                     {
                         ESP_LOGI(TAG, "REBOOT requested from MQTT!");
-                        mqttHelper->GetIoRtsManager()->Reboot();
+                        mgr->Reboot();
                     }
                     else if (entity_id.compare(MQTT_CLIENT_CONFIG_IO_ID) == 0 && topic_str.ends_with(MQTT_CLIENT_COMMAND_TOPIC))
                     {
@@ -300,7 +301,7 @@ namespace Helpers
                             {
                                 std::transform(deviceID.begin(), deviceID.end(), deviceID.begin(), [](unsigned char c)
                                                { return std::toupper(c); }); // convert to uppercase
-                                mqttHelper->GetIoRtsManager()->mIoHome->AddDevice(deviceID);
+                                mgr->mIoHome->AddDevice(deviceID);
                             }
                         }
                         // RemoveIoDevice kept for backwards compat — maps to deactivate
@@ -312,7 +313,7 @@ namespace Helpers
                             {
                                 std::transform(deviceID.begin(), deviceID.end(), deviceID.begin(), [](unsigned char c)
                                                { return std::toupper(c); });
-                                mqttHelper->GetIoRtsManager()->DeactivateDevice(deviceID);
+                                mgr->DeactivateDevice(deviceID);
                             }
                         }
                         cJSON *deactDeviceItem = cJSON_GetObjectItem(root, MQTT_CLIENT_DEACT_DEVICE_ID.c_str());
@@ -323,7 +324,7 @@ namespace Helpers
                             {
                                 std::transform(deviceID.begin(), deviceID.end(), deviceID.begin(), [](unsigned char c)
                                                { return std::toupper(c); });
-                                mqttHelper->GetIoRtsManager()->DeactivateDevice(deviceID);
+                                mgr->DeactivateDevice(deviceID);
                             }
                         }
                         cJSON *delDeviceItem = cJSON_GetObjectItem(root, MQTT_CLIENT_DEL_DEVICE_ID.c_str());
@@ -336,7 +337,7 @@ namespace Helpers
                                 std::string deviceID = data.substr(0, NODE_ID_SIZE * 2);
                                 std::transform(deviceID.begin(), deviceID.end(), deviceID.begin(), [](unsigned char c)
                                                { return std::toupper(c); });
-                                mqttHelper->GetIoRtsManager()->DeleteDevice(deviceID);
+                                mgr->DeleteDevice(deviceID);
                             }
                             else
                             {
@@ -351,7 +352,7 @@ namespace Helpers
                         if (mqttHelper->isIoHomePassive())
                             break; // don't process IO devices commands if in passive mode
                         ESP_LOGI(TAG, "DISCOVER requested from MQTT!");
-                        mqttHelper->GetIoRtsManager()->mIoHome->DiscoverAndPairDevice();
+                        mgr->mIoHome->DiscoverAndPairDevice();
                     }
                     else if (entity_id.compare(MQTT_CLIENT_DEACT_SELECT_TOPIC) == 0 && topic_str.ends_with(MQTT_CLIENT_COMMAND_TOPIC))
                     {
@@ -367,7 +368,7 @@ namespace Helpers
                                 std::transform(deviceID.begin(), deviceID.end(), deviceID.begin(), [](unsigned char c)
                                                { return std::toupper(c); });
                                 ESP_LOGI(TAG, "DeactivateDevice from select: %s", deviceID.c_str());
-                                mqttHelper->GetIoRtsManager()->DeactivateDevice(deviceID);
+                                mgr->DeactivateDevice(deviceID);
                                 // Reset deactivate select state to placeholder
                                 std::string state_topic = mqttHelper->GetTopicPrefix() + "/" + MQTT_CLIENT_DEACT_SELECT_TOPIC + MQTT_CLIENT_STATE_TOPIC;
                                 esp_mqtt_client_publish(client, state_topic.c_str(), "— none —", 0, 0, 0);
@@ -388,7 +389,7 @@ namespace Helpers
                                 std::transform(deviceID.begin(), deviceID.end(), deviceID.begin(), [](unsigned char c)
                                                { return std::toupper(c); });
                                 ESP_LOGI(TAG, "ReactivateDevice from select: %s", deviceID.c_str());
-                                mqttHelper->GetIoRtsManager()->ReactivateDevice(deviceID);
+                                mgr->ReactivateDevice(deviceID);
                                 // Publish updated state back to the select (reset to placeholder)
                                 std::string state_topic = mqttHelper->GetTopicPrefix() + "/" + MQTT_CLIENT_REACT_SELECT_TOPIC + MQTT_CLIENT_STATE_TOPIC;
                                 esp_mqtt_client_publish(client, state_topic.c_str(), "— none —", 0, 0, 0);
@@ -432,17 +433,17 @@ namespace Helpers
                             {
                                 std::string newName(valueItem->valuestring);
                                 ESP_LOGI(TAG, "Per-device manage: rename %s -> '%s'", deviceID.c_str(), newName.c_str());
-                                mqttHelper->GetIoRtsManager()->mIoHome->SetDeviceName(deviceID, newName);
+                                mgr->mIoHome->SetDeviceName(deviceID, newName);
                             }
                             else if (action == "deactivate")
                             {
                                 ESP_LOGI(TAG, "Per-device manage: deactivate %s", deviceID.c_str());
-                                mqttHelper->GetIoRtsManager()->DeactivateDevice(deviceID);
+                                mgr->DeactivateDevice(deviceID);
                             }
                             else if (action == "invert")
                             {
                                 ESP_LOGI(TAG, "Per-device manage: invert %s", deviceID.c_str());
-                                mqttHelper->GetIoRtsManager()->mIoHome->InvertOpenClosePositionForDevice(deviceID);
+                                mgr->mIoHome->InvertOpenClosePositionForDevice(deviceID);
                                 mqttHelper->SendDiscovery(); // refresh discovery so position_open/closed swaps
                             }
                             else if (action == "link_remote" && cJSON_IsString(valueItem))
@@ -453,7 +454,7 @@ namespace Helpers
                                     std::transform(remoteID.begin(), remoteID.end(), remoteID.begin(), [](unsigned char c)
                                                    { return std::toupper(c); });
                                     ESP_LOGI(TAG, "Per-device manage: link remote %s -> device %s", remoteID.c_str(), deviceID.c_str());
-                                    mqttHelper->GetIoRtsManager()->LinkRemoteToDevice(remoteID, deviceID);
+                                    mgr->LinkRemoteToDevice(remoteID, deviceID);
                                 }
                             }
                             else if (action == "remove_remote" && cJSON_IsString(valueItem))
@@ -464,14 +465,14 @@ namespace Helpers
                                     std::transform(remoteID.begin(), remoteID.end(), remoteID.begin(), [](unsigned char c)
                                                    { return std::toupper(c); });
                                     ESP_LOGI(TAG, "Per-device manage: remove remote %s", remoteID.c_str());
-                                    mqttHelper->GetIoRtsManager()->RemoveIoRemote(remoteID);
+                                    mgr->RemoveIoRemote(remoteID);
                                 }
                             }
                             else if (action == "set_transit_time" && cJSON_IsNumber(valueItem))
                             {
                                 uint32_t transitMs = (uint32_t)(valueItem->valuedouble * 1000);
                                 ESP_LOGI(TAG, "Per-device manage: set transit time %s -> %ums", deviceID.c_str(), transitMs);
-                                if (mqttHelper->GetIoRtsManager()->SetTransitTime(deviceID, transitMs))
+                                if (mgr->SetTransitTime(deviceID, transitMs))
                                     mqttHelper->SendIoDeviceStatus(deviceID); // publish updated value
                             }
                             else
