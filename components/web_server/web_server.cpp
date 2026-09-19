@@ -1,4 +1,5 @@
 #include "web_server.h"
+#include <cmath>
 #include "sdkconfig.h"
 #include "esp_log.h"
 #include "esp_netif.h"
@@ -475,8 +476,8 @@ static esp_err_t api_devices_get(httpd_req_t *req)
             cJSON_AddStringToObject(obj, "somfy_name", dev.info.name);
         cJSON_AddBoolToObject(obj, "inactive", dev.is_deleted);
 
-        int pos  = (dev.position == iohome::UNKNOWN_POSITION) ? -1 : (int)dev.position;
-        int tilt = (dev.tilt     == iohome::UNKNOWN_POSITION) ? -1 : (int)dev.tilt;
+        int pos  = (dev.position == iohome::UNKNOWN_POSITION) ? -1 : (int)std::lround(dev.position);
+        int tilt = (dev.tilt     == iohome::UNKNOWN_POSITION) ? -1 : (int)std::lround(dev.tilt);
         cJSON_AddNumberToObject(obj, "position", pos);
         cJSON_AddNumberToObject(obj, "tilt", tilt);
         cJSON_AddNumberToObject(obj, "type", (int)dev.info.device_type);
@@ -3556,7 +3557,7 @@ static bool wait_for_stopped(const char *deviceID, int step, const char *msg, fl
         auto it = s_manager->mIoDevices.find(deviceID);
         bool stopped = (it != s_manager->mIoDevices.end()) && it->second.is_stopped;
         int pos = (it != s_manager->mIoDevices.end() && it->second.position != iohome::UNKNOWN_POSITION)
-                  ? (int)it->second.position : -1;
+                  ? (int)std::lround(it->second.position) : -1;
         s_manager->mIoDevicesMutex.unlock();
 
         if (!stopped) seen_moving = true;

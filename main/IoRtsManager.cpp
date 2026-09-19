@@ -1,4 +1,5 @@
 #include "IoRtsManager.hpp"
+#include <cmath>
 #include "HardwareConfig.hpp"
 #include "MqttConfig.hpp"
 #include "IoHomeConfig.hpp"
@@ -159,7 +160,7 @@ namespace IoRts
             sIoRtsManager->mIoDevicesMutex.unlock(); // release mutex as MQTT needs it!
 #if CONFIG_WEB_ENABLED
             if (device.position != iohome::UNKNOWN_POSITION)
-                web_server_broadcast_position(deviceID.c_str(), (int)device.position, device.is_stopped, false);
+                web_server_broadcast_position(deviceID.c_str(), (int)std::lround(device.position), device.is_stopped, false);
 #endif
             // send MQTT messages
             if (sMqttHelper != nullptr)
@@ -191,7 +192,7 @@ namespace IoRts
             float fraction = (float)elapsed_ms / (float)dev.transit_time_ms;
             if (fraction > 1.0f) fraction = 1.0f;
             float estimated = dev.move_start_pos + (dev.move_target_pos - dev.move_start_pos) * fraction;
-            int estimated_int = (int)estimated;
+            int estimated_int = (int)std::lround(estimated);
             // Derive open/opening/closing/closed state from movement direction
             const char *state = nullptr;
             if (fraction >= 1.0f)
