@@ -58,6 +58,7 @@ static const std::string MQTT_CLIENT_SUFFIX_FAV_IO = "_fav";     // unique_id su
 static const std::string MQTT_CLIENT_SUFFIX_IDENTIFY = "_ident"; // unique_id suffix for IO devices "identify" button
 static const std::string MQTT_CLIENT_SUFFIX_MANAGE = "_manage";  // per-device manage command topic suffix
 static const std::string MQTT_CLIENT_SUFFIX_REMOTES = "_remotes"; // per-device remotes sensor topic suffix
+static const std::string MQTT_CLIENT_SUFFIX_TRANSIT = "_transit"; // per-device transit time number topic suffix
 
 static const std::string MQTT_CLIENT_BIRTH_WILL_TOPIC = "/status"; // birth and last will topic
 static const std::string MQTT_CLIENT_BIRTH_MSG = "online";         // last will message - birth
@@ -465,6 +466,13 @@ namespace Helpers
                                     ESP_LOGI(TAG, "Per-device manage: remove remote %s", remoteID.c_str());
                                     mqttHelper->GetIoRtsManager()->RemoveIoRemote(remoteID);
                                 }
+                            }
+                            else if (action == "set_transit_time" && cJSON_IsNumber(valueItem))
+                            {
+                                uint32_t transitMs = (uint32_t)(valueItem->valuedouble * 1000);
+                                ESP_LOGI(TAG, "Per-device manage: set transit time %s -> %ums", deviceID.c_str(), transitMs);
+                                if (mqttHelper->GetIoRtsManager()->SetTransitTime(deviceID, transitMs))
+                                    mqttHelper->SendIoDeviceStatus(deviceID); // publish updated value
                             }
                             else
                             {
@@ -1322,6 +1330,27 @@ namespace Helpers
                 {
                     std::string deviceNodeID = it->first;
                     std::string devName = iohome::device_display_name(it->second);
+                    // transit time number — cover devices only
+                    if (device_platform == "cover")
+                    {
+                        std::string uid = MQTT_CLIENT_PREFIX_IO + deviceNodeID + MQTT_CLIENT_SUFFIX_TRANSIT;
+                        std::string transitStateTopic = GetTopicPrefix() + "/" + uid + MQTT_CLIENT_STATE_TOPIC;
+                        cJSON *cmpTransit = cJSON_AddObjectToObject(cmps, uid.c_str());
+                        if (cmpTransit == NULL) { error = true; goto manage_done; }
+                        error = error || (cJSON_AddStringToObject(cmpTransit, "p", "number") == NULL);
+                        error = error || (cJSON_AddStringToObject(cmpTransit, "unique_id", uid.c_str()) == NULL);
+                        error = error || (cJSON_AddStringToObject(cmpTransit, "name", (devName + " Transition time").c_str()) == NULL);
+                        error = error || (cJSON_AddStringToObject(cmpTransit, "entity_category", "config") == NULL);
+                        error = error || (cJSON_AddStringToObject(cmpTransit, "icon", "mdi:timer-outline") == NULL);
+                        error = error || (cJSON_AddNumberToObject(cmpTransit, "min", 1) == NULL);
+                        error = error || (cJSON_AddNumberToObject(cmpTransit, "max", 300) == NULL);
+                        error = error || (cJSON_AddNumberToObject(cmpTransit, "step", 1) == NULL);
+                        error = error || (cJSON_AddStringToObject(cmpTransit, "unit_of_measurement", "s") == NULL);
+                        error = error || (cJSON_AddStringToObject(cmpTransit, "state_topic", transitStateTopic.c_str()) == NULL);
+                        error = error || (cJSON_AddStringToObject(cmpTransit, "command_topic", device_manage_cmd_topic.c_str()) == NULL);
+                        std::string tmpl = "{\"action\":\"set_transit_time\",\"value\":{{ value | int }}}";
+                        error = error || (cJSON_AddStringToObject(cmpTransit, "command_template", tmpl.c_str()) == NULL);
+                    }
                     // rename text
                     {
                         std::string uid = MQTT_CLIENT_PREFIX_IO + deviceNodeID + "_rename";
@@ -1463,6 +1492,10 @@ namespace Helpers
                 std::string tiltTopic = GetTopicPrefix() + "/" + MQTT_CLIENT_PREFIX_IO + deviceId + MQTT_CLIENT_TILT_TOPIC;
                 esp_mqtt_client_publish(mMqttClientHandle, tiltTopic.c_str(), NULL, 0, 0, 1);
             }
+            {
+                std::string transitTopic = GetTopicPrefix() + "/" + MQTT_CLIENT_PREFIX_IO + deviceId + MQTT_CLIENT_SUFFIX_TRANSIT + MQTT_CLIENT_STATE_TOPIC;
+                esp_mqtt_client_publish(mMqttClientHandle, transitTopic.c_str(), NULL, 0, 0, 1);
+            }
             return;
         }
         switch (deviceCopy.info.device_type)
@@ -1533,6 +1566,15 @@ namespace Helpers
             {
                 // Skip state topic — publishing "open" by default causes stale retained state in HA for 1W devices that never report position.
                 esp_mqtt_client_publish(mMqttClientHandle, positionTopic.c_str(), "None", 0, 0, 1);
+            }
+            // publish transit time (0 = uncalibrated, published as empty to avoid HA showing 0)
+            {
+                std::string transitTopic = GetTopicPrefix() + "/" + MQTT_CLIENT_PREFIX_IO + deviceId + MQTT_CLIENT_SUFFIX_TRANSIT + MQTT_CLIENT_STATE_TOPIC;
+                if (deviceCopy.transit_time_ms > 0)
+                {
+                    data = std::to_string(deviceCopy.transit_time_ms / 1000);
+                    esp_mqtt_client_publish(mMqttClientHandle, transitTopic.c_str(), data.c_str(), 0, 0, 1);
+                }
             }
             break;
         case DeviceType::LIGHT:
