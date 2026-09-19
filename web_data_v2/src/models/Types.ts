@@ -32,6 +32,12 @@ export interface FallBackConfig {
   connected: boolean;
 }
 
+export interface IoConfig {
+  node_id: string;
+  tx_power: number;
+  passive_mode: boolean;
+}
+
 export interface MqttConfig {
   user: string;
   server: string;
