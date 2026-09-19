@@ -47,45 +47,90 @@ if (pos === 0)  return window.t ? window.t("label.pos_open")    : "Open";
 if (pos === 100)return window.t ? window.t("label.pos_closed")  : "Closed";
 return window.t ? window.t("label.pos_partial") : "Partial";
 }
-function buildPosIndicator(device) {
-var op = openPct(device.position);
-var fillW = op !== null ? op : 0;
-var wrapper = document.createElement("div");
-wrapper.className = "pos-indicator";
-var topRow = document.createElement("div");
-topRow.className = "pos-top-row";
-var valEl = document.createElement("span");
-valEl.className = "pos-value" + (op === null ? " unknown" : "");
-valEl.textContent = op !== null ? device.position + "%" : "—";
-var stateEl = document.createElement("span");
-stateEl.className = "pos-state";
-stateEl.textContent = posStateLabel(device.position);
-topRow.appendChild(valEl);
-topRow.appendChild(stateEl);
-var strip = document.createElement("div");
-strip.className = "light-strip";
-var fill = document.createElement("div");
-fill.className = "light-fill";
-fill.style.width = fillW + "%";
-strip.appendChild(fill);
-wrapper.appendChild(topRow);
-wrapper.appendChild(strip);
-return wrapper;
+function buildBlindPane(app, device) {
+var pane    = document.createElement("div");
+pane.className = "blind-pane";
+var fill    = document.createElement("div");
+fill.className = "blind-fill";
+var handle  = document.createElement("div");
+handle.className = "blind-handle";
+var target  = document.createElement("div");
+target.className = "blind-target";
+var caption = document.createElement("div");
+caption.className = "blind-caption";
+pane.appendChild(fill);
+pane.appendChild(handle);
+pane.appendChild(target);
+pane.appendChild(caption);
+var pos = device.position >= 0 ? device.position : 0;
+fill.style.height   = pos + "%";
+handle.style.top    = pos + "%";
+caption.textContent = device.position >= 0 ? pos + "%" : "—";
+var lastPct = pos;
+var dragging = false;
+function pctFromEvent(e) {
+  var r = pane.getBoundingClientRect();
+  var y = e.touches ? e.touches[0].clientY : e.clientY;
+  return Math.max(0, Math.min(100, Math.round((y - r.top) / r.height * 100)));
+}
+function applyDrag(p) {
+  lastPct = p;
+  fill.style.height   = p + "%";
+  handle.style.top    = p + "%";
+  caption.textContent = p + "%";
+}
+pane.addEventListener("mousedown", function (e) {
+  dragging = true; applyDrag(pctFromEvent(e)); e.preventDefault();
+});
+pane.addEventListener("touchstart", function (e) {
+  dragging = true; applyDrag(pctFromEvent(e)); e.preventDefault();
+}, { passive: false });
+pane.addEventListener("touchmove", function (e) {
+  if (dragging) { applyDrag(pctFromEvent(e)); e.preventDefault(); }
+}, { passive: false });
+document.addEventListener("mousemove", function (e) {
+  if (dragging) applyDrag(pctFromEvent(e));
+});
+document.addEventListener("mouseup", function () {
+  if (!dragging) return;
+  dragging = false;
+  runAction(app, device.id, "position", lastPct)
+    .catch(function (e) { showToast(e.message, "error"); });
+});
+document.addEventListener("touchend", function () {
+  if (!dragging) return;
+  dragging = false;
+  runAction(app, device.id, "position", lastPct)
+    .catch(function (e) { showToast(e.message, "error"); });
+});
+return pane;
 }
 function updateDeviceFill(deviceId, percent, inverted, estimated) {
 var el = document.querySelector('.device[data-id="' + deviceId + '"]');
 if (!el) return;
 el.classList.remove("unreachable");
 el.classList.toggle("estimating", !!estimated);
-var fill   = el.querySelector(".light-fill");
-var valEl  = el.querySelector(".pos-value");
-var stateEl= el.querySelector(".pos-state");
+var blindFill    = el.querySelector(".blind-fill");
+var blindHandle  = el.querySelector(".blind-handle");
+var blindCaption = el.querySelector(".blind-caption");
+var blindTarget  = el.querySelector(".blind-target");
+if (blindFill) {
+  var h = percent >= 0 ? percent : 0;
+  blindFill.style.height   = h + "%";
+  blindHandle.style.top    = h + "%";
+  if (blindCaption) blindCaption.textContent = percent >= 0 ? percent + "%" : "—";
+  if (blindTarget)  blindTarget.style.display = "none";
+} else {
+  var fill   = el.querySelector(".light-fill");
+  var valEl  = el.querySelector(".pos-value");
+  var stateEl= el.querySelector(".pos-state");
+  var op     = percent < 0 ? null : (inverted ? percent : 100 - percent);
+  if (fill)   fill.style.width    = (op !== null ? op : 0) + "%";
+  if (valEl)  valEl.textContent   = percent >= 0 ? percent + "%" : "—";
+  if (stateEl)stateEl.textContent = posStateLabel(percent);
+}
 var slider = el.querySelector(".card-slider[data-slider='position']");
-var op     = percent < 0 ? null : (inverted ? percent : 100 - percent);
-if (fill)   fill.style.width    = (op !== null ? op : 0) + "%";
-if (valEl)  valEl.textContent   = percent >= 0 ? percent + "%" : "—";
-if (stateEl)stateEl.textContent = posStateLabel(percent);
-if (slider) slider.value        = percent;
+if (slider) slider.value = percent;
 }
 function updateDeviceState(deviceId, isStopped) {
 var el = document.querySelector('.device[data-id="' + deviceId + '"]');
@@ -162,15 +207,24 @@ var fav = getFavPos(deviceId);
 btn.className = "card-btn card-fav" + (fav !== null ? " has-favorite" : "");
 btn.title = fav !== null ? ("Favorite: " + fav + "%") : "No favorite set";
 }
+function showBlindTarget(li, pct) {
+var t = li.querySelector(".blind-target");
+if (!t) return;
+t.style.top = pct + "%";
+t.style.display = "block";
+}
+function hideBlindTarget(li) {
+var t = li.querySelector(".blind-target");
+if (t) t.style.display = "none";
+}
 function buildControls(app, device, li, group) {
 if (group === "shutter" || group === "venetian" || group === "window") {
 li.appendChild(makeRow([
-makeBtn("↑", function () { runAction(app, device.id, "open").catch(function (e) { showToast(e.message, "error"); }); }),
-makeBtn("■", function () { runAction(app, device.id, "stop").catch(function (e) { showToast(e.message, "error"); }); }),
-makeBtn("↓", function () { runAction(app, device.id, "close").catch(function (e) { showToast(e.message, "error"); }); }),
+makeBtn("↑", function () { showBlindTarget(li, 0);   runAction(app, device.id, "open").catch(function (e) { showToast(e.message, "error"); }); }),
+makeBtn("■", function () { hideBlindTarget(li);       runAction(app, device.id, "stop").catch(function (e) { showToast(e.message, "error"); }); }),
+makeBtn("↓", function () { showBlindTarget(li, 100); runAction(app, device.id, "close").catch(function (e) { showToast(e.message, "error"); }); }),
 makeFavBtn(app, device)
 ]));
-li.appendChild(makeSlider(app, device, "position", device.position));
 if (group === "venetian") {
 li.appendChild(makeSlider(app, device, "tilt", device.tilt));
 }
@@ -791,14 +845,15 @@ nameEl.textContent = device.name;
 var typeEl = document.createElement("span");
 typeEl.className = "card-badge";
 typeEl.textContent = (device.type_name || "").toLowerCase();
+var protoBadge = document.createElement("span");
+protoBadge.className = "card-badge " + (device.protocol === "1w" ? "badge-1w" : "badge-2w");
+protoBadge.textContent = device.protocol === "1w" ? "1W" : "2W";
+var metaRow = document.createElement("div");
+metaRow.className = "card-meta";
+metaRow.appendChild(typeEl);
+metaRow.appendChild(protoBadge);
 nameBlock.appendChild(nameEl);
-nameBlock.appendChild(typeEl);
-if (device.protocol === "1w") {
-var badge1w = document.createElement("span");
-badge1w.className = "card-badge badge-1w";
-badge1w.textContent = "1W";
-nameBlock.appendChild(badge1w);
-}
+nameBlock.appendChild(metaRow);
 var menuBtn = document.createElement("button");
 menuBtn.textContent = "⋯";
 menuBtn.className = "btn menu";
@@ -814,11 +869,12 @@ badge.textContent = app.i18nText("badge.inactive", "inactive");
 li.appendChild(badge);
 } else {
 if (hasPos) {
-li.appendChild(buildPosIndicator(device));
-}
+li.appendChild(buildBlindPane(app, device));
+} else {
 var spacer = document.createElement("div");
 spacer.className = "card-spacer";
 li.appendChild(spacer);
+}
 buildControls(app, device, li, group);
 if (device.position >= 0) {
 updateDeviceFill(device.id, device.position, !!device.is_inverted, !!device.position_estimated);
@@ -830,9 +886,82 @@ list.appendChild(li);
 var countPill = document.getElementById("count-pill");
 if (countPill) countPill.textContent = active.length + " " + (window.t ? window.t("nav.devices") : "devices");
 app.logStatus("Device list updated.", "info");
+if (app._dragSort) app._dragSort.applySavedOrder();
 } catch (error) {
 app.logStatus("Error fetching devices: " + error.message, "error");
 }
+}
+function initDragSort(list) {
+var ORDER_KEY = "device_order_v1";
+function getSavedOrder() {
+  try { return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch(e) { return []; }
+}
+function saveOrder() {
+  var ids = Array.from(list.querySelectorAll(".device[data-id]")).map(function(el){ return el.dataset.id; });
+  try { localStorage.setItem(ORDER_KEY, JSON.stringify(ids)); } catch(e) {}
+}
+function applySavedOrder() {
+  var order = getSavedOrder();
+  if (!order.length) return;
+  var cards = Array.from(list.querySelectorAll(".device[data-id]"));
+  var ordered = [];
+  order.forEach(function(id) {
+    var c = cards.find(function(c){ return c.dataset.id === id; });
+    if (c) ordered.push(c);
+  });
+  cards.forEach(function(c){ if (ordered.indexOf(c) === -1) ordered.push(c); });
+  ordered.forEach(function(c){ list.appendChild(c); });
+}
+var ghost = null, srcCard = null, dragging = false;
+var startX, startY, offX, offY;
+list.addEventListener("pointerdown", function(e) {
+  if (e.target.closest("button")) return;
+  var top = e.target.closest(".card-top");
+  if (!top) return;
+  srcCard = e.target.closest(".device");
+  if (!srcCard) return;
+  startX = e.clientX; startY = e.clientY;
+  dragging = false;
+  list.setPointerCapture(e.pointerId);
+}, { passive: true });
+list.addEventListener("pointermove", function(e) {
+  if (!srcCard) return;
+  var dx = e.clientX - startX, dy = e.clientY - startY;
+  if (!dragging && Math.sqrt(dx*dx + dy*dy) > 8) {
+    dragging = true;
+    var r = srcCard.getBoundingClientRect();
+    offX = startX - r.left; offY = startY - r.top;
+    ghost = srcCard.cloneNode(true);
+    ghost.style.cssText = "position:fixed;width:" + r.width + "px;pointer-events:none;z-index:9999;opacity:.88;transform:scale(1.03) rotate(1.5deg);box-shadow:0 12px 40px rgba(0,0,0,.55);border-radius:14px;transition:none;top:" + r.top + "px;left:" + r.left + "px;";
+    document.body.appendChild(ghost);
+    srcCard.classList.add("drag-src");
+  }
+  if (!dragging) return;
+  ghost.style.top  = (e.clientY - offY) + "px";
+  ghost.style.left = (e.clientX - offX) + "px";
+  var cx = e.clientX, cy = e.clientY;
+  var best = null, bestD = Infinity;
+  Array.from(list.querySelectorAll(".device:not(.drag-src)")).forEach(function(c) {
+    var r = c.getBoundingClientRect();
+    var d = Math.abs(cx - (r.left + r.width/2)) + Math.abs(cy - (r.top + r.height/2));
+    if (d < bestD) { bestD = d; best = c; }
+  });
+  if (best) {
+    var r = best.getBoundingClientRect();
+    if (cy < r.top + r.height / 2) list.insertBefore(srcCard, best);
+    else list.insertBefore(srcCard, best.nextSibling);
+  }
+}, { passive: true });
+function endDrag() {
+  if (!srcCard) return;
+  if (ghost) { ghost.remove(); ghost = null; }
+  srcCard.classList.remove("drag-src");
+  if (dragging) saveOrder();
+  dragging = false; srcCard = null;
+}
+list.addEventListener("pointerup",     endDrag);
+list.addEventListener("pointercancel", endDrag);
+return { applySavedOrder: applySavedOrder };
 }
 var pairingWizard = (function () {
 var _app = null, _wizard = null, _statusEl = null, _btnsEl = null;
@@ -1179,6 +1308,8 @@ app.fetchAndDisplayDevices = function () { return fetchAndDisplayDevices(app); }
 app.updateDeviceFill  = updateDeviceFill;
 app.updateDeviceState = updateDeviceState;
 app.pairingWizard     = pairingWizard;
+var list = app.elements && app.elements.deviceList;
+if (list) app._dragSort = initDragSort(list);
 var pairBtn = document.getElementById("pair-device-btn");
 if (pairBtn) pairBtn.addEventListener("click", function () { pairingWizard.open(app); });
 var _si=document.getElementById("somfy-import-btn");
