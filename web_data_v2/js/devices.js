@@ -521,21 +521,7 @@ if (device.protocol === "1w") {
 }
 
 body.appendChild(transitRow);
-if (device.protocol === "1w") {
-var resetOpenBtn   = devBtn("0% — Open",    "");
-var resetClosedBtn = devBtn("100% — Closed", "");
-resetOpenBtn.onclick = function () {
-    window.MiOpenApi.postJson("/api/action", { deviceId: device.id, action: "resetPosition1w", value: 0 })
-        .then(function (r) { if (r.success) { device.position = 0; showToast("Position reset to open.", "success"); } else showToast(r.message || "Failed.", "error"); })
-        .catch(function (e) { showToast(e.message, "error"); });
-};
-resetClosedBtn.onclick = function () {
-    window.MiOpenApi.postJson("/api/action", { deviceId: device.id, action: "resetPosition1w", value: 100 })
-        .then(function (r) { if (r.success) { device.position = 100; showToast("Position reset to closed.", "success"); } else showToast(r.message || "Failed.", "error"); })
-        .catch(function (e) { showToast(e.message, "error"); });
-};
-body.appendChild(devRow("Reset position", "Force estimated position to a known state.", [resetOpenBtn, resetClosedBtn]));
-// Device type selector
+// Device type selector — shown for all protocols
 var DEVICE_TYPES = [
     [2,"Roller shutter"],[1,"Venetian blind"],[10,"Blind"],[13,"Dual shutter"],
     [3,"Awning"],[16,"Horizontal awning"],[24,"Swinging shutter"],
@@ -565,6 +551,20 @@ typeSaveBtn.onclick = function () {
         .catch(function (e) { typeSaveBtn.disabled = false; showToast(e.message, "error"); });
 };
 body.appendChild(devRow("Device type", "Controls which buttons appear in the UI.", [typeSelect, typeSaveBtn]));
+if (device.protocol === "1w") {
+var resetOpenBtn   = devBtn("0% — Open",    "");
+var resetClosedBtn = devBtn("100% — Closed", "");
+resetOpenBtn.onclick = function () {
+    window.MiOpenApi.postJson("/api/action", { deviceId: device.id, action: "resetPosition1w", value: 0 })
+        .then(function (r) { if (r.success) { device.position = 0; showToast("Position reset to open.", "success"); } else showToast(r.message || "Failed.", "error"); })
+        .catch(function (e) { showToast(e.message, "error"); });
+};
+resetClosedBtn.onclick = function () {
+    window.MiOpenApi.postJson("/api/action", { deviceId: device.id, action: "resetPosition1w", value: 100 })
+        .then(function (r) { if (r.success) { device.position = 100; showToast("Position reset to closed.", "success"); } else showToast(r.message || "Failed.", "error"); })
+        .catch(function (e) { showToast(e.message, "error"); });
+};
+body.appendChild(devRow("Reset position", "Force estimated position to a known state.", [resetOpenBtn, resetClosedBtn]));
 // Brand / manufacturer selector
 var MANUFACTURERS = [
     [2,"Somfy"],[1,"Velux"],[3,"Honeywell"],[4,"Hörmann"],[5,"Assa Abloy"],
@@ -711,8 +711,10 @@ danger.appendChild(unpairRow);
 }
 var deleteBtn = devBtn(app.i18nText("button.delete", "Delete permanently"), "danger");
 deleteBtn.onclick = function () {
-if (!confirm(app.i18nText("confirm.delete_device", "Permanently delete \"{name}\"?").replace("{name}", device.name) + "\n"
-+ app.i18nText("popup.delete_warning", "Permanent removal. Cannot be undone — requires factory reset to re-pair."))) return;
+var deleteWarning = device.protocol === "1w"
+    ? app.i18nText("popup.delete_warning_1w", "Removes from this controller only. Unpair first to free the remote slot on the device — otherwise it stays in device memory.")
+    : app.i18nText("popup.delete_warning", "Permanent removal. Cannot be undone — requires factory reset to re-pair.");
+if (!confirm(app.i18nText("confirm.delete_device", "Permanently delete \"{name}\"?").replace("{name}", device.name) + "\n" + deleteWarning)) return;
 var doDelete = function () {
 window.MiOpenApi.postJson("/api/action", { deviceId: device.id, action: "deleteDevice" })
 .then(function (r) {
@@ -733,7 +735,9 @@ doDelete();
 };
 danger.appendChild(devRow(
 app.i18nText("popup.device_delete_label", "Delete permanently"),
-app.i18nText("popup.delete_warning", "Cannot be undone. Requires factory reset to re-pair."),
+device.protocol === "1w"
+    ? app.i18nText("popup.delete_desc_1w", "Removes from this controller. Unpair first to clear the slot from the device.")
+    : app.i18nText("popup.delete_warning", "Cannot be undone. Requires factory reset to re-pair."),
 deleteBtn
 ));
 body.appendChild(danger);
@@ -1045,7 +1049,7 @@ row.appendChild(lbl); row.appendChild(sel);
 _statusEl.appendChild(row);
 return sel;
 }
-var typeSelect = selRow("Device type", [[0,"All types (default)"],[2,"Roller shutter"],[3,"Awning"],[10,"Blind"]]);
+var typeSelect = selRow("Device type", [[2,"Roller shutter"],[3,"Awning"],[10,"Blind"],[0,"All types"]]);
 var mfrSelect  = selRow("Manufacturer",  [[2,"Somfy (default)"],[1,"Velux"]]);
 setTimeout(function () { nameInput.focus(); }, 50);
 setButtons([
