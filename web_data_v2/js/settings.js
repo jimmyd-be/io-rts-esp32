@@ -26,7 +26,7 @@
                     return;
                 }
                 ss("iohc-devices-status", "Uploading…");
-                var _h = Object.assign({ "Content-Type": "application/json" },
+                var h = Object.assign({ "Content-Type": "application/json" },
                     (window.MiOpenApi.otaKey ? { "X-OTA-Key": window.MiOpenApi.otaKey } : {}));
                 fetch("/api/upload/iohomecontrol", { method: "POST", headers: h, body: JSON.stringify(data) })
                     .then(function (r) { return r.json(); })
@@ -168,6 +168,7 @@
 
 // ── Settings view ─────────────────────────────────────────────────────────────
 (function () {
+    var t = window.t;
     function g(id) { return document.getElementById(id); }
 
     let _fallbackStatusTimer = null;

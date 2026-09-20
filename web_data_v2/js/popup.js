@@ -1,4 +1,5 @@
 (function () {
+    var t = window.t;
     function createParagraphs(container, items) {
         container.textContent = "";
         items.forEach(function (item) {

@@ -168,6 +168,7 @@ window.getLang = getLang;
 })();
 
 window.MiOpenBackup=(function(){
+var t=window.t;
 function init(){
 var st=document.getElementById("backup-status");
 function ss(m,ok){if(st){st.textContent=m;st.style.color=ok===true?"var(--green)":ok===false?"var(--red)":"";}};

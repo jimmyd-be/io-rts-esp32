@@ -1,4 +1,5 @@
 (function () {
+    var t = window.t;
     var HELP_SECTIONS = {
         "wifi":        ["what-it-does", "after-saving", "scan"],
         "fallback-ap": ["what-it-does", "hotspot-name", "password", "retries-boot", "retries-running", "timeout"],

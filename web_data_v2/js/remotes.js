@@ -1,4 +1,5 @@
 (function () {
+    var t = window.t;
     var _app;
     var _mode = "add";
     var _capturedId = "";
