@@ -101,6 +101,12 @@ namespace IoRts
 #if CONFIG_WEB_ENABLED
                 web_server_broadcast_message(
                     std::format("{{\"type\":\"device_added\",\"id\":\"{}\",\"name\":\"{}\"}}", deviceID, device.info.name).c_str());
+                {
+                    char logline[96];
+                    snprintf(logline, sizeof(logline), "PAIR_2W  %s key=%s name=%s OK",
+                             deviceID.c_str(), Config::IoHomeConfig::GetIoSystemKey().c_str(), device.info.name);
+                    pair_log_append(logline);
+                }
 #endif
             }
             else

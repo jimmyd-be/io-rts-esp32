@@ -1,4 +1,5 @@
 #include "web_server.h"
+#include "pair_log.h"
 #include <cmath>
 #include "sdkconfig.h"
 #include "esp_log.h"
@@ -712,12 +713,23 @@ static esp_err_t api_action_post(httpd_req_t *req)
         if (strlen(deviceId) > 0) { s_manager->ReactivateDevice(deviceId); ok = true; }
     } else if (strcmp(action, "deleteDevice") == 0) {
         if (strlen(deviceId) > 0) {
+            // Capture name before deletion for the log
+            char devName[48] = "-";
+            s_manager->mIoDevicesMutex.lock();
+            auto dit = s_manager->mIoDevices.find(deviceId);
+            if (dit != s_manager->mIoDevices.end())
+                snprintf(devName, sizeof(devName), "%s", dit->second.info.name);
+            s_manager->mIoDevicesMutex.unlock();
+
             ok = s_manager->DeleteDevice(deviceId);
             if (!ok) {
                 cJSON_Delete(json);
                 send_result(req, false, "Deactivate the device first before deleting.");
                 return ESP_OK;
             }
+            char logline[96];
+            snprintf(logline, sizeof(logline), "REMOVE   %s name=%s", deviceId, devName);
+            pair_log_append(logline);
         }
     } else if (strcmp(action, "sendpair1w") == 0) {
         if (strlen(deviceId) > 0)
@@ -729,8 +741,19 @@ static esp_err_t api_action_post(httpd_req_t *req)
         if (strlen(deviceId) > 0)
             ok = s_manager->SendRemove1W(deviceId);
     } else if (strcmp(action, "unpair1w") == 0) {
-        if (strlen(deviceId) > 0)
+        if (strlen(deviceId) > 0) {
+            char devName[48] = "-";
+            s_manager->mIoDevicesMutex.lock();
+            auto uit = s_manager->mIoDevices.find(deviceId);
+            if (uit != s_manager->mIoDevices.end())
+                snprintf(devName, sizeof(devName), "%s", uit->second.info.name);
+            s_manager->mIoDevicesMutex.unlock();
+
             ok = s_manager->Unpair1WDevice(deviceId);
+            char logline[96];
+            snprintf(logline, sizeof(logline), "UNPAIR_1W %s name=%s %s", deviceId, devName, ok ? "OK" : "FAILED");
+            pair_log_append(logline);
+        }
     } else if (strcmp(action, "pair1w") == 0) {
         const char *name = cJSON_IsString(jName) ? jName->valuestring : "";
         if (strlen(name) > 0) {
@@ -744,6 +767,9 @@ static esp_err_t api_action_post(httpd_req_t *req)
                 : iohome::Manufacturer::SOMFY;
             std::string newId = s_manager->Pair1WDevice(name, type, mfr);
             if (!newId.empty()) {
+                char logline[96];
+                snprintf(logline, sizeof(logline), "PAIR_1W  %s name=%s OK", newId.c_str(), name);
+                pair_log_append(logline);
                 cJSON_Delete(json);
                 cJSON *resp = cJSON_CreateObject();
                 cJSON_AddBoolToObject(resp, "success", true);
@@ -3273,8 +3299,9 @@ static void pairing_task(void *)
     if (result != iohome::PairResult::PAIRED_FULL) {
         ESP_LOGW(TAG, "Pairing timed out after 120 s");
         web_server_broadcast_message("{\"type\":\"pair_failed\",\"status\":\"timeout\"}");
+        pair_log_append("PAIR_2W - FAILED");
     }
-    // On success device_added is broadcast from deviceStatusCallback
+    // On success PAIR_2W is logged from IoRtsManager deviceStatusCallback (new device)
     vTaskDelete(nullptr);
 }
 
@@ -3763,6 +3790,8 @@ void web_server_start(void *ioRtsManager)
     reg("/api/devices/add",       HTTP_POST, api_devices_add_post);
     reg("/api/pair/start",        HTTP_POST, api_pair_start_post);
     reg("/api/pair/status",       HTTP_GET,  api_pair_status_get);
+    reg("/api/pairing-log",       HTTP_GET,  [](httpd_req_t *r) { return pair_log_serve(r); });
+    reg("/api/pairing-log",       HTTP_DELETE, [](httpd_req_t *r) { return pair_log_clear(r); });
     reg("/api/learn/start",              HTTP_POST, api_learn_start_post);
     reg("/api/learn/stop",               HTTP_POST, api_learn_stop_post);
     reg("/api/learn/status",             HTTP_GET,  api_learn_status_get);
