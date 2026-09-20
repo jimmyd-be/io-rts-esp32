@@ -711,6 +711,19 @@
         loadIoKey(app);
     }
 
+    function initPairingLog() {
+        var btn = g("pairing-log-btn");
+        if (!btn) return;
+        btn.addEventListener("click", function () {
+            var a = document.createElement("a");
+            a.href = "/api/pairing-log";
+            a.download = "pairing_log.txt";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    }
+
     function initReboot() {
         var btn = g("reboot-btn");
         if (!btn) return;
@@ -780,6 +793,7 @@
         initIoConfig(app);
         initAccessPassword(app);
         initIoKey(app);
+        initPairingLog();
         initReboot();
 
         var betaCheckbox = g("update-channel-beta");
