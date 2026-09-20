@@ -32,7 +32,7 @@ namespace iohome
   typedef void (*UpdatedDeviceCallback)(const std::string deviceID, const IoDevice &device);   // Callback to receive status update of devices
   typedef void (*UnknownSenderCallback)(const std::string &senderID);                          // Callback when a frame from an unregistered sender is received
   typedef void (*KeySniffCallback)(const std::string &hexKey);                                 // Callback when a key is captured during passive sniffing
-  typedef void (*MovementStartedCallback)(const std::string &deviceID, uint32_t transit_time_ms, float distance_fraction); // Callback when movement tracking starts
+  typedef void (*MovementStartedCallback)(const std::string &deviceID, uint32_t transit_time_ms, float distance_fraction, float target_pos); // Callback when movement tracking starts
 
   /**
    * @brief io-homecontrol Node Controller

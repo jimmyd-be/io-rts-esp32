@@ -791,7 +791,7 @@ namespace iohome
                     if (sMovementStartedCallback)
                     {
                       float dist = std::abs(remoteTarget - device->second.position) / 100.0f;
-                      sMovementStartedCallback(deviceID, device->second.transit_time_ms, dist);
+                      sMovementStartedCallback(deviceID, device->second.transit_time_ms, dist, remoteTarget);
                     }
                   }
                   else

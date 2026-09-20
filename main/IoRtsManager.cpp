@@ -735,9 +735,27 @@ namespace IoRts
                 mIo1W = new iohome::Io1WControl(mIoHome);
                 mIoHome->SetUnknownSenderCallback(unknownSenderCallback);
                 mIoHome->SetKeySniffCallback(keySniffCallback);
-                mIoHome->SetMovementStartedCallback([](const std::string &deviceID, uint32_t transit_ms, float dist) {
-                    if (sIoRtsManager)
-                        sIoRtsManager->ScheduleConfirmationPoll(deviceID, transit_ms, dist);
+                mIoHome->SetMovementStartedCallback([](const std::string &deviceID, uint32_t transit_ms, float dist, float target_pos) {
+                    if (!sIoRtsManager) return;
+                    {
+                        std::lock_guard<std::mutex> guard(sIoRtsManager->mIoDevicesMutex);
+                        auto it = sIoRtsManager->mIoDevices.find(deviceID);
+                        if (it != sIoRtsManager->mIoDevices.end())
+                        {
+                            auto &dev = it->second;
+                            float cur = dev.position;
+                            if (cur == iohome::UNKNOWN_POSITION)
+                                cur = (target_pos <= 50.0f) ? 100.0f : 0.0f;
+                            if (std::abs(cur - target_pos) > 1.0f)
+                            {
+                                dev.move_start_us   = esp_timer_get_time();
+                                dev.move_start_pos  = cur;
+                                dev.move_target_pos = target_pos;
+                                dev.is_stopped      = false;
+                            }
+                        }
+                    }
+                    sIoRtsManager->ScheduleConfirmationPoll(deviceID, transit_ms, dist);
                 });
                 mIoHome->SetRemote1WCallback([](const std::string &deviceID, float target) {
                     if (!sIoRtsManager) return;
