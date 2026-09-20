@@ -883,9 +883,10 @@ namespace iohome
                 if (dev->second.consecutive_poll_failures < 4)
                   dev->second.consecutive_poll_failures++;
                 int64_t backoff;
+                bool moving = !dev->second.is_stopped;
                 switch (dev->second.consecutive_poll_failures)
                 {
-                  case 1:  backoff = STATUS_UPDATE_NEXT_TRY_US;  break;
+                  case 1:  backoff = moving ? 10000000LL : STATUS_UPDATE_NEXT_TRY_US;  break; // 10 s if moving, 60 s if stopped
                   case 2:  backoff = STATUS_UPDATE_BACKOFF_2_US; break;
                   case 3:  backoff = STATUS_UPDATE_BACKOFF_3_US; break;
                   default: backoff = STATUS_UPDATE_MAX_TIME_US;  break;
@@ -926,9 +927,10 @@ namespace iohome
                   if (dev->second.consecutive_poll_failures < 4)
                     dev->second.consecutive_poll_failures++;
                   int64_t backoff;
+                  bool moving = !dev->second.is_stopped;
                   switch (dev->second.consecutive_poll_failures)
                   {
-                    case 1:  backoff = STATUS_UPDATE_NEXT_TRY_US;    break; // 60 s
+                    case 1:  backoff = moving ? 10000000LL : STATUS_UPDATE_NEXT_TRY_US; break; // 10 s if moving, 60 s if stopped
                     case 2:  backoff = STATUS_UPDATE_BACKOFF_2_US;   break; // 5 min
                     case 3:  backoff = STATUS_UPDATE_BACKOFF_3_US;   break; // 30 min
                     default: backoff = STATUS_UPDATE_MAX_TIME_US;    break; // 1 hr

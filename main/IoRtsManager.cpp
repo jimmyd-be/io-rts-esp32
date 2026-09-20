@@ -134,7 +134,21 @@ namespace IoRts
                 }
                 it->second.is_stopped = device.is_stopped;
                 if (device.is_stopped)
+                {
                     it->second.move_start_us = 0;
+                }
+                else if (it->second.move_start_us == 0 &&
+                         it->second.transit_time_ms > 0 &&
+                         device.position != iohome::UNKNOWN_POSITION &&
+                         device.target   != iohome::UNKNOWN_POSITION &&
+                         std::abs(device.position - device.target) > 1.0f)
+                {
+                    // Movement detected via poll (remote/group-addr/external trigger):
+                    // start interpolation from current known position toward target
+                    it->second.move_start_us   = esp_timer_get_time();
+                    it->second.move_start_pos  = device.position;
+                    it->second.move_target_pos = device.target;
+                }
                 it->second.last_status_timestamp = device.last_status_timestamp;
                 it->second.next_status_update_timestamp = device.next_status_update_timestamp;
                 it->second.position = device.position;
