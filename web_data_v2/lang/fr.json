@@ -1,6 +1,6 @@
 {
-  "page.title": "MiOpen.IO - Controle des appareils",
-  "header.title": "Controle des appareils",
+  "page.title": "io-control",
+  "header.title": "io-control",
   "nav.devices": "Appareils",
   "nav.help": "Aide",
   "nav.status": "Status/Logs",

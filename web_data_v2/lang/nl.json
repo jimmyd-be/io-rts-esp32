@@ -1,6 +1,6 @@
 {
-  "page.title": "MiOpen.IO - Apparaatbeheer",
-  "header.title": "Apparaatbeheer",
+  "page.title": "io-control",
+  "header.title": "io-control",
   "nav.devices": "Schermen",
   "nav.help": "Help",
   "nav.status": "Status/Logs",
