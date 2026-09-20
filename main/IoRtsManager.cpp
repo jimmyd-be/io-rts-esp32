@@ -189,7 +189,9 @@ namespace IoRts
             if (dev.move_start_us == 0 || dev.transit_time_ms == 0)
                 continue;
             int64_t elapsed_ms = (now - dev.move_start_us) / 1000;
-            float fraction = (float)elapsed_ms / (float)dev.transit_time_ms;
+            float distance = std::abs(dev.move_target_pos - dev.move_start_pos);
+            float effective_ms = (float)dev.transit_time_ms * (distance / 100.0f);
+            float fraction = (effective_ms > 0.1f) ? (float)elapsed_ms / effective_ms : 1.0f;
             if (fraction > 1.0f) fraction = 1.0f;
             float estimated = dev.move_start_pos + (dev.move_target_pos - dev.move_start_pos) * fraction;
             int estimated_int = (int)std::lround(estimated);
