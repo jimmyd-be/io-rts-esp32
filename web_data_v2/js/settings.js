@@ -753,8 +753,8 @@
         app.saveFallbackConfig = function () { return saveFallbackConfig(app); };
         g("fallback-save").addEventListener("click", function () { app.saveFallbackConfig(); });
         loadFallbackConfig(app);
-        fallbackStatusTimer = setInterval(function () { pollFallbackStatus(app); }, 15000);
-        mqttStatusTimer = setInterval(function () { pollMqttStatus(app); }, 3000);
+        _fallbackStatusTimer = setInterval(function () { pollFallbackStatus(app); }, 15000);
+        _mqttStatusTimer = setInterval(function () { pollMqttStatus(app); }, 3000);
 
         app.elements.mqttEnabledInput  = g("mqtt-enabled");
         app.elements.mqttEnabledToggle = g("mqtt-enabled-toggle");
