@@ -141,6 +141,7 @@ extern "C" void app_main(void)
 
 #if CONFIG_WEB_ENABLED
     web_server_start(&ioRtsManager);
+    pair_log_append("BOOT");
 #endif
 
     // Register IO command handlers now that the manager is ready

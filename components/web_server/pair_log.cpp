@@ -8,7 +8,7 @@
 #include "esp_http_server.h"
 
 static const char *TAG = "pair_log";
-static const char *LOG_PATH = "/littlefs/pairing_log.txt";
+static const char *LOG_PATH = "/devices/pairing_log.txt";
 static const int   MAX_LINES = 500;
 
 static std::string timestamp_str()
