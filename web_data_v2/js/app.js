@@ -207,6 +207,9 @@
                     if (window.MiOpenDevices && window.MiOpenDevices.onCalibrationFailed)
                         window.MiOpenDevices.onCalibrationFailed(data);
                 }
+                } else if (data.type === "ping") {
+                    ws.send('{"type":"pong"}');
+                }
             } catch (e) { /* ignore parse errors */ }
         };
         ws.onopen = function () {

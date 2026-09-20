@@ -183,12 +183,8 @@ static void ws_send_str(int fd, const char *str)
     job->fd  = fd;
     job->len = len;
     memcpy(job->buf, str, len + 1);
-    if (httpd_queue_work(s_server, ws_send_job_fn, job) != ESP_OK) {
-        free(job);
-        for (int i = 0; i < WS_MAX_CLIENTS; i++)
-            if (s_ws_fds[i] == fd) { s_ws_fds[i] = -1; break; }
-        httpd_sess_trigger_close(s_server, fd);
-    }
+    if (httpd_queue_work(s_server, ws_send_job_fn, job) != ESP_OK)
+        free(job); // queue full — drop message, keep connection alive
 }
 
 static esp_err_t ws_handler(httpd_req_t *req)
@@ -267,7 +263,7 @@ void web_server_broadcast_position(const char *device_id, int position, bool is_
     if (!s_server) return;
     char buf[160];
     snprintf(buf, sizeof(buf),
-        "{\"type\":\"position\",\"id\":\"%s\",\"position\":%d,\"stopped\":%s,\"estimated\":%s}",
+        "{\"type\":\"position\",\"id\":\"%s\",\"position\":%d,\"is_stopped\":%s,\"estimated\":%s}",
         device_id, position, is_stopped ? "true" : "false", estimated ? "true" : "false");
     for (int i = 0; i < WS_MAX_CLIENTS; i++)
         if (s_ws_fds[i] != -1) ws_send_str(s_ws_fds[i], buf);
