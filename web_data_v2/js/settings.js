@@ -715,12 +715,15 @@
         var btn = g("pairing-log-btn");
         if (!btn) return;
         btn.addEventListener("click", function () {
-            var a = document.createElement("a");
-            a.href = "/api/pairing-log";
-            a.download = "pairing_log.txt";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            fetch("/api/pairing-log")
+                .then(function (r) { return r.blob(); })
+                .then(function (b) {
+                    var a = document.createElement("a");
+                    a.href = URL.createObjectURL(b);
+                    a.download = "pairing_log.txt";
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                });
         });
     }
 
