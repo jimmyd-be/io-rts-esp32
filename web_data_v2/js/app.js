@@ -1,4 +1,5 @@
 (function () {
+    var t = window.t;
     function createElements() {
         return {
             deviceList:           document.getElementById("device-list"),

@@ -26,7 +26,7 @@
                     return;
                 }
                 ss("iohc-devices-status", "Uploading…");
-                var h = Object.assign({ "Content-Type": "application/json" },
+                var _h = Object.assign({ "Content-Type": "application/json" },
                     (window.MiOpenApi.otaKey ? { "X-OTA-Key": window.MiOpenApi.otaKey } : {}));
                 fetch("/api/upload/iohomecontrol", { method: "POST", headers: h, body: JSON.stringify(data) })
                     .then(function (r) { return r.json(); })
@@ -143,7 +143,7 @@
                 return;
             }
             try {
-                var h = Object.assign({ "Content-Type": "application/json" },
+                var _h = Object.assign({ "Content-Type": "application/json" },
                     (window.MiOpenApi.otaKey ? { "X-OTA-Key": window.MiOpenApi.otaKey } : {}));
                 var fd = new FormData();
                 fd.append("file", new Blob([JSON.stringify(payload)], { type: "application/json" }), "remotes.json");
@@ -170,8 +170,8 @@
 (function () {
     function g(id) { return document.getElementById(id); }
 
-    let fallbackStatusTimer = null;
-    let mqttStatusTimer = null;
+    let _fallbackStatusTimer = null;
+    let _mqttStatusTimer = null;
 
     function updateMqttStatusEl(status) {
         var el = g("mqtt-conn-status");
@@ -188,7 +188,7 @@
         el.style.color = s.color;
     }
 
-    async function pollMqttStatus(app) {
+    async function pollMqttStatus(_app) {
         var settingsView = g("view-settings");
         if (!settingsView || !settingsView.classList.contains("active")) return;
         try {
@@ -613,7 +613,7 @@
         modal.classList.add("open");
     }
 
-    async function startSniff(app) {
+    async function startSniff(_app) {
         g("io-sniff-start").style.display = "none";
         g("io-sniff-retry").style.display = "none";
         g("io-sniff-result-row").style.display = "none";

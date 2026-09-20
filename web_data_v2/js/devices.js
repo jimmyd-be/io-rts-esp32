@@ -1,4 +1,5 @@
 (function () {
+var t = window.t;
 var FAV_PREFIX = "fav_pos_";
 function getFavPos(id) {
 var v = localStorage.getItem(FAV_PREFIX + id);
@@ -38,7 +39,7 @@ function markUnreachable(deviceId) {
 var el = document.querySelector('.device[data-id="' + deviceId + '"]');
 if (el) el.classList.add("unreachable");
 }
-function openPct(pos) {
+function _openPct(pos) {
 return pos < 0 ? null : 100 - pos;
 }
 function posStateLabel(pos) {
@@ -1212,7 +1213,7 @@ setStatus("Resending…");
 setButtons([]);
 window.MiOpenApi.postJson("/api/action", { deviceId: deviceId, action: "sendpair1w" })
 .then(function () { showPairConfirm(deviceId, name); })
-.catch(function (e) { showPairConfirm(deviceId, name); });
+.catch(function (_e) { showPairConfirm(deviceId, name); });
 }
 function doConfirm() {
 setStatus("✓ Paired: <strong>" + name + "</strong>");

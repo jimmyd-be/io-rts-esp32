@@ -164,7 +164,7 @@
         });
     }
 
-    function fetchAndDisplayIoKey() {
+    function _fetchAndDisplayIoKey() {
         var display = document.getElementById("io-key-display");
         if (!display) return;
         window.MiOpenApi.requestJson("/api/io/key?" + Date.now())
@@ -172,7 +172,7 @@
             .catch(function () {});
     }
 
-    function initIoKeyModal() {
+    function _initIoKeyModal() {
         var modal     = document.getElementById("io-key-modal");
         var editBtn   = document.getElementById("io-key-edit");
         var cancelBtn = document.getElementById("io-key-cancel");
@@ -237,7 +237,7 @@
         });
     }
 
-    function uploadWebUi(app) {
+    function uploadWebUi(_app) {
         var file = document.getElementById("ota-web-file") && document.getElementById("ota-web-file").files[0];
         var progress = document.getElementById("ota-web-progress");
         var status = document.getElementById("ota-web-status");
