@@ -743,19 +743,39 @@ namespace IoRts
                         if (it != sIoRtsManager->mIoDevices.end())
                         {
                             auto &dev = it->second;
-                            float cur = dev.position;
-                            if (cur == iohome::UNKNOWN_POSITION)
-                                cur = (target_pos <= 50.0f) ? 100.0f : 0.0f;
-                            if (std::abs(cur - target_pos) > 1.0f)
+                            if (target_pos < 0.0f)
                             {
-                                dev.move_start_us   = esp_timer_get_time();
-                                dev.move_start_pos  = cur;
-                                dev.move_target_pos = target_pos;
-                                dev.is_stopped      = false;
+                                // STOP signal: freeze interpolation at current estimated position
+                                if (dev.move_start_us != 0 && dev.transit_time_ms > 0)
+                                {
+                                    int64_t elapsed_ms = (esp_timer_get_time() - dev.move_start_us) / 1000;
+                                    float d = std::abs(dev.move_target_pos - dev.move_start_pos);
+                                    float eff_ms = (float)dev.transit_time_ms * (d / 100.0f);
+                                    float frac = (eff_ms > 0.1f) ? std::min(1.0f, (float)elapsed_ms / eff_ms) : 1.0f;
+                                    dev.position = dev.move_start_pos + (dev.move_target_pos - dev.move_start_pos) * frac;
+                                }
+                                dev.move_start_us = 0;
+                                dev.is_stopped    = true;
+                            }
+                            else
+                            {
+                                float cur = dev.position;
+                                if (cur == iohome::UNKNOWN_POSITION)
+                                    cur = (target_pos <= 50.0f) ? 100.0f : 0.0f;
+                                if (std::abs(cur - target_pos) > 1.0f)
+                                {
+                                    dev.move_start_us   = esp_timer_get_time();
+                                    dev.move_start_pos  = cur;
+                                    dev.move_target_pos = target_pos;
+                                    dev.is_stopped      = false;
+                                }
                             }
                         }
                     }
-                    sIoRtsManager->ScheduleConfirmationPoll(deviceID, transit_ms, dist);
+                    if (target_pos < 0.0f)
+                        sIoRtsManager->ScheduleConfirmationPoll(deviceID, 0, 0.0f); // quick poll to confirm actual stopped position
+                    else
+                        sIoRtsManager->ScheduleConfirmationPoll(deviceID, transit_ms, dist);
                 });
                 mIoHome->SetRemote1WCallback([](const std::string &deviceID, float target) {
                     if (!sIoRtsManager) return;

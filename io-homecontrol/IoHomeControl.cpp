@@ -797,6 +797,8 @@ namespace iohome
                   else
                   {
                     device->second.move_start_us = 0; // STOP or special command, no interpolation
+                    if (sMovementStartedCallback)
+                      sMovementStartedCallback(deviceID, 0, 0.0f, -1.0f); // -1 = STOP signal
                   }
                 }
                 else if (sRemote1WCallback)
