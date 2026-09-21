@@ -1,9 +1,9 @@
 import useApi, { ApiResponse } from "../useApi";
 import { Key } from "../../models/Types";
 
-export function useOtaKey(): ApiResponse<Key> {
+export default function useIOSystemKey(): ApiResponse<Key> {
   return useApi<Key>({
-    endpoint: "/api/ota/key",
+    endpoint: "/api/io/key",
     method: "GET",
   });
 }

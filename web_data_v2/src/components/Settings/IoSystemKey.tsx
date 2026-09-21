@@ -1,7 +1,11 @@
 import { AccordionHead } from "../AccordionHead";
+import useIOSystemKey from "../../hooks/api/useIOSystemKey";
 
 //TODO: implement IO System Key functionality
 export function IoSystemKeySettings() {
+
+  const api = useIOSystemKey();
+
   return (
     <div class="acc-row" data-help="io-key">
       <AccordionHead
@@ -19,6 +23,7 @@ export function IoSystemKeySettings() {
             type="password"
             class="s-input key-display"
             placeholder="(not set)"
+            value={api.data?.key || ""}
             readOnly
             style="flex:1;min-width:140px;"
           />

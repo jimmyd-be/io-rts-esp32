@@ -1,4 +1,4 @@
-import useApi from "../useApi";
+import useApi, { ApiResponse } from "../useApi";
 import { NetworkConfig } from "../../models/Types";
 
 export function useNetworkConfig(): ApiResponse<NetworkConfig> {

@@ -3,7 +3,7 @@ export interface WifiConfig {
   password: string;
 }
 
-export interface otaKeyResponse {
+export interface Key {
   key: string;
 }
 
