@@ -9,6 +9,15 @@ export interface Key {
 
 export interface GithubReleaseResponse {
   tag_name: string;
+  prerelease: boolean;
+  draft: boolean;
+  html_url: string;
+  assets: GithubReleaseAsset[];
+}
+
+export interface GithubReleaseAsset {
+  name: string;
+  browser_download_url: string;
 }
 
 export interface NetworkConfig {
