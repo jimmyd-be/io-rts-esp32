@@ -11,7 +11,6 @@ import { FirmwareSettings } from "../components/Settings/Firmware";
 import { WebUISettings } from "../components/Settings/WebUi";
 import { WebUIUpdateSettings } from "../components/Settings/WebUiUpdate";
 import { BackupSettings } from "../components/Settings/Backup";
-import { ImportSettings } from "../components/Settings/Import";
 import { RebootSettings } from "../components/Settings/Reboot";
 import { SoftwareUpdateSettings } from "../components/Settings/SoftwareUpdate";
 import { FirmwareUpdateSettings } from "../components/Settings/FirmwareUpdate";
@@ -78,7 +77,6 @@ export function Settings() {
           <WebUIUpdateSettings />
           <FirmwareUpdateSettings />
           <BackupSettings />
-          <ImportSettings />
           <PairingLogs />
           <RebootSettings />
           <SoftwareUpdateSettings />
