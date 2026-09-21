@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "preact/hooks";
 
 type WebSocketMessage = Record<string, any>;
 
