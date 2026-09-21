@@ -11,10 +11,14 @@ export default function useApi<Type>({
   endpoint,
   method,
   body,
+  headers = {},
+  includeOtaKey = true,
 }: {
   endpoint: string;
   method: "GET" | "POST";
   body?: any;
+  headers?: HeadersInit;
+  includeOtaKey?: boolean;
 }): ApiResponse<Type> {
   const [data, setData] = useState<Type | undefined>(undefined);
   const [loaded, setLoaded] = useState(false);
@@ -28,7 +32,9 @@ export default function useApi<Type>({
       setLoaded(false);
       setIsError(false);
 
-      const otaKey = await fetch("/api/ota/key", {});
+      const otaKey = includeOtaKey
+        ? await fetch("/api/ota/key", {})
+        : undefined;
 
       try {
         const res = await fetch(endpoint, {
@@ -36,9 +42,14 @@ export default function useApi<Type>({
           headers: {
             Accept: "application/json",
             "Content-Type": body ? "application/json" : "text/plain",
-            "X-OTA-Key": otaKey.ok
-              ? ((await otaKey.json()) as Key).key
-              : "",
+            ...headers,
+            ...(otaKey
+              ? {
+                  "X-OTA-Key": otaKey.ok
+                    ? ((await otaKey.json()) as Key).key
+                    : "",
+                }
+              : {}),
           },
           body:
             method === "POST" && body !== undefined
@@ -89,7 +100,7 @@ export default function useApi<Type>({
       cancelled = true;
       controller.abort();
     };
-  }, [endpoint, method, JSON.stringify(body ?? null)]);
+  }, [endpoint, method, JSON.stringify(body ?? null), JSON.stringify(headers), includeOtaKey]);
 
   return { data, loaded, isError };
 }

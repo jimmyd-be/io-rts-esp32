@@ -14,15 +14,11 @@ import { BackupSettings } from "../components/Settings/Backup";
 import { RebootSettings } from "../components/Settings/Reboot";
 import { SoftwareUpdateSettings } from "../components/Settings/SoftwareUpdate";
 import { FirmwareUpdateSettings } from "../components/Settings/FirmwareUpdate";
-import useApi from "../hooks/useApi";
-import { InfoResponse } from "../models/Types";
 import { PairingLogs } from "../components/Settings/PairingLogs";
+import { useInfo } from "../hooks/api/useInfo";
 
 export function Settings() {
-  const infoData = useApi<InfoResponse>({
-    endpoint: "/api/info",
-    method: "GET",
-  });
+  const infoData = useInfo();
   return (
     <section class="view active">
       <div class="view-header">
