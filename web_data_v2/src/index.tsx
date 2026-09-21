@@ -8,11 +8,13 @@ import { NotFound } from "./pages/_404.tsx";
 import "./style.css";
 import { Log } from "./pages/log";
 import { Settings } from "./pages/settings";
+import { FirmwareUpdater } from "./components/FirmwareUpdater";
 
 export function App() {
   return (
     <LocationProvider>
       <Header />
+      <FirmwareUpdater />
       <main>
         <Router>
           <Route path="/" component={Devices} />

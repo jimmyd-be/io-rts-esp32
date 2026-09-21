@@ -7,6 +7,10 @@ export interface Key {
   key: string;
 }
 
+export interface GithubReleaseResponse {
+  tag_name: string;
+}
+
 export interface NetworkConfig {
   hostname: string;
   dhcp: boolean;
