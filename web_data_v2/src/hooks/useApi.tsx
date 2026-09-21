@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { otaKeyResponse } from "../models/Types";
+import { Key } from "../models/Types";
 
 export interface ApiResponse<Type> {
   data: Type | undefined;
@@ -37,7 +37,7 @@ export default function useApi<Type>({
             Accept: "application/json",
             "Content-Type": body ? "application/json" : "text/plain",
             "X-OTA-Key": otaKey.ok
-              ? ((await otaKey.json()) as otaKeyResponse).key
+              ? ((await otaKey.json()) as Key).key
               : "",
           },
           body:
