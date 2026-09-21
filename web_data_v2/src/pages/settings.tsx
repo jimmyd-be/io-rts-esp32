@@ -17,6 +17,7 @@ import { SoftwareUpdateSettings } from "../components/Settings/SoftwareUpdate";
 import { FirmwareUpdateSettings } from "../components/Settings/FirmwareUpdate";
 import useApi from "../hooks/useApi";
 import { InfoResponse } from "../models/Types";
+import { PairingLogs } from "../components/Settings/PairingLogs";
 
 export function Settings() {
   const infoData = useApi<InfoResponse>({
@@ -78,6 +79,7 @@ export function Settings() {
           <FirmwareUpdateSettings />
           <BackupSettings />
           <ImportSettings />
+          <PairingLogs />
           <RebootSettings />
           <SoftwareUpdateSettings />
         </div>
