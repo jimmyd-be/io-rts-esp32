@@ -9,22 +9,25 @@ import "./style.css";
 import { Log } from "./pages/log";
 import { Settings } from "./pages/settings";
 import { FirmwareUpdater } from "./components/FirmwareUpdater";
+import { ToastProvider } from "./components/ToastProvider";
 
 export function App() {
   return (
-    <LocationProvider>
-      <Header />
-      <FirmwareUpdater />
-      <main>
-        <Router>
-          <Route path="/" component={Devices} />
-          <Route path="/log" component={Log} />
-          <Route path="/settings" component={Settings} />
-          <Route default component={NotFound} />
-        </Router>
-      </main>
-      <Footer />
-    </LocationProvider>
+    <ToastProvider>
+      <LocationProvider>
+        <Header />
+        <FirmwareUpdater />
+        <main>
+          <Router>
+            <Route path="/" component={Devices} />
+            <Route path="/log" component={Log} />
+            <Route path="/settings" component={Settings} />
+            <Route default component={NotFound} />
+          </Router>
+        </main>
+        <Footer />
+      </LocationProvider>
+    </ToastProvider>
   );
 }
 
