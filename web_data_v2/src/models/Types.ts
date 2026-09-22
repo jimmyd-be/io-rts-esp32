@@ -77,15 +77,22 @@ export interface ActionResult {
 export interface Device {
   id: string;
   name: string;
-  inactive?: boolean;
-  protocol?: string;
-  type_name?: string;
-  manufacturer?: string;
-  position?: number;
-  is_inverted?: boolean;
-  position_estimated?: boolean;
-  is_stopped?: boolean;
-  device?: Device;
+  inactive: boolean;
+  position: number;
+  tilt: number;
+  type: number;
+  type_name: string;
+  subtype: number;
+  manufacturer: string;
+  manufacturer_id: number;
+  is_low_power: boolean;
+  is_stopped: boolean;
+  is_inverted: boolean;
+  is_quiet: boolean;
+  tilt_supported: boolean;
+  transit_time_ms: number;
+  protocol: string;
+  position_estimated: boolean;
 }
 
 export interface WifiScanResult {
