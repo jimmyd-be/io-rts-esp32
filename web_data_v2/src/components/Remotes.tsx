@@ -1,15 +1,9 @@
 import { useState } from "preact/hooks";
 import { useRemoteWizard } from "./Modals/remoteWizard.tsx";
-import { Remote } from "../models/Types";
-import { ApiResponse } from "../hooks/useApi";
-
-interface RemotesProps {
-  data: ApiResponse<Remote[]>;
-}
-
-export function Remotes({ data: remotesApi }: RemotesProps) {
-  const [droppedDown, setOpen] = useState(true);
+export function Remotes({ data: remotesApi }) {
+  const [droppedDown] = useState(true);
   const { open } = useRemoteWizard();
+  const remotes = remotesApi.data ?? [];
 
   return (
     <div id="remotes-section" class={droppedDown ? "open" : ""}>
@@ -19,8 +13,10 @@ export function Remotes({ data: remotesApi }: RemotesProps) {
         </span>
 
         <div className="acc-summary" style={{ gap: 8 }}>
-          <span id="remotes-count" />
-          <button className="s-btn" onClick={() => open()}>
+          <span id="remotes-count">
+            {remotesApi.loaded ? `${remotes.length}` : "…"}
+          </span>
+          <button type="button" className="s-btn" onClick={() => open()}>
             + Add
           </button>
         </div>
@@ -49,18 +45,43 @@ export function Remotes({ data: remotesApi }: RemotesProps) {
                 <th data-i18n="table.edit">Edit</th>
               </tr>
             </thead>
-            {!remotesApi.loaded
-              ? "Loading…"
-              : remotesApi.data?.map((remote: Remote) => (
+            <tbody>
+              {!remotesApi.loaded ? (
+                <tr>
+                  <td colSpan={3}>Loading…</td>
+                </tr>
+              ) : remotesApi.isError ? (
+                <tr>
+                  <td colSpan={3}>Failed to load remotes.</td>
+                </tr>
+              ) : remotes.length === 0 ? (
+                <tr>
+                  <td colSpan={3}>No remotes available.</td>
+                </tr>
+              ) : (
+                remotes.map((remote) => (
                   <tr key={remote.id}>
                     <td>{remote.id}</td>
                     <td>{remote.devices.join(", ")}</td>
                     <td>
-                      <button className="btn edit bg">Edit</button>
+                      <button
+                        type="button"
+                        className="btn edit bg"
+                        onClick={() =>
+                          open({
+                            mode: "edit",
+                            remoteId: remote.id,
+                            linkedDevices: remote.devices,
+                          })
+                        }
+                      >
+                        Edit
+                      </button>
                     </td>
                   </tr>
-                ))}
-            <tbody />
+                ))
+              )}
+            </tbody>
           </table>
         </div>
       </div>

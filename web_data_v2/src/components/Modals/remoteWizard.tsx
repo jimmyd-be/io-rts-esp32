@@ -97,12 +97,12 @@ export function RemoteWizardProvider({
     }
   }, []);
 
-   const cancelCapture = useCallback(() => {
-     captureActiveRef.current = false;
-     setCaptureActive(false);
-     clearTimer();
-     cancelCaptureRequest(otaData.data?.key || "").catch(() => undefined);
-   }, [clearTimer, otaData.data?.key]);
+  const cancelCapture = useCallback(() => {
+    captureActiveRef.current = false;
+    setCaptureActive(false);
+    clearTimer();
+    cancelCaptureRequest(otaData.data?.key).catch(() => undefined);
+  }, [clearTimer, otaData.data?.key]);
 
   const startCapture = useCallback(() => {
     setShowRetry(false);
@@ -130,17 +130,17 @@ export function RemoteWizardProvider({
       });
     }, 1000);
 
-     startCaptureRequest(otaData.data?.key || "").catch((e: Error) => {
-       clearTimer();
-       captureActiveRef.current = false;
-       setCaptureActive(false);
-       setCaptureStatus({
-         text: t("status.capture_failed", { message: e.message }),
-         tone: "red",
-       });
-       setShowRetry(true);
-     });
-   }, [clearTimer, t, otaData.data?.key]);
+    startCaptureRequest(otaData.data?.key).catch((e: Error) => {
+      clearTimer();
+      captureActiveRef.current = false;
+      setCaptureActive(false);
+      setCaptureStatus({
+        text: t("status.capture_failed", { message: e.message }),
+        tone: "red",
+      });
+      setShowRetry(true);
+    });
+  }, [clearTimer]);
 
   const selectedForDevices = useCallback(
     (linked: string[]) =>
@@ -242,69 +242,68 @@ export function RemoteWizardProvider({
     goToDeviceStep(value);
   }, [manualInput, goToDeviceStep]);
 
-   const save = useCallback(async () => {
-     setDevicesError("");
-     setDevicesErrorMuted(false);
+  const save = useCallback(async () => {
+    setDevicesError("");
+    setDevicesErrorMuted(false);
 
-     if (!selectedIds.length) {
-       setDevicesError(t("status.select-at-least-one-device"));
-       return;
-     }
+    if (!selectedIds.length) {
+      setDevicesError(t("status.select-at-least-one-device"));
+      return;
+    }
 
-     setSaving(true);
-     try {
-       const otaKey = otaData.data?.key || "";
-       if (mode === "add") {
-         for (const deviceId of selectedIds) {
-           const result = await linkRemote(
-             remoteId,
-             deviceId,
-             otaKey,
-           );
-           if (!result.success)
-             throw new Error(result.message || "Link failed for " + deviceId);
-         }
-         // showToast(t("toast.remote_added", { id: remoteId }), "success");
-       } else {
-         await unlinkRemote(remoteId, otaKey);
-         const failed: string[] = [];
-         for (const deviceId of selectedIds) {
-           try {
-             await linkRemote(remoteId, deviceId, otaKey);
-           } catch {
-             failed.push(deviceId);
-           }
-         }
-         if (failed.length) {
-           setDevicesError(
-             t("status.link_partial_fail", { ids: failed.join(", ") }),
-           );
-           setSaving(false);
-           await onSaved?.();
-           return;
-         }
-         // showToast(t("toast.remote_updated", { id: remoteId }), "success");
-       }
-       setSaving(false);
-       close();
-       await onSaved?.();
-     } catch (e) {
-       setDevicesError("Error: " + (e as Error).message);
-       setSaving(false);
-     }
-   }, [mode, remoteId, selectedIds, close, onSaved, t, otaData.data?.key]);
+    setSaving(true);
+    try {
+      if (mode === "add") {
+        for (const deviceId of selectedIds) {
+          const result = await linkRemote(
+            remoteId,
+            deviceId,
+            otaData.data?.key,
+          );
+          if (!result.success)
+            throw new Error(result.message || "Link failed for " + deviceId);
+        }
+        // showToast(t("toast.remote_added", { id: remoteId }), "success");
+      } else {
+        await unlinkRemote(remoteId);
+        const failed: string[] = [];
+        for (const deviceId of selectedIds) {
+          try {
+            await linkRemote(remoteId, deviceId, otaData.data?.key);
+          } catch {
+            failed.push(deviceId);
+          }
+        }
+        if (failed.length) {
+          setDevicesError(
+            t("status.link_partial_fail", { ids: failed.join(", ") }),
+          );
+          setSaving(false);
+          await onSaved?.();
+          return;
+        }
+        // showToast(t("toast.remote_updated", { id: remoteId }), "success");
+      }
+      setSaving(false);
+      close();
+      await onSaved?.();
+    } catch (e) {
+      setDevicesError("Error: " + (e as Error).message);
+      setSaving(false);
+    }
+  }, [mode, remoteId, selectedIds, close, onSaved]);
 
-   const remove = useCallback(async () => {
-     if (!confirm(t("confirm.delete_remote", { id: remoteId }))) return;
-     try {
-       await deleteRemote(remoteId, otaData.data?.key || "");
-       // showToast(t("toast.remote_removed"), "success");
-       close();
-       await onSaved?.();
-     } catch (e) {
-       setDevicesError("Error: " + (e as Error).message);
-     }
-   }, [remoteId, close, onSaved, t, otaData.data?.key]);
+  const remove = useCallback(async () => {
+    if (!confirm(t("confirm.delete_remote", { id: remoteId }))) return;
+    try {
+      await deleteRemote(remoteId, otaData.data?.key);
+      // showToast(t("toast.remote_removed"), "success");
+      close();
+      await onSaved?.();
+    } catch (e) {
+      setDevicesError("Error: " + (e as Error).message);
+    }
+  }, [remoteId, close, onSaved]);
 
   const api = useMemo<RemoteWizardApi>(
     () => ({ open, close, onRemoteSeen, onCaptureTimeout }),
@@ -460,7 +459,7 @@ export function RemoteWizardProvider({
                             <label className="arm-device-item" key={device.id}>
                               <input
                                 type="checkbox"
-                                className="arm-device-cb"
+                                className="arm-device-item"
                                 value={device.id}
                                 checked={selectedIds.indexOf(device.id) !== -1}
                                 onChange={() => toggleDevice(device.id)}
@@ -479,7 +478,7 @@ export function RemoteWizardProvider({
                     </div>
                   )}
                   {mode === "edit" ? (
-                    <button className="btn bg" onClick={remove}>
+                    <button class="btn-ghost arm-delete-btn" onClick={remove}>
                       {t("button.delete")}
                     </button>
                   ) : (
@@ -490,7 +489,11 @@ export function RemoteWizardProvider({
                       {t("button.back")}
                     </button>
                   )}
-                  <button className="btn" disabled={saving} onClick={save}>
+                  <button
+                    class="btn-danger-confirm"
+                    disabled={saving}
+                    onClick={save}
+                  >
                     {t("button.save")}
                   </button>
                 </div>
