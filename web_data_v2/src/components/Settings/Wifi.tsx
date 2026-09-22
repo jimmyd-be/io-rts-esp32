@@ -4,15 +4,18 @@ import useI18n from "../../hooks/useI18n";
 import { JSX } from "preact";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useWifiConfig } from "../../hooks/api/useWifiConfig";
+import { WifiScanResult } from "../../models/Types";
+import { useToast } from "../../hooks/useToast.tsx";
+import { ToastType } from "../ToastProvider";
 
-
-//TODO : Implement WiFi scan functionality and display results in a dropdown for selection.
 export function WifiSettings(): JSX.Element {
   const [scan, setScan] = useState(false);
+  const [scanResults, setScanResults] = useState<WifiScanResult[]>([]);
 
   const wifiData = useWifiConfig();
   const otaData = useOtaKey();
   const t = useI18n();
+  const showToast = useToast();
 
   const [formValues, setFormValues] = useState({
     ssid: "",
@@ -28,26 +31,39 @@ export function WifiSettings(): JSX.Element {
     }
   }, [wifiData.loaded, wifiData.data]);
 
-  // useEffect(() => {
-  //   if (scan) {
-  //     // Perform scan logic here
-  //
-  //     await fetch("/api/wifi/scan", {
-  //       method: "GET"}).then((r) => {
-  //       if (r.ok) {
-  //         const data = await r.json() as WifiScanResult;
-  //
-  //     }
-  //
-  //     setScan(false);
-  //   }
-  // }, [scan]);
-
   const handleFieldChange = (field: "ssid" | "password", value: string) => {
     setFormValues((current) => ({
       ...current,
       [field]: value,
     }));
+  };
+
+  const scanWifiNetworks = () => {
+    setScan(true);
+    fetch("/api/wifi/scan", {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "X-OTA-Key": otaData.data?.key ?? "",
+      },
+    })
+      .then(async (r) => {
+        if (r.ok) {
+          setScanResults((await r.json()) as WifiScanResult[]);
+          setScan(false);
+        }
+      })
+      .catch(() => {
+        showToast("toast.wifi-scan-failed", ToastType.ERROR);
+        setScan(false);
+      });
+  };
+
+  const getIcon = (rssi: number) => {
+    if (rssi > -55) return "▂▄▆█";
+    if (rssi > -70) return "▂▄▆";
+    if (rssi > -80) return "▂▄";
+    return "▂";
   };
 
   return (
@@ -69,7 +85,9 @@ export function WifiSettings(): JSX.Element {
             password: formValues.password,
           }),
         }).then((r) => {
-          // TODO handle Response status: restarting
+          showToast("toast.wifi-saved-restarting", ToastType.SUCCESS);
+        }).catch(() => {
+          showToast("toast.error-saving-wifi", ToastType.ERROR);
         });
       }}
     >
@@ -119,14 +137,32 @@ export function WifiSettings(): JSX.Element {
               <button
                 class="s-btn"
                 type="button"
-                data-i18n="button.scan"
-                onClick={() => setScan(true)}
-              >
-                Scan
-              </button>
+                disabled={scan}
+                data-i18n={scan ? "button.scanning" : "button.scan"}
+                onClick={() => scanWifiNetworks()}
+              />
             </div>
           </div>
         </div>
+        {scanResults.length > 0 && (
+          <div id="wifi-scan-results" style="display: block;">
+            {scanResults.map((result: WifiScanResult) => (
+              <div
+                class="wifi-scan-row"
+                onClick={() => {
+                  handleFieldChange("ssid", result.ssid);
+                  setScan(false);
+                  setScanResults([]);
+                }}
+              >
+                <span>{result.ssid}</span>
+                <span class="wifi-scan-signal">
+                  {getIcon(result.rssi)} {result.rssi}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
         <div>
           <label class={"label-title"} data-i18n="label.password">
             Password
