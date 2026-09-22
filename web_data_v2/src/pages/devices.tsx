@@ -5,26 +5,27 @@ import { Remotes } from "../components/Remotes";
 import { DeviceCard } from "../components/DeviceCard";
 import { RemoteWizardProvider } from "../components/Modals/remoteWizard";
 import { DeviceModalProvider } from "../hooks/useDeviceModal";
+import { Device, Remote } from "../models/Types";
 
 //TODO : Implement device pairing functionality and display a modal for pairing new devices.
 export function Devices() {
-  const [devices, setDevices] = useState([]);
+  const [devices, setDevices] = useState<Device[]>([]);
   const [activeCount, setActiveCount] = useState(0);
 
   const { t } = useI18n();
 
-  const deviceApi = useApi({
+  const deviceApi = useApi<Device[]>({
     endpoint: "/api/devices",
     method: "GET",
   });
 
-  const remotesApi = useApi({
+  const remotesApi = useApi<Remote[]>({
     endpoint: "/api/remotes",
     method: "GET",
   });
 
   useEffect(() => {
-    const list = deviceApi.loaded && deviceApi.data != null ? deviceApi.data : [];
+    const list = deviceApi.loaded && Array.isArray(deviceApi.data) ? deviceApi.data : [];
 
     const active = list.filter((d) => !d.inactive);
     const inactive = list.filter((d) => d.inactive);
@@ -94,7 +95,7 @@ export function Devices() {
           remotes={remotesApi.data ?? []}
           devices={deviceApi.data ?? []}
         >
-          <Remotes data={remotesApi} />
+          <Remotes remotesApi={remotesApi} />
         </RemoteWizardProvider>
       </section>
     </DeviceModalProvider>

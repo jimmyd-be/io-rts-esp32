@@ -2,24 +2,10 @@ import { Device } from "../models/Types";
 import useI18n from "../hooks/useI18n";
 import { useDeviceModal } from "../hooks/useDeviceModal";
 
-const getDeviceGroup = (device: Device) => {
-  const type = (device.type_name || "").toLowerCase();
-
-  if (["shutter", "venetian", "window", "gate"].includes(type)) return type;
-  if (["awning", "blind"].includes(type)) return type;
-  return "other";
-};
-
 export function DeviceCard({ device }: { device: Device }) {
   const { t } = useI18n();
   const { open } = useDeviceModal();
 
-  const group = getDeviceGroup(device);
-  const hasPos =
-    group === "shutter" ||
-    group === "venetian" ||
-    group === "window" ||
-    group === "gate";
 
   return (
     <li

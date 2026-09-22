@@ -1,6 +1,13 @@
 import { useState } from "preact/hooks";
 import { useRemoteWizard } from "./Modals/remoteWizard.tsx";
-export function Remotes({ data: remotesApi }) {
+import { ApiResponse } from "../hooks/useApi";
+import { Remote } from "../models/Types";
+
+interface RemotesProps {
+  remotesApi: ApiResponse<Remote[]>;
+}
+
+export function Remotes({ remotesApi }: RemotesProps) {
   const [droppedDown] = useState(true);
   const { open } = useRemoteWizard();
   const remotes = remotesApi.data ?? [];

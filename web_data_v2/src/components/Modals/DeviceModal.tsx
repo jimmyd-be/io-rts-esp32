@@ -29,8 +29,12 @@ export function DeviceModal({ device, onClose }: DeviceModalProps) {
         </div>
         <div id="dev-sheet-body">
           <div class="dev-name-row">
-            <input type="text" class="s-input" style="flex: 1 1 0%;"
-            value={device.name}/>
+            <input
+              type="text"
+              class="s-input"
+              style="flex: 1 1 0%;"
+              value={device.name}
+            />
             <button class="s-btn primary" style="flex-shrink: 0;">
               Save
             </button>
@@ -55,7 +59,7 @@ export function DeviceModal({ device, onClose }: DeviceModalProps) {
               <input
                 type="number"
                 min="1"
-                value={device.transition_time}
+                value={device.transit_time_ms / 1000}
                 max="300"
                 class="s-input"
                 style="width: 64px;"
