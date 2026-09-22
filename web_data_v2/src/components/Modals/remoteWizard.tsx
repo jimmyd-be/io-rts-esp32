@@ -101,7 +101,7 @@ export function RemoteWizardProvider({
     captureActiveRef.current = false;
     setCaptureActive(false);
     clearTimer();
-    cancelCaptureRequest(otaData.data?.key).catch(() => undefined);
+    cancelCaptureRequest(otaData.data?.key as string).catch(() => undefined);
   }, [clearTimer, otaData.data?.key]);
 
   const startCapture = useCallback(() => {
@@ -130,7 +130,7 @@ export function RemoteWizardProvider({
       });
     }, 1000);
 
-    startCaptureRequest(otaData.data?.key).catch((e: Error) => {
+    startCaptureRequest(otaData.data?.key as string).catch((e: Error) => {
       clearTimer();
       captureActiveRef.current = false;
       setCaptureActive(false);
@@ -258,18 +258,18 @@ export function RemoteWizardProvider({
           const result = await linkRemote(
             remoteId,
             deviceId,
-            otaData.data?.key,
+            otaData.data?.key as string,
           );
           if (!result.success)
             throw new Error(result.message || "Link failed for " + deviceId);
         }
         // showToast(t("toast.remote_added", { id: remoteId }), "success");
       } else {
-        await unlinkRemote(remoteId);
+        await unlinkRemote(remoteId, otaData.data?.key as string);
         const failed: string[] = [];
         for (const deviceId of selectedIds) {
           try {
-            await linkRemote(remoteId, deviceId, otaData.data?.key);
+            await linkRemote(remoteId, deviceId, otaData.data?.key as string);
           } catch {
             failed.push(deviceId);
           }
@@ -296,7 +296,7 @@ export function RemoteWizardProvider({
   const remove = useCallback(async () => {
     if (!confirm(t("confirm.delete_remote", { id: remoteId }))) return;
     try {
-      await deleteRemote(remoteId, otaData.data?.key);
+      await deleteRemote(remoteId, otaData.data?.key as string);
       // showToast(t("toast.remote_removed"), "success");
       close();
       await onSaved?.();
