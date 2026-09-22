@@ -1,5 +1,6 @@
 import { Device } from "../models/Types";
 import useI18n from "../hooks/useI18n";
+import { useDeviceModal } from "../hooks/useDeviceModal";
 
 const getDeviceGroup = (device: Device) => {
   const type = (device.type_name || "").toLowerCase();
@@ -11,6 +12,7 @@ const getDeviceGroup = (device: Device) => {
 
 export function DeviceCard({ device }: { device: Device }) {
   const { t } = useI18n();
+  const { open } = useDeviceModal();
 
   const group = getDeviceGroup(device);
   const hasPos =
@@ -29,8 +31,9 @@ export function DeviceCard({ device }: { device: Device }) {
       <div className="moving-dot" />
 
       <div className="card-top">
-        <div className="nameBlock">
+        <div >
           <div className="card-name">{device.name}</div>
+          <div class="card-meta">
           <span className="card-badge">
             {(device.type_name || "").toLowerCase()}
           </span>
@@ -38,16 +41,13 @@ export function DeviceCard({ device }: { device: Device }) {
           {device.protocol === "1w" && (
             <span className="card-badge badge-1w">1W</span>
           )}
-        </div>
+          </div></div>
 
         <button
           type="button"
           className="btn menu"
           aria-label="Edit"
-          onClick={() => {
-            // replace with your modal open logic
-            console.log("Open device edit modal:", device.id);
-          }}
+          onClick={() => open(device)}
         >
           ⋯
         </button>

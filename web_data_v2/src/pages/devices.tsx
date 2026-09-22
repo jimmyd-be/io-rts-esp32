@@ -4,6 +4,7 @@ import useI18n from "../hooks/useI18n";
 import { Remotes } from "../components/Remotes";
 import { DeviceCard } from "../components/DeviceCard";
 import { RemoteWizardProvider } from "../components/Modals/remoteWizard";
+import { DeviceModalProvider } from "../hooks/useDeviceModal";
 
 //TODO : Implement device pairing functionality and display a modal for pairing new devices.
 export function Devices() {
@@ -36,64 +37,66 @@ export function Devices() {
   const countText = `${activeCount} ${t ? t("nav.devices") : "devices"}`;
 
   return (
-    <section className="view active">
-      <div className="view-header">
-        <h2 className="view-title" data-i18n="nav.devices">
-          Devices
-        </h2>
+    <DeviceModalProvider>
+      <section className="view active">
+        <div className="view-header">
+          <h2 className="view-title" data-i18n="nav.devices">
+            Devices
+          </h2>
 
-        <span
-          style={{
-            fontSize: "11px",
-            color: "var(--text3)",
-            marginRight: "auto",
-            paddingLeft: "8px",
-          }}
-        >
-          {!deviceApi.loaded ? "Loading…" : countText}
-        </span>
-
-        <button className="view-add-btn" title="Pair new device">
-          +
-        </button>
-      </div>
-
-      <ul id="device-list">
-        {!deviceApi.loaded ? (
-          <li
+          <span
             style={{
-              padding: "20px",
+              fontSize: "11px",
               color: "var(--text3)",
-              textAlign: "center",
-              gridColumn: "1 / -1",
+              marginRight: "auto",
+              paddingLeft: "8px",
             }}
           >
-            {t ? t("popup.loading") : "Loading…"}
-          </li>
-        ) : devices.length === 0 ? (
-          <li
-            style={{
-              padding: "20px",
-              color: "var(--text3)",
-              textAlign: "center",
-              gridColumn: "1 / -1",
-            }}
-          >
-            {t
-              ? t("list.no_devices_available")
-              : "No devices available."}
-          </li>
+            {!deviceApi.loaded ? "Loading…" : countText}
+          </span>
+
+          <button className="view-add-btn" title="Pair new device">
+            +
+          </button>
+        </div>
+
+        <ul id="device-list">
+          {!deviceApi.loaded ? (
+            <li
+              style={{
+                padding: "20px",
+                color: "var(--text3)",
+                textAlign: "center",
+                gridColumn: "1 / -1",
+              }}
+            >
+              {t ? t("popup.loading") : "Loading…"}
+            </li>
+          ) : devices.length === 0 ? (
+            <li
+              style={{
+                padding: "20px",
+                color: "var(--text3)",
+                textAlign: "center",
+                gridColumn: "1 / -1",
+              }}
+            >
+              {t
+                ? t("list.no_devices_available")
+                : "No devices available."}
+            </li>
           ) : (
-          devices.map((device) => <DeviceCard key={device.id} device={device} />)
-        )}
-      </ul>
+            devices.map((device) => <DeviceCard key={device.id} device={device} />)
+          )}
+        </ul>
 
         <RemoteWizardProvider
-            remotes={remotesApi.data ?? []}
-            devices={deviceApi.data ?? []}
+          remotes={remotesApi.data ?? []}
+          devices={deviceApi.data ?? []}
         >
           <Remotes data={remotesApi} />
         </RemoteWizardProvider>
-    </section>
+      </section>
+    </DeviceModalProvider>
   );
 }
