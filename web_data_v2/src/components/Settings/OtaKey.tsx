@@ -1,8 +1,10 @@
 import { AccordionHead } from "../AccordionHead";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
+import { ToastType } from "../ToastProvider";
+import { useToast } from "../../hooks/useToast";
 
 export function OtaKeySettings() {
-
+  const { showToast } = useToast();
   const otaKeyApi = useOtaKey();
 
   return (
@@ -23,9 +25,13 @@ export function OtaKeySettings() {
             "X-OTA-Key": otaKeyApi.data?.key ?? "",
           },
           body: JSON.stringify(data),
-        }).then((r) => {
-          // TODO handle Response status: restarting
-        });
+        })
+          .then(() => {
+            showToast("toast.ota-key-saved", ToastType.SUCCESS);
+          })
+          .catch(() => {
+            showToast("toast.error-saving-ota-key", ToastType.ERROR);
+          });
       }}
     >
     <div class="acc-row" data-help="ota-key">

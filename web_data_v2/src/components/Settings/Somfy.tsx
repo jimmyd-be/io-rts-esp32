@@ -1,9 +1,13 @@
 import { AccordionHead } from "../AccordionHead";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useSomfyConfig } from "../../hooks/api/useSomfyConfig";
+import { useToast } from "../../hooks/useToast";
+import { ToastType } from "../ToastProvider";
 
 export function SomfySettings() {
   const otaData = useOtaKey();
+
+  const { showToast } = useToast();
 
   const api = useSomfyConfig();
 
@@ -22,9 +26,13 @@ export function SomfySettings() {
             "Content-Type": "application/json",
             "X-OTA-Key": otaData.data?.key || "",
           },
-        }).then(() => {
-          // TODO handle response
-        });
+        })
+          .then(() => {
+            showToast("toast.somfy-saved", ToastType.SUCCESS);
+          })
+          .catch(() => {
+            showToast("toast.error-saving-somfy", ToastType.ERROR);
+          });
       }}
     >
       <div class="acc-row" data-help="somfy">

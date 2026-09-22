@@ -3,9 +3,11 @@ import { useEffect, useState } from "preact/hooks";
 import { JSX } from "preact";
 import { useFallBackConfig } from "../../hooks/api/useFallBackConfig";
 import { Checkbox } from "../Checkbox";
+import { ToastType } from "../ToastProvider";
 
 export function FallbackApSettings(): JSX.Element {
   const api = useFallBackConfig();
+  const { showToast } = useToast();
 
   const [formValues, setFormValues] = useState({
     enabled: false,
@@ -62,7 +64,9 @@ export function FallbackApSettings(): JSX.Element {
             ap_ssid: formValues.ap_ssid,
           }),
         }).then((r) => {
-          // TODO handle save status
+          showToast("toast.fallback-saved", ToastType.SUCCESS);
+        }).catch((err) => {
+          showToast("toast.error-saving-fallback", ToastType.ERROR);
         });
       }}
     >

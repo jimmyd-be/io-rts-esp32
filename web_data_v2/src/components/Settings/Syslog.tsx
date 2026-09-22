@@ -2,10 +2,13 @@ import { AccordionHead } from "../AccordionHead";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useSyslogConfig } from "../../hooks/api/useSyslogConfig";
 import { Checkbox } from "../Checkbox";
+import { ToastType } from "../ToastProvider";
+import { useToast } from "../../hooks/useToast";
 
 export function SyslogSettings() {
   const otaData = useOtaKey();
   const api = useSyslogConfig();
+  const { showToast } = useToast();
 
   return (
     <form
@@ -14,7 +17,6 @@ export function SyslogSettings() {
 
         const fd = new FormData(e.currentTarget);
         const data = Object.fromEntries(fd.entries());
-        console.log();
 
         fetch("/api/syslog", {
           method: "POST",
@@ -23,9 +25,13 @@ export function SyslogSettings() {
             "Content-Type": "application/json",
             "X-OTA-Key": otaData.data?.key || "",
           },
-        }).then((r) => {
-          //TODO handle Response
-        });
+        })
+          .then(() => {
+            showToast("toast.syslog-saved", ToastType.SUCCESS);
+          })
+          .catch(() => {
+            showToast("toast.error-saving-syslog", ToastType.ERROR);
+          });
       }}
     >
       <div class="acc-row" data-help="syslog">
@@ -37,7 +43,7 @@ export function SyslogSettings() {
           summary={
             <>
               <span class="acc-sum-val">{api.data?.server || "Off"}</span>
-              <span class="row-status"></span>
+              <span class="row-status" />
             </>
           }
         >

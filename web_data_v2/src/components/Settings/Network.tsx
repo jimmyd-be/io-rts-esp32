@@ -3,9 +3,12 @@ import { useState } from "preact/hooks";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useNetworkConfig } from "../../hooks/api/useNetworkConfig";
 import { Checkbox } from "../Checkbox";
+import { ToastType } from "../ToastProvider";
+import { useToast } from "../../hooks/useToast";
 
 export function NetworkSettings() {
   const otaData = useOtaKey();
+  const { showToast } = useToast();
 
   const api = useNetworkConfig();
 
@@ -27,7 +30,12 @@ export function NetworkSettings() {
             "X-OTA-Key": otaData.data?.key || "",
           },
         }).then(() => {
-          // TODO handle response
+          showToast("toast.network-saved-restarting", ToastType.SUCCESS);
+        }).catch((e) => {
+          showToast(
+            "toast.error-saving-network", { message: e.message || e },
+            ToastType.ERROR,
+          );
         });
       }}
     >
