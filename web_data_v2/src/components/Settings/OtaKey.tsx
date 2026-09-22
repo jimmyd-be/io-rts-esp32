@@ -4,7 +4,7 @@ import { ToastType } from "../ToastProvider";
 import { useToast } from "../../hooks/useToast";
 
 export function OtaKeySettings() {
-  const { showToast } = useToast();
+  const showToast = useToast();
   const otaKeyApi = useOtaKey();
 
   return (

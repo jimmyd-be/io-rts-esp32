@@ -8,7 +8,7 @@ import { useToast } from "../../hooks/useToast";
 export function SyslogSettings() {
   const otaData = useOtaKey();
   const api = useSyslogConfig();
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   return (
     <form

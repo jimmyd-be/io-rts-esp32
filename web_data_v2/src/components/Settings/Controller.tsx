@@ -8,7 +8,7 @@ import { useToast } from "../../hooks/useToast";
 export function ControllerSettings() {
   const otaData = useOtaKey();
   const api = useIOConfig();
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   return (
     <form
@@ -30,7 +30,6 @@ export function ControllerSettings() {
         }).catch((e) => {
           showToast(
             "toast.error-saving-controller",
-            { message: e.message || e },
             ToastType.ERROR,
           );
         });

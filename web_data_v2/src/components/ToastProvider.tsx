@@ -1,5 +1,6 @@
 import { createContext, ComponentChildren } from "preact";
 import { useState, useCallback } from "preact/hooks";
+import useI18n from "../hooks/useI18n";
 
 export interface Toast {
   id: string;
@@ -29,7 +30,7 @@ interface ToastProviderProps {
 
 export function ToastProvider({ children }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const {t} = useTranslation();
+  const {t} = useI18n();
 
   const showToast = useCallback(
     (message: string, type: ToastType = ToastType.DEFAULT, duration: number = 3000) => {

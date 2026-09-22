@@ -73,7 +73,7 @@ export function Devices() {
               gridColumn: "1 / -1",
             }}
           >
-            {t ? t("popup.loading", "Loading…") : "Loading…"}
+            {t ? t("popup.loading") : "Loading…"}
           </li>
         ) : devices.length === 0 ? (
           <li
@@ -85,7 +85,7 @@ export function Devices() {
             }}
           >
             {t
-              ? t("list.no_devices_available", "No devices available.")
+              ? t("list.no_devices_available")
               : "No devices available."}
           </li>
         ) : (
@@ -93,8 +93,8 @@ export function Devices() {
         )}
       </ul>
 
-      <RemoteWizardProvider remotes={remotesApi.data} devices={deviceApi.data}>
-        <Remotes remotes={remotesApi.data} />
+      <RemoteWizardProvider remotes={remotesApi.data as Remote[]} devices={deviceApi.data as Device[]}>
+        <Remotes remotes={remotesApi} />
       </RemoteWizardProvider>
     </section>
   );

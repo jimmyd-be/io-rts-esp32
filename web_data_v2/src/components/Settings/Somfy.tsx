@@ -7,7 +7,7 @@ import { ToastType } from "../ToastProvider";
 export function SomfySettings() {
   const otaData = useOtaKey();
 
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   const api = useSomfyConfig();
 

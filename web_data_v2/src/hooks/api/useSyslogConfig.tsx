@@ -1,4 +1,4 @@
-import useApi from "../useApi";
+import useApi, { ApiResponse } from "../useApi";
 import { SyslogConfig } from "../../models/Types";
 
 export function useSyslogConfig(): ApiResponse<SyslogConfig> {

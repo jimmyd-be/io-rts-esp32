@@ -6,7 +6,7 @@ export default [
   ...preact,
   {
     files: ["**/*.ts", "**/*.tsx"],
-    ignores: ["dist/**/*", "test/fixtures/**", "test/__snapshots__/**"],
+    ignores: ["dist/**/*", "test/fixtures/**", "test/__snapshots__/**", "**/*.js", "**/*.jsx"],
   },
   eslintJS.configs.recommended,
   {

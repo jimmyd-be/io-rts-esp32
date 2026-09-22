@@ -7,7 +7,7 @@ import { useToast } from "../../hooks/useToast";
 
 export function MqttSettings() {
   const otaData = useOtaKey();
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   const api = useMqttConfig();
 

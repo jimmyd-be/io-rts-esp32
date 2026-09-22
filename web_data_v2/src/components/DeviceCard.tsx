@@ -55,7 +55,7 @@ export function DeviceCard({ device }: { device: Device }) {
 
       {device.inactive ? (
         <span className="device-status-only">
-          {t ? t("badge.inactive", "inactive") : "inactive"}
+          {t ? t("badge.inactive") : "inactive"}
         </span>
       ) : (
         <>

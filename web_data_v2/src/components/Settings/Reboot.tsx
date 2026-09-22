@@ -7,7 +7,7 @@ import { ToastType } from "../ToastProvider";
 export function RebootSettings() {
   const otaData = useOtaKey();
   const {t} = useI18n();
-  const {showToast} = useToast();
+  const showToast = useToast();
 
   return (
     <div class="settings-row">

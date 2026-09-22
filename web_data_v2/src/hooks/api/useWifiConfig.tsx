@@ -1,4 +1,4 @@
-import useApi from "../useApi";
+import useApi, { ApiResponse } from "../useApi";
 import { WifiConfig } from "../../models/Types";
 
 export function useWifiConfig(): ApiResponse<WifiConfig> {
