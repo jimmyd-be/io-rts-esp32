@@ -93,9 +93,9 @@ export function Devices() {
         )}
       </ul>
 
-      <RemoteWizardProvider remotes={remotesApi.data as Remote[]} devices={deviceApi.data as Device[]}>
-        <Remotes remotes={remotesApi} />
-      </RemoteWizardProvider>
+       <RemoteWizardProvider remotes={remotesApi.data as Remote[]} devices={deviceApi.data as Device[]}>
+         <Remotes data={remotesApi} />
+       </RemoteWizardProvider>
     </section>
   );
 }

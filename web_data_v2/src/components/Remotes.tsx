@@ -3,7 +3,11 @@ import { useRemoteWizard } from "./Modals/remoteWizard.tsx";
 import { Remote } from "../models/Types";
 import { ApiResponse } from "../hooks/useApi";
 
-export function Remotes(remotesApi: ApiResponse<Remote[]>) {
+interface RemotesProps {
+  data: ApiResponse<Remote[]>;
+}
+
+export function Remotes({ data: remotesApi }: RemotesProps) {
   const [droppedDown, setOpen] = useState(true);
   const { open } = useRemoteWizard();
 
