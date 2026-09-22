@@ -75,7 +75,7 @@ export function Settings() {
           <BackupSettings />
           <PairingLogs />
           <RebootSettings />
-          <SoftwareUpdateSettings />
+          <SoftwareUpdateSettings infoData={infoData.data} />
         </div>
       </div>
     </section>

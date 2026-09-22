@@ -1,8 +1,9 @@
 
 //TODO: Implement this
 import { Checkbox } from "../Checkbox";
+import { InfoResponse } from "../../models/Types.ts";
 
-export function SoftwareUpdateSettings() {
+export function SoftwareUpdateSettings({ infoData }: { infoData: InfoResponse | undefined }) {
   return (
     <div class="settings-row">
       <span class="row-label" data-i18n="settings.row.software-updates">
