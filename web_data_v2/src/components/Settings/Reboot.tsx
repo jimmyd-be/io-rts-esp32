@@ -1,10 +1,13 @@
 
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import useI18n from "../../hooks/useI18n";
+import { useToast } from "../../hooks/useToast";
+import { ToastType } from "../ToastProvider";
 
 export function RebootSettings() {
   const otaData = useOtaKey();
-  const {t} = useI18n()
+  const {t} = useI18n();
+  const {showToast} = useToast();
 
   return (
     <div class="settings-row">
@@ -22,7 +25,9 @@ export function RebootSettings() {
                 "X-OTA-Key": otaData.data?.key || "",
               },
             }).then(() => {
-              // TODO handle response
+              showToast("toast.rebooting", ToastType.SUCCESS);
+            }).catch(() => {
+              showToast("toast.reboot-failed", ToastType.ERROR);
             });
             }
           }}

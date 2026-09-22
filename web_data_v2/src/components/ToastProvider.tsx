@@ -9,11 +9,11 @@ export interface Toast {
   isHiding?: boolean;
 }
 
-export interface ToastType {
- SUCCESS: "success";
- ERROR: "error";
- INFO: "info";
- DEFAULT: "";
+export enum ToastType {
+ SUCCESS = "success",
+ ERROR = "error",
+ INFO = "info",
+ DEFAULT = "",
 }
 export interface ToastContextType {
   toasts: Toast[];
@@ -29,6 +29,7 @@ interface ToastProviderProps {
 
 export function ToastProvider({ children }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const {t} = useTranslation();
 
   const showToast = useCallback(
     (message: string, type: ToastType = ToastType.DEFAULT, duration: number = 3000) => {
@@ -71,7 +72,7 @@ export function ToastProvider({ children }: ToastProviderProps) {
             className={`toast${toast.type ? ` toast-${toast.type}` : ""}${toast.isHiding ? " toast-hide" : ""}`}
             onClick={() => dismissToast(toast.id)}
           >
-            {toast.message}
+            {t(toast.message)}
           </div>
         ))}
       </div>

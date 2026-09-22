@@ -6,6 +6,7 @@ import { Remotes } from "../components/Remotes";
 import { DeviceCard } from "../components/DeviceCard";
 import { RemoteWizardProvider } from "../components/Modals/remoteWizard";
 
+//TODO : Implement device pairing functionality and display a modal for pairing new devices.
 export function Devices() {
   const [devices, setDevices] = useState<Device[]>([]);
   const [activeCount, setActiveCount] = useState(0);

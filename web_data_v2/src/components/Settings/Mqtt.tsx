@@ -2,9 +2,12 @@ import { AccordionHead } from "../AccordionHead";
 import { Checkbox } from "../Checkbox";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useMqttConfig } from "../../hooks/api/useMqttConfig";
+import { ToastType } from "../ToastProvider";
+import { useToast } from "../../hooks/useToast";
 
 export function MqttSettings() {
   const otaData = useOtaKey();
+  const { showToast } = useToast();
 
   const api = useMqttConfig();
 
@@ -24,7 +27,9 @@ export function MqttSettings() {
             "X-OTA-Key": otaData.data?.key || "",
           },
         }).then(() => {
-          // TODO handle response
+          showToast("toast.mqtt-saved", ToastType.SUCCESS);
+        }).catch(() => {
+          showToast("toast.error-saving-mqtt", ToastType.ERROR);
         });
       }}
     >

@@ -2,10 +2,13 @@ import { AccordionHead } from "../AccordionHead";
 import { Checkbox } from "../Checkbox";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useIOConfig } from "../../hooks/api/useIOConfig";
+import { ToastType } from "../ToastProvider";
+import { useToast } from "../../hooks/useToast";
 
 export function ControllerSettings() {
   const otaData = useOtaKey();
   const api = useIOConfig();
+  const { showToast } = useToast();
 
   return (
     <form
@@ -23,7 +26,13 @@ export function ControllerSettings() {
             "X-OTA-Key": otaData.data?.key || "",
           },
         }).then(() => {
-          // TODO handle response
+          showToast("toast.controller-saved", ToastType.SUCCESS);
+        }).catch((e) => {
+          showToast(
+            "toast.error-saving-controller",
+            { message: e.message || e },
+            ToastType.ERROR,
+          );
         });
       }}
     >
