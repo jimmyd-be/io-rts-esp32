@@ -4,10 +4,11 @@ import { JSX } from "preact";
 import { useFallBackConfig } from "../../hooks/api/useFallBackConfig";
 import { Checkbox } from "../Checkbox";
 import { ToastType } from "../ToastProvider";
+import { useToast } from "../../hooks/useToast";
 
 export function FallbackApSettings(): JSX.Element {
   const api = useFallBackConfig();
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   const [formValues, setFormValues] = useState({
     enabled: false,

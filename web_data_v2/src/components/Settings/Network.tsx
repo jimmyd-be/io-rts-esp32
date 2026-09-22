@@ -8,7 +8,7 @@ import { useToast } from "../../hooks/useToast";
 
 export function NetworkSettings() {
   const otaData = useOtaKey();
-  const { showToast } = useToast();
+  const showToast = useToast();
 
   const api = useNetworkConfig();
 
@@ -33,7 +33,7 @@ export function NetworkSettings() {
           showToast("toast.network-saved-restarting", ToastType.SUCCESS);
         }).catch((e) => {
           showToast(
-            "toast.error-saving-network", { message: e.message || e },
+            "toast.error-saving-network",
             ToastType.ERROR,
           );
         });

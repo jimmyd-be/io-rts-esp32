@@ -1,7 +1,9 @@
 import { useState } from "preact/hooks";
 import { useRemoteWizard } from "./Modals/remoteWizard.tsx";
+import { Remote } from "../models/Types";
+import { ApiResponse } from "../hooks/useApi";
 
-export function Remotes(remotesApi) {
+export function Remotes(remotesApi: ApiResponse<Remote[]>) {
   const [droppedDown, setOpen] = useState(true);
   const { open } = useRemoteWizard();
 
@@ -45,7 +47,7 @@ export function Remotes(remotesApi) {
             </thead>
             {!remotesApi.loaded
               ? "Loading…"
-              : remotesApi.data?.map((remote) => (
+              : remotesApi.data?.map((remote: Remote) => (
                   <tr key={remote.id}>
                     <td>{remote.id}</td>
                     <td>{remote.devices.join(", ")}</td>

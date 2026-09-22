@@ -21,7 +21,7 @@ export function BackupSettings() {
     setStatusOk(ok);
   };
 
-  const otaHeaders = () =>
+  const otaHeaders = (): Record<string, string> =>
     otaData.data?.key ? { "X-OTA-Key": otaData.data.key } : {};
 
   const exportBackup = async () => {

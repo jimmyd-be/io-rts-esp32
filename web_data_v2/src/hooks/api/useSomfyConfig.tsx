@@ -1,4 +1,4 @@
-import useApi from "../useApi";
+import useApi, { ApiResponse } from "../useApi";
 import { SomfyConfig } from "../../models/Types";
 
 export function useSomfyConfig(): ApiResponse<SomfyConfig> {
