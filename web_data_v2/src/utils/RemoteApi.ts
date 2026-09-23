@@ -1,4 +1,4 @@
-import { ActionResult } from "../../models/Types";
+import { ActionResult } from "../models/Types.ts";
 
 const FAVORITE_POSITION_PREFIX = "fav_pos_";
 

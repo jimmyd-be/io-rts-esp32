@@ -14,7 +14,7 @@ import {
   REMOTE_ID_RE,
   startCaptureRequest,
   unlinkRemote,
-} from "../api/RemoteApi";
+} from "../../utils/RemoteApi.ts";
 import useI18n from "../../hooks/useI18n";
 import { Device, Remote } from "../../models/Types";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
@@ -358,10 +358,10 @@ export function RemoteWizardProvider({
                 </div>
               )}
 
-              {step === "capture" && (
-                <div id="arm-step-capture">
-                  <div class="arm-capture-row">
-                    <p id="arm-capture-status" class="key-modal-warning-text">
+               {step === "capture" && (
+                 <div class="arm-step">
+                   <div class="arm-capture-row">
+                     <p class="key-modal-warning-text">
                       Press any button on the remote…
                     </p>
                     <span id="arm-countdown" class="arm-countdown">

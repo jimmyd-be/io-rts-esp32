@@ -7,7 +7,7 @@ import { deviceHasPosition } from "../utils/deviceUtils";
 import { useToast } from "../hooks/useToast";
 import { ToastType } from "./ToastProvider";
 import { useOtaKey } from "../hooks/api/useOtaKey";
-import { getFavoritePosition, postDeviceAction } from "./api/RemoteApi";
+import { getFavoritePosition, postDeviceAction } from "../utils/RemoteApi.ts";
 
 interface DeviceCardProps {
   device: Device;

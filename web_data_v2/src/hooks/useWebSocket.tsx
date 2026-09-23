@@ -34,11 +34,9 @@ export function useWebSocket<T = WebSocketMessage>({
   onOpen,
   onClose,
 }: UseWebSocketOptions<T>) {
-  const webSocketHost = "192.168.0.78";
-
   const url =
     customUrl ||
-    `${window.location.protocol === "https:" ? "wss" : "ws"}://${webSocketHost}/ws`;
+    `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.hostname}/ws`;
 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectDelayRef = useRef(reconnectDelayMs);
