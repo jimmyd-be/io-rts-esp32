@@ -29,14 +29,13 @@ export function NetworkSettings() {
             "Content-Type": "application/json",
             "X-OTA-Key": otaData.data?.key || "",
           },
-        }).then(() => {
-          showToast("toast.network-saved-restarting", ToastType.SUCCESS);
-        }).catch((e) => {
-          showToast(
-            "toast.error-saving-network",
-            ToastType.ERROR,
-          );
-        });
+        })
+          .then(() => {
+            showToast("toast.network-saved-restarting", ToastType.SUCCESS);
+          })
+          .catch((e) => {
+            showToast("toast.error-saving-network", ToastType.ERROR);
+          });
       }}
     >
       <div class="acc-row" data-help="network">

@@ -16,13 +16,24 @@ function parseVersion(tag: string | undefined): string | null {
   return tag && /^v\d+\.\d+\.\d+/.test(tag) ? tag : null;
 }
 
-function isNewer(latest: string | undefined, current: string | undefined): boolean {
+function isNewer(
+  latest: string | undefined,
+  current: string | undefined,
+): boolean {
   const latestVersion = parseVersion(latest);
   const currentVersion = parseVersion(current);
   if (!latestVersion || !currentVersion) return false;
 
-  const latestParts = latestVersion.replace(/^v/, "").split("-")[0].split(".").map(Number);
-  const currentParts = currentVersion.replace(/^v/, "").split("-")[0].split(".").map(Number);
+  const latestParts = latestVersion
+    .replace(/^v/, "")
+    .split("-")[0]
+    .split(".")
+    .map(Number);
+  const currentParts = currentVersion
+    .replace(/^v/, "")
+    .split("-")[0]
+    .split(".")
+    .map(Number);
   for (let i = 0; i < 3; i += 1) {
     const latestPart = latestParts[i] || 0;
     const currentPart = currentParts[i] || 0;
@@ -31,14 +42,22 @@ function isNewer(latest: string | undefined, current: string | undefined): boole
   return false;
 }
 
-function findAssetUrl(release: GithubReleaseResponse, name: string): string | null {
-  return release.assets.find((asset) => asset.name === name)?.browser_download_url || null;
+function findAssetUrl(
+  release: GithubReleaseResponse,
+  name: string,
+): string | null {
+  return (
+    release.assets.find((asset) => asset.name === name)?.browser_download_url ||
+    null
+  );
 }
 
 async function pollUntilOnline(deadline: number): Promise<void> {
   while (Date.now() <= deadline) {
     try {
-      const response = await fetch(`/api/info?${Date.now()}`, { cache: "no-store" });
+      const response = await fetch(`/api/info?${Date.now()}`, {
+        cache: "no-store",
+      });
       if (response.ok) return;
     } catch {
       // The device is expected to be unreachable while it reboots.
@@ -65,7 +84,9 @@ async function otaFromUrl(
   try {
     data = JSON.parse(text) as { status?: string; message?: string };
   } catch {
-    throw new Error(`Server returned unexpected response: ${text.substring(0, 120)}`);
+    throw new Error(
+      `Server returned unexpected response: ${text.substring(0, 120)}`,
+    );
   }
   if (data.status === "rebooting") {
     onStatus("Rebooting…");
@@ -77,7 +98,9 @@ async function otaFromUrl(
 export function FirmwareUpdater() {
   const releases = useGithubReleases();
   const info = useInfo();
-  const [dismissed, setDismissed] = useState(() => localStorage.getItem(DISMISSED_KEY));
+  const [dismissed, setDismissed] = useState(() =>
+    localStorage.getItem(DISMISSED_KEY),
+  );
   const [status, setStatus] = useState<UpdateStatus | null>(null);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState("");
@@ -85,7 +108,8 @@ export function FirmwareUpdater() {
   const release = useMemo(() => {
     const channel = localStorage.getItem(CHANNEL_KEY) || DEFAULT_CHANNEL;
     return releases.data?.find((candidate) => {
-      if (candidate.draft || (candidate.prerelease && channel === "stable")) return false;
+      if (candidate.draft || (candidate.prerelease && channel === "stable"))
+        return false;
       return !!parseVersion(candidate.tag_name);
     });
   }, [releases.data]);
@@ -97,7 +121,8 @@ export function FirmwareUpdater() {
     isNewer(release.tag_name, currentVersion);
 
   useEffect(() => {
-    if (releases.isError || info.isError) setError("Could not check for updates.");
+    if (releases.isError || info.isError)
+      setError("Could not check for updates.");
   }, [releases.isError, info.isError]);
 
   const dismiss = () => {
@@ -117,7 +142,9 @@ export function FirmwareUpdater() {
       `${info.data.board}-${release.tag_name}-web.bin`,
     );
     if (!firmwareUrl || !webUrl) {
-      setError(`Release assets not found for board "${info.data.board}". Please update manually.`);
+      setError(
+        `Release assets not found for board "${info.data.board}". Please update manually.`,
+      );
       return;
     }
 
@@ -125,7 +152,9 @@ export function FirmwareUpdater() {
     setError("");
     setStatus({ label: "Starting update…", progress: 0 });
     try {
-      const keyResponse = await fetch(`/api/ota/key?${Date.now()}`, { cache: "no-store" });
+      const keyResponse = await fetch(`/api/ota/key?${Date.now()}`, {
+        cache: "no-store",
+      });
       if (!keyResponse.ok) throw new Error("Failed to retrieve OTA key.");
       const keyData = (await keyResponse.json()) as { key?: string };
       if (!keyData.key) throw new Error("Failed to retrieve OTA key.");
@@ -138,7 +167,10 @@ export function FirmwareUpdater() {
         if (!(updateError instanceof TypeError)) throw updateError;
         setStatus({ label: "Rebooting…", progress: null });
       }
-      setStatus({ label: "Waiting for device to come back online…", progress: null });
+      setStatus({
+        label: "Waiting for device to come back online…",
+        progress: null,
+      });
       await pollUntilOnline(Date.now() + 60000);
       try {
         await otaFromUrl(webUrl, "web", keyData.key, (label) =>
@@ -148,20 +180,32 @@ export function FirmwareUpdater() {
         if (!(updateError instanceof TypeError)) throw updateError;
         setStatus({ label: "Rebooting…", progress: null });
       }
-      setStatus({ label: "Waiting for device to come back online…", progress: null });
+      setStatus({
+        label: "Waiting for device to come back online…",
+        progress: null,
+      });
       await pollUntilOnline(Date.now() + 60000);
       let webVersion = "";
       try {
-        const response = await fetch(`/api/info?${Date.now()}`, { cache: "no-store" });
+        const response = await fetch(`/api/info?${Date.now()}`, {
+          cache: "no-store",
+        });
         const latestInfo = (await response.json()) as { web_version?: string };
-        webVersion = latestInfo.web_version ? ` (web ${latestInfo.web_version})` : "";
+        webVersion = latestInfo.web_version
+          ? ` (web ${latestInfo.web_version})`
+          : "";
       } catch {
         // The update succeeded even if the final informational request fails.
       }
-      setStatus({ label: `Update complete${webVersion}! Reloading…`, progress: 100 });
+      setStatus({
+        label: `Update complete${webVersion}! Reloading…`,
+        progress: 100,
+      });
       window.setTimeout(() => window.location.reload(), 1500);
     } catch (updateError) {
-      setError(`Update failed: ${updateError instanceof Error ? updateError.message : "unknown error"}`);
+      setError(
+        `Update failed: ${updateError instanceof Error ? updateError.message : "unknown error"}`,
+      );
       setStatus(null);
       setUpdating(false);
     }
@@ -174,15 +218,29 @@ export function FirmwareUpdater() {
       <div class="update-banner-inner">
         <div class="update-banner-info">
           <span class="update-banner-version">
-            Update available: {release.prerelease ? "Beta" : "Stable"} {release.tag_name}
+            Update available: {release.prerelease ? "Beta" : "Stable"}{" "}
+            {release.tag_name}
           </span>
-          <a class="update-banner-link" target="_blank" rel="noopener" href={release.html_url}>
+          <a
+            class="update-banner-link"
+            target="_blank"
+            rel="noopener"
+            href={release.html_url}
+          >
             What's new
           </a>
         </div>
         <div class="update-banner-actions">
-          {!updating && <button class="update-banner-dismiss" onClick={dismiss}>✕</button>}
-          <button class="update-banner-btn" disabled={updating} onClick={startUpdate}>
+          {!updating && (
+            <button class="update-banner-dismiss" onClick={dismiss}>
+              ✕
+            </button>
+          )}
+          <button
+            class="update-banner-btn"
+            disabled={updating}
+            onClick={startUpdate}
+          >
             {updating ? "Updating…" : "Update"}
           </button>
         </div>
@@ -191,7 +249,11 @@ export function FirmwareUpdater() {
         <div class="update-progress">
           <div class="update-progress-label">{status.label}</div>
           {status.progress !== null && (
-            <progress class="update-progress-bar" max="100" value={status.progress} />
+            <progress
+              class="update-progress-bar"
+              max="100"
+              value={status.progress}
+            />
           )}
         </div>
       )}

@@ -64,11 +64,13 @@ export function FallbackApSettings(): JSX.Element {
             ap_timeout_s: formValues.ap_timeout_s,
             ap_ssid: formValues.ap_ssid,
           }),
-        }).then((r) => {
-          showToast("toast.fallback-saved", ToastType.SUCCESS);
-        }).catch((err) => {
-          showToast("toast.error-saving-fallback", ToastType.ERROR);
-        });
+        })
+          .then((r) => {
+            showToast("toast.fallback-saved", ToastType.SUCCESS);
+          })
+          .catch((err) => {
+            showToast("toast.error-saving-fallback", ToastType.ERROR);
+          });
       }}
     >
       <AccordionHead

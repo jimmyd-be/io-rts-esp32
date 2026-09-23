@@ -29,7 +29,9 @@ export function DeviceCard({ device }: DeviceCardProps) {
             <span className="card-badge">
               {(device.type_name || "").toLowerCase()}
             </span>
-            <span className={`card-badge ${device.protocol === "1w" ? "badge-1w" : "badge-2w"}`}>
+            <span
+              className={`card-badge ${device.protocol === "1w" ? "badge-1w" : "badge-2w"}`}
+            >
               {device.protocol === "1w" ? "1W" : "2W"}
             </span>
           </div>

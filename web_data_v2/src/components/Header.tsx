@@ -50,11 +50,7 @@ export function Header() {
     <header class="app-header">
       <div class="header-left">
         <div class="app-dot"></div>
-        <img
-          src="img/logo.png"
-          alt=""
-          style="height:24px;width:auto;"
-        />
+        <img src="img/logo.png" alt="" style="height:24px;width:auto;" />
         <span class="app-wordmark">io-homecontrol</span>
       </div>
       <div class="header-right">

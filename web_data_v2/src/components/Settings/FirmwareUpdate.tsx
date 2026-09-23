@@ -38,7 +38,9 @@ export function FirmwareUpdateSettings() {
 
           setStatus("Firmware uploaded. The device is rebooting.");
         } catch {
-          setStatus("Upload failed. Check the device connection and try again.");
+          setStatus(
+            "Upload failed. Check the device connection and try again.",
+          );
         }
       }}
     >
@@ -50,8 +52,8 @@ export function FirmwareUpdateSettings() {
         >
           <div>
             <label class={"label-title"}>
-              Firmware file — use <strong>heltec-vX.X.X-firmware.bin</strong> from
-              the GitHub release, not full.bin or web.bin
+              Firmware file — use <strong>heltec-vX.X.X-firmware.bin</strong>{" "}
+              from the GitHub release, not full.bin or web.bin
             </label>
             <input
               type="file"

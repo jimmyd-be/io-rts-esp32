@@ -43,27 +43,27 @@ export function Log() {
     },
   });
 
-   const logStatus = useCallback(
-     (message: string, level?: LogLevel | boolean) => {
-       let normalizedLevel: LogLevel;
-       if (level === true) {
-         normalizedLevel = "error";
-       } else if (level === false || level === undefined) {
-         normalizedLevel = "debug";
-       } else {
-         normalizedLevel = level;
-       }
+  const logStatus = useCallback(
+    (message: string, level?: LogLevel | boolean) => {
+      let normalizedLevel: LogLevel;
+      if (level === true) {
+        normalizedLevel = "error";
+      } else if (level === false || level === undefined) {
+        normalizedLevel = "debug";
+      } else {
+        normalizedLevel = level;
+      }
 
-       if (filter === "off") return;
+      if (filter === "off") return;
 
-       setMessages((prev) => {
-         const next = [
-           ...prev,
-           { id: Date.now() + Math.random(), message, level: normalizedLevel },
-         ];
-         return next.slice(-100);
-       });
-     },
+      setMessages((prev) => {
+        const next = [
+          ...prev,
+          { id: Date.now() + Math.random(), message, level: normalizedLevel },
+        ];
+        return next.slice(-100);
+      });
+    },
     [filter],
   );
 

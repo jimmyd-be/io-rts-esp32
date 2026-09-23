@@ -84,11 +84,13 @@ export function WifiSettings(): JSX.Element {
             ssid: formValues.ssid,
             password: formValues.password,
           }),
-        }).then((r) => {
-          showToast("toast.wifi-saved-restarting", ToastType.SUCCESS);
-        }).catch(() => {
-          showToast("toast.error-saving-wifi", ToastType.ERROR);
-        });
+        })
+          .then((r) => {
+            showToast("toast.wifi-saved-restarting", ToastType.SUCCESS);
+          })
+          .catch(() => {
+            showToast("toast.error-saving-wifi", ToastType.ERROR);
+          });
       }}
     >
       <AccordionHead

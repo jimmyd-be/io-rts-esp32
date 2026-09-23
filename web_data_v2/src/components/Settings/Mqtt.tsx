@@ -26,11 +26,13 @@ export function MqttSettings() {
             "Content-Type": "application/json",
             "X-OTA-Key": otaData.data?.key || "",
           },
-        }).then(() => {
-          showToast("toast.mqtt-saved", ToastType.SUCCESS);
-        }).catch(() => {
-          showToast("toast.error-saving-mqtt", ToastType.ERROR);
-        });
+        })
+          .then(() => {
+            showToast("toast.mqtt-saved", ToastType.SUCCESS);
+          })
+          .catch(() => {
+            showToast("toast.error-saving-mqtt", ToastType.ERROR);
+          });
       }}
     >
       <div class="acc-row" data-help="mqtt">

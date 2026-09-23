@@ -25,14 +25,13 @@ export function ControllerSettings() {
             "Content-Type": "application/json",
             "X-OTA-Key": otaData.data?.key || "",
           },
-        }).then(() => {
-          showToast("toast.controller-saved", ToastType.SUCCESS);
-        }).catch((e) => {
-          showToast(
-            "toast.error-saving-controller",
-            ToastType.ERROR,
-          );
-        });
+        })
+          .then(() => {
+            showToast("toast.controller-saved", ToastType.SUCCESS);
+          })
+          .catch((e) => {
+            showToast("toast.error-saving-controller", ToastType.ERROR);
+          });
       }}
     >
       <div class="acc-row" data-help="controller">
@@ -45,7 +44,7 @@ export function ControllerSettings() {
             <div class="acc-summary">
               <span class="acc-sum-val" id="acc-ctrl-val">
                 {api.data?.node_id}
-                  </span>
+              </span>
             </div>
           }
         >
