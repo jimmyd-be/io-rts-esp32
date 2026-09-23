@@ -1,21 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useWebSocket } from "../hooks/useWebSocket";
+import { useWebSocket, WebSocketLogMessage } from "../hooks/useWebSocket";
 
-type LogLevel = "debug" | "info" | "error";
-type LogFilter = "all" | "info" | "off";
+export type LogLevel = "debug" | "info" | "error";
+export type LogFilter = "all" | "info" | "off";
 
-const webSocketHost = "192.168.0.78";
-
-type LogEntry = {
+export type LogEntry = {
   id: number;
   message: string;
   level: LogLevel;
-};
-
-type WebSocketLogMessage = {
-  type?: string;
-  message?: string;
-  level?: LogLevel | boolean;
 };
 
 const logLevelVisible = (entryLevel: LogLevel, filter: LogFilter): boolean => {
@@ -30,7 +22,6 @@ export function Log() {
   const statusMessagesRef = useRef<HTMLDivElement | null>(null);
 
   useWebSocket<WebSocketLogMessage>({
-    url: `${window.location.protocol === "https:" ? "wss" : "ws"}://${webSocketHost}/ws`,
     helloMessage: '{"type":"hello"}',
     onOpen: () => {
       console.log("WS connected");
