@@ -524,10 +524,10 @@ export function DeviceModal({ device, onClose }: DeviceModalProps) {
           </div>
           <button id="device-edit-close" aria-label="Close" onClick={onClose}>
             ×
-          </button>
-        </div>
-        <div id="dev-sheet-body">
-          <div class="dev-name-row">
+           </button>
+         </div>
+         <div class="dev-sheet-body">
+           <div class="dev-name-row">
             <input
               type="text"
               class="s-input"
