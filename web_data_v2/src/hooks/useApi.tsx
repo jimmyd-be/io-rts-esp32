@@ -100,7 +100,13 @@ export default function useApi<Type>({
       cancelled = true;
       controller.abort();
     };
-  }, [endpoint, method, JSON.stringify(body ?? null), JSON.stringify(headers), includeOtaKey]);
+  }, [
+    endpoint,
+    method,
+    JSON.stringify(body ?? null),
+    JSON.stringify(headers),
+    includeOtaKey,
+  ]);
 
   return { data, loaded, isError };
 }

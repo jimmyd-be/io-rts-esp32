@@ -62,7 +62,8 @@ export function BackupSettings() {
         body: await file.text(),
       });
       const data = (await response.json()) as BackupResponse;
-      if (!response.ok) throw new Error(data.message || `HTTP ${response.status}`);
+      if (!response.ok)
+        throw new Error(data.message || `HTTP ${response.status}`);
       setResult(data.message || t("toast.backup-importing"), data.success);
     } catch (error) {
       setResult(
@@ -88,14 +89,17 @@ export function BackupSettings() {
         headers: otaHeaders(),
       });
       const data = (await response.json()) as BackupResponse;
-      if (!response.ok) throw new Error(data.message || `HTTP ${response.status}`);
+      if (!response.ok)
+        throw new Error(data.message || `HTTP ${response.status}`);
       setResult(
         data.message || t("toast.factory-reset-rebooting"),
         data.success,
       );
     } catch (error) {
       setResult(
-        error instanceof Error ? error.message : "Factory reset request failed.",
+        error instanceof Error
+          ? error.message
+          : "Factory reset request failed.",
         false,
       );
     } finally {
@@ -153,7 +157,13 @@ export function BackupSettings() {
           </button>
         </div>
         <span
-          class={statusOk === true ? "field-status success-text" : statusOk === false ? "field-status error-text" : "field-status"}
+          class={
+            statusOk === true
+              ? "field-status success-text"
+              : statusOk === false
+                ? "field-status error-text"
+                : "field-status"
+          }
         >
           {status}
         </span>

@@ -56,4 +56,3 @@ export function DeviceModalProvider({ children }: DeviceModalProviderProps) {
     </DeviceModalContext.Provider>
   );
 }
-

@@ -110,13 +110,17 @@ export function IoSystemKeySettings() {
     tone: "",
   });
   const [sniffActive, setSniffActive] = useState(false);
-  const [sniffSecondsLeft, setSniffSecondsLeft] = useState(SNIFF_DURATION_SECONDS);
+  const [sniffSecondsLeft, setSniffSecondsLeft] = useState(
+    SNIFF_DURATION_SECONDS,
+  );
   const [sniffCapturedKey, setSniffCapturedKey] = useState("");
   const [showSniffRetry, setShowSniffRetry] = useState(false);
 
   const editInputRef = useRef<HTMLInputElement | null>(null);
   const sniffPollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const sniffCountdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sniffCountdownTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
 
   const otaKey = otaKeyApi.data?.key ?? "";
   const displayedKey = (currentKey ?? api.data?.key ?? "").toUpperCase();
@@ -170,7 +174,9 @@ export function IoSystemKeySettings() {
 
   async function stopSniffOnBackend() {
     try {
-      await postIoJson<ActionResult>("/api/io/sniff", otaKey, { active: false });
+      await postIoJson<ActionResult>("/api/io/sniff", otaKey, {
+        active: false,
+      });
     } catch {
       // ignore stop failures
     }
@@ -206,7 +212,9 @@ export function IoSystemKeySettings() {
     setEditStatus({ text: "", tone: "" });
 
     try {
-      const result = await postIoJson<ActionResult>("/api/io/key", otaKey, { key });
+      const result = await postIoJson<ActionResult>("/api/io/key", otaKey, {
+        key,
+      });
 
       if (result.success === false) {
         setEditStatus({
@@ -393,7 +401,9 @@ export function IoSystemKeySettings() {
           <div class="modal-content" onClick={(e) => e.stopPropagation()}>
             <div class="key-modal-inner">
               <h3>{t("popup.io-key-edit-title")}</h3>
-              <p class="key-modal-warning-text">{t("popup.io-key-edit-body")}</p>
+              <p class="key-modal-warning-text">
+                {t("popup.io-key-edit-body")}
+              </p>
               <label class="key-modal-label" for="io-key-new-input">
                 {t("popup.io-key-new-label")}
               </label>
@@ -481,8 +491,12 @@ export function IoSystemKeySettings() {
 
               {sniffCapturedKey && (
                 <div>
-                  <label class="key-modal-label">{t("popup.io-key-sniff-captured-label")}</label>
-                  <div class="key-modal-input" style="margin-top:6px;">{sniffCapturedKey}</div>
+                  <label class="key-modal-label">
+                    {t("popup.io-key-sniff-captured-label")}
+                  </label>
+                  <div class="key-modal-input" style="margin-top:6px;">
+                    {sniffCapturedKey}
+                  </div>
                 </div>
               )}
 

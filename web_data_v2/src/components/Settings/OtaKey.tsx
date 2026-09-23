@@ -34,34 +34,36 @@ export function OtaKeySettings() {
           });
       }}
     >
-    <div class="acc-row" data-help="ota-key">
-      <AccordionHead
-        title="OTA Key"
-        summary={
-          <span class="acc-sum-val" id="acc-otakey-val">
-            ••••
-          </span>
-        }
-        titleI18n="settings.row.ota-key"
-        helpLabel="Help for ota-key"
-        helpKey="ota-key"
-      >
-        <div style="display:flex;gap:6px;align-items:center;">
-          <input
-            type="text"
-            name={"key"}
-            class="s-input key-display"
-            value={otaKeyApi.data?.key ?? ""}
-            style="flex:1;font-size:11px;"
-          />
-          <button type={"submit"} class="s-btn">
-            Save
-          </button>
-        </div>
-        <p class="warning-notive" data-i18n="label.ota-key-notice">
-          ⚠ Changing the OTA key invalidates any scripts using the current key..
-        </p>
-      </AccordionHead>
-    </div></form>
+      <div class="acc-row" data-help="ota-key">
+        <AccordionHead
+          title="OTA Key"
+          summary={
+            <span class="acc-sum-val" id="acc-otakey-val">
+              ••••
+            </span>
+          }
+          titleI18n="settings.row.ota-key"
+          helpLabel="Help for ota-key"
+          helpKey="ota-key"
+        >
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input
+              type="text"
+              name={"key"}
+              class="s-input key-display"
+              value={otaKeyApi.data?.key ?? ""}
+              style="flex:1;font-size:11px;"
+            />
+            <button type={"submit"} class="s-btn">
+              Save
+            </button>
+          </div>
+          <p class="warning-notive" data-i18n="label.ota-key-notice">
+            ⚠ Changing the OTA key invalidates any scripts using the current
+            key..
+          </p>
+        </AccordionHead>
+      </div>
+    </form>
   );
 }

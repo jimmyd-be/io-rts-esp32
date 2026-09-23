@@ -5,7 +5,7 @@ import useI18n from "../hooks/useI18n.tsx";
 import { usePairingWizard } from "./Modals/PairingWizard.tsx";
 
 interface DevicesSectionProps {
-  devices?: Device[]
+  devices?: Device[];
 }
 
 export function DevicesSection({ devices }: DevicesSectionProps) {

@@ -1,5 +1,5 @@
-import { createContext, ComponentChildren } from "preact";
-import { useState, useCallback } from "preact/hooks";
+import { ComponentChildren, createContext } from "preact";
+import { useCallback, useState } from "preact/hooks";
 import useI18n from "../hooks/useI18n";
 
 export interface Toast {
@@ -11,10 +11,10 @@ export interface Toast {
 }
 
 export enum ToastType {
- SUCCESS = "success",
- ERROR = "error",
- INFO = "info",
- DEFAULT = "",
+  SUCCESS = "success",
+  ERROR = "error",
+  INFO = "info",
+  DEFAULT = "",
 }
 export interface ToastContextType {
   toasts: Toast[];
@@ -30,10 +30,14 @@ interface ToastProviderProps {
 
 export function ToastProvider({ children }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const {t} = useI18n();
+  const { t } = useI18n();
 
   const showToast = useCallback(
-    (message: string, type: ToastType = ToastType.DEFAULT, duration: number = 3000) => {
+    (
+      message: string,
+      type: ToastType = ToastType.DEFAULT,
+      duration: number = 3000,
+    ) => {
       const id = `toast-${Date.now()}-${Math.random()}`;
       const toast: Toast = { id, message, type, duration };
 
@@ -80,6 +84,3 @@ export function ToastProvider({ children }: ToastProviderProps) {
     </ToastContext.Provider>
   );
 }
-
-
-

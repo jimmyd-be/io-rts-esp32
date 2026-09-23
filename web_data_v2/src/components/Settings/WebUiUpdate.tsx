@@ -62,7 +62,11 @@ export function WebUIUpdateSettings() {
               style="padding:5px 10px;margin-top:4px;"
             />
           </div>
-          <button type="submit" class="s-btn primary" data-i18n="button.upload-web-ui">
+          <button
+            type="submit"
+            class="s-btn primary"
+            data-i18n="button.upload-web-ui"
+          >
             Upload Web UI
           </button>
           <span id="ota-status" class="field-status">
