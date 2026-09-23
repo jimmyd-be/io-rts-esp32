@@ -74,13 +74,6 @@ export interface ActionResult {
   message?: string;
 }
 
-export interface DeviceSerial {
-  node_id: string;
-  oem_id: string;
-  year?: string;
-  week?: string;
-}
-
 export interface Device {
   id: string;
   name: string;
@@ -100,9 +93,6 @@ export interface Device {
   transit_time_ms: number;
   protocol: string;
   position_estimated: boolean;
-  somfy_name?: string;
-  info1_serial?: DeviceSerial;
-  info2_serial?: DeviceSerial;
 }
 
 export interface WifiScanResult {
