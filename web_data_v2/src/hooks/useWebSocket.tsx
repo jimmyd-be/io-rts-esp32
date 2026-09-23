@@ -1,6 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { LogLevel } from "../pages/log.tsx";
 
 type WebSocketMessage = Record<string, unknown>;
+
+export type WebSocketLogMessage = {
+  type?: string;
+  position?: number;
+  id?: string;
+  is_stopped?: boolean;
+  estimated?: boolean;
+  message?: string;
+  level?: LogLevel | boolean;
+};
 
 type UseWebSocketOptions<T> = {
   url?: string;
@@ -14,7 +25,7 @@ type UseWebSocketOptions<T> = {
 };
 
 export function useWebSocket<T = WebSocketMessage>({
-  url,
+  url: customUrl,
   autoConnect = true,
   reconnectDelayMs = 1000,
   maxReconnectDelayMs = 30000,
@@ -23,13 +34,54 @@ export function useWebSocket<T = WebSocketMessage>({
   onOpen,
   onClose,
 }: UseWebSocketOptions<T>) {
+  const webSocketHost = "192.168.0.78";
+
+  const url =
+    customUrl ||
+    `${window.location.protocol === "https:" ? "wss" : "ws"}://${webSocketHost}/ws`;
+
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectDelayRef = useRef(reconnectDelayMs);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shouldReconnectRef = useRef(autoConnect);
+  const onMessageRef = useRef<typeof onMessage>(onMessage);
+  const onOpenRef = useRef<typeof onOpen>(onOpen);
+  const onCloseRef = useRef<typeof onClose>(onClose);
+  const helloMessageRef = useRef(helloMessage);
   const [connected, setConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<T | null>(null);
 
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+  }, [onMessage]);
+
+  useEffect(() => {
+    onOpenRef.current = onOpen;
+  }, [onOpen]);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    helloMessageRef.current = helloMessage;
+  }, [helloMessage]);
+
   const connect = useCallback(() => {
     if (!url) return;
+
+    if (
+      wsRef.current &&
+      (wsRef.current.readyState === WebSocket.OPEN ||
+        wsRef.current.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
+    }
+
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
 
     const socket = new WebSocket(url);
     wsRef.current = socket;
@@ -37,26 +89,35 @@ export function useWebSocket<T = WebSocketMessage>({
     socket.onopen = () => {
       reconnectDelayRef.current = reconnectDelayMs;
       setConnected(true);
-      socket.send(helloMessage);
-      onOpen?.();
+      socket.send(helloMessageRef.current);
+      onOpenRef.current?.();
     };
 
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data) as T;
         setLastMessage(data);
-        onMessage?.(data);
+        onMessageRef.current?.(data);
       } catch (error) {
         console.warn("WebSocket message parse error:", error);
       }
     };
 
     socket.onclose = () => {
+      if (wsRef.current === socket) {
+        wsRef.current = null;
+      }
+
       setConnected(false);
-      onClose?.();
+      onCloseRef.current?.();
+
+      if (!shouldReconnectRef.current) {
+        return;
+      }
 
       const timeout = reconnectDelayRef.current;
-      setTimeout(() => {
+      reconnectTimerRef.current = setTimeout(() => {
+        reconnectTimerRef.current = null;
         connect();
       }, timeout);
 
@@ -73,10 +134,6 @@ export function useWebSocket<T = WebSocketMessage>({
     url,
     reconnectDelayMs,
     maxReconnectDelayMs,
-    helloMessage,
-    onMessage,
-    onOpen,
-    onClose,
   ]);
 
   const send = useCallback((payload: unknown) => {
@@ -90,11 +147,20 @@ export function useWebSocket<T = WebSocketMessage>({
   }, []);
 
   useEffect(() => {
+    shouldReconnectRef.current = autoConnect;
+
     if (!autoConnect || !url) return;
 
     connect();
 
     return () => {
+      shouldReconnectRef.current = false;
+
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
+
       if (wsRef.current) {
         wsRef.current.close();
         wsRef.current = null;
