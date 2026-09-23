@@ -3,10 +3,15 @@ import { Device } from "../models/Types";
 
 interface BlindPaneProps {
   device: Device;
-  onPositionChange?: (newPosition: number) => void;
+  targetPosition?: number | null;
+  onPositionChange?: (newPosition: number) => void | Promise<void>;
 }
 
-export function BlindPane({ device, onPositionChange }: BlindPaneProps) {
+export function BlindPane({
+  device,
+  targetPosition,
+  onPositionChange,
+}: BlindPaneProps) {
   const paneRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [lastPct, setLastPct] = useState(
@@ -29,9 +34,28 @@ export function BlindPane({ device, onPositionChange }: BlindPaneProps) {
   }, []);
 
   useEffect(() => {
+    if (dragging) return;
+    setLastPct(device.position >= 0 ? device.position : 0);
+  }, [device.position, dragging]);
+
+  const commitPosition = useCallback(
+    async (position: number) => {
+      if (!onPositionChange) return;
+
+      try {
+        await onPositionChange(position);
+      } catch {
+        setLastPct(device.position >= 0 ? device.position : 0);
+      }
+    },
+    [device.position, onPositionChange],
+  );
+
+  useEffect(() => {
     const handleMouseDown = (e: MouseEvent) => {
       if (!paneRef.current) return;
       setDragging(true);
+      e.preventDefault();
       applyDrag(pctFromEvent(e));
     };
 
@@ -43,14 +67,13 @@ export function BlindPane({ device, onPositionChange }: BlindPaneProps) {
     const handleMouseUp = () => {
       if (!dragging) return;
       setDragging(false);
-      if (onPositionChange) {
-        onPositionChange(lastPct);
-      }
+      void commitPosition(lastPct);
     };
 
     const handleTouchStart = (e: TouchEvent) => {
       if (!paneRef.current) return;
       setDragging(true);
+      e.preventDefault();
       applyDrag(pctFromEvent(e));
     };
 
@@ -63,9 +86,7 @@ export function BlindPane({ device, onPositionChange }: BlindPaneProps) {
     const handleTouchEnd = () => {
       if (!dragging) return;
       setDragging(false);
-      if (onPositionChange) {
-        onPositionChange(lastPct);
-      }
+      void commitPosition(lastPct);
     };
 
     const pane = paneRef.current;
@@ -88,22 +109,23 @@ export function BlindPane({ device, onPositionChange }: BlindPaneProps) {
       document.removeEventListener("mouseup", handleMouseUp);
       document.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [dragging, lastPct, pctFromEvent, applyDrag, onPositionChange]);
+  }, [dragging, lastPct, pctFromEvent, applyDrag, commitPosition]);
 
-  const pos =
-    lastPct !== undefined
-      ? lastPct
-      : device.position >= 0
-        ? device.position
-        : 0;
+  const pos = lastPct;
 
   return (
     <div ref={paneRef} className="blind-pane">
       <div className="blind-fill" style={{ height: `${pos}%` }} />
       <div className="blind-handle" style={{ top: `${pos}%` }} />
-      <div className="blind-target" />
+      <div
+        className="blind-target"
+        style={{
+          display: targetPosition === null ? "none" : "block",
+          top: `${targetPosition ?? 0}%`,
+        }}
+      />
       <div className="blind-caption">
-        {device.position >= 0 ? `${pos}%` : "—"}
+        {dragging || device.position >= 0 ? `${pos}%` : "—"}
       </div>
     </div>
   );
