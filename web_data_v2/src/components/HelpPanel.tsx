@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
 import useI18n from "../hooks/useI18n";
 
-type TranslateFn = (key: string, params?: Record<string, any>) => string;
+type TranslateFn = (key: string, params?: Record<string, string>) => string;
 
 type HelpSection = {
   label: string;

@@ -65,10 +65,10 @@ export function FallbackApSettings(): JSX.Element {
             ap_ssid: formValues.ap_ssid,
           }),
         })
-          .then((r) => {
+          .then(() => {
             showToast("toast.fallback-saved", ToastType.SUCCESS);
           })
-          .catch((err) => {
+          .catch(() => {
             showToast("toast.error-saving-fallback", ToastType.ERROR);
           });
       }}

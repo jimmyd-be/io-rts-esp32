@@ -29,7 +29,7 @@ export function ControllerSettings() {
           .then(() => {
             showToast("toast.controller-saved", ToastType.SUCCESS);
           })
-          .catch((e) => {
+          .catch(() => {
             showToast("toast.error-saving-controller", ToastType.ERROR);
           });
       }}

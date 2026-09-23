@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && eslint . && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write ."
@@ -13,11 +13,13 @@
     "preact-iso": "^2.12.2"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@preact/preset-vite": "^2.10.2",
     "eslint": "^9.39.5",
     "eslint-config-preact": "^2.0.0",
     "prettier": "3.9.7",
-    "typescript": "^7.0.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1",
     "vite": "^8.0.0"
   }
 }

@@ -85,7 +85,7 @@ export function WifiSettings(): JSX.Element {
             password: formValues.password,
           }),
         })
-          .then((r) => {
+          .then(() => {
             showToast("toast.wifi-saved-restarting", ToastType.SUCCESS);
           })
           .catch(() => {
