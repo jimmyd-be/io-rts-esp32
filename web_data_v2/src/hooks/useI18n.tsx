@@ -9,9 +9,10 @@ import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 // - provides t(key, params) that returns translated value if present, else fallback, else key
 
 type I18nDict = Record<string, string>;
+type TranslationParams = Record<string, string | number | boolean | null | undefined>;
 
 export interface UseI18nResult {
-  t: (key: string, params?: Record<string, any>) => string;
+  t: (key: string, params?: TranslationParams) => string;
   setLang: (lang: string) => Promise<void>;
   getLang: () => string;
   currentLang: string;
@@ -44,7 +45,7 @@ export default function useI18n(
           cache.current[lang] = json as I18nDict;
           return cache.current[lang];
         }
-      } catch  {
+        } catch {
         // try next
         continue;
       }
@@ -55,8 +56,7 @@ export default function useI18n(
   }, []);
 
   const interpolate = useCallback(
-    (text: any, params: Record<string, any> = {}) => {
-      if (typeof text !== "string") return text;
+    (text: string, params: TranslationParams = {}) => {
       return text.replace(/\{(\w+)\}/g, (_, key) =>
         Object.prototype.hasOwnProperty.call(params, key)
           ? String(params[key])
@@ -67,7 +67,7 @@ export default function useI18n(
   );
 
   const t = useCallback(
-    (key: string, params: Record<string, any> = {}) => {
+    (key: string, params: TranslationParams = {}) => {
       // Prefer exact presence in current language, then fallback; otherwise return key
       if (Object.prototype.hasOwnProperty.call(i18nState, key)) {
         return interpolate(i18nState[key], params);
@@ -84,7 +84,7 @@ export default function useI18n(
     if (typeof document === "undefined") return;
 
     document.querySelectorAll<HTMLElement>("[data-i18n]").forEach((el) => {
-      const k = (el.dataset as any).i18n as string | undefined;
+      const k = el.dataset.i18n;
       if (!k) return;
       const text = t(k);
 
@@ -103,18 +103,16 @@ export default function useI18n(
     document
       .querySelectorAll<HTMLElement>("[data-i18n-placeholder]")
       .forEach((el) => {
-        const k = (el.dataset as any).i18nPlaceholder as string | undefined;
+        const k = el.dataset.i18nPlaceholder;
         if (!k) return;
-        try {
-          (el as any).placeholder = t(k);
-        } catch  {
-          /* ignore */
+        if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+          el.placeholder = t(k);
         }
       });
 
     try {
       document.title = t("page.title");
-    } catch  {
+    } catch {
       /* ignore */
     }
   }, [t]);
@@ -127,7 +125,7 @@ export default function useI18n(
       setCurrentLang(next);
       try {
         localStorage.setItem(STORAGE_KEY, next);
-      } catch  {
+      } catch {
         /* ignore */
       }
       apply();
@@ -146,8 +144,8 @@ export default function useI18n(
       let saved: string | null = null;
       try {
         saved = localStorage.getItem(STORAGE_KEY);
-      } catch  {
-        saved = null;
+      } catch {
+        /* ignore */
       }
       const auto = (
         typeof navigator !== "undefined" ? navigator.language || "en" : "en"
@@ -162,7 +160,7 @@ export default function useI18n(
           "lang",
         ) as HTMLSelectElement | null;
         if (select) select.value = lang;
-      } catch  {
+      } catch {
         /* ignore */
       }
 
@@ -215,5 +213,5 @@ export default function useI18n(
     currentLang,
     supported,
     apply,
-  } as UseI18nResult;
+  };
 }
