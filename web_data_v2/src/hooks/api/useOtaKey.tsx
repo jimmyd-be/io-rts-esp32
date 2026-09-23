@@ -6,6 +6,11 @@ export function useOtaKey(): ApiResponse<Key> {
   const [data, setData] = useState<Key | undefined>(undefined);
   const [loaded, setLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [refreshNonce, setRefreshNonce] = useState(0);
+
+  const refresh = () => {
+    setRefreshNonce((prev) => prev + 1);
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -60,7 +65,7 @@ export function useOtaKey(): ApiResponse<Key> {
       cancelled = true;
       controller.abort();
     };
-  }, []);
+  }, [refreshNonce]);
 
-  return { data, loaded, isError };
+  return { data, loaded, isError, refresh };
 }
