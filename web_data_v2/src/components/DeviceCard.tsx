@@ -1,11 +1,17 @@
 import { Device } from "../models/Types";
 import useI18n from "../hooks/useI18n";
 import { useDeviceModal } from "../hooks/useDeviceModal";
+import { BlindPane } from "./BlindPane";
+import { deviceHasPosition } from "../utils/deviceUtils";
 
-export function DeviceCard({ device }: { device: Device }) {
+interface DeviceCardProps {
+  device: Device;
+}
+
+export function DeviceCard({ device }: DeviceCardProps) {
   const { t } = useI18n();
   const { open } = useDeviceModal();
-
+  const hasPos = deviceHasPosition(device);
 
   return (
     <li
@@ -17,17 +23,17 @@ export function DeviceCard({ device }: { device: Device }) {
       <div className="moving-dot" />
 
       <div className="card-top">
-        <div >
+        <div>
           <div className="card-name">{device.name}</div>
-          <div class="card-meta">
-          <span className="card-badge">
-            {(device.type_name || "").toLowerCase()}
-          </span>
-
-          {device.protocol === "1w" && (
-            <span className="card-badge badge-1w">1W</span>
-          )}
-          </div></div>
+          <div className="card-meta">
+            <span className="card-badge">
+              {(device.type_name || "").toLowerCase()}
+            </span>
+            <span className={`card-badge ${device.protocol === "1w" ? "badge-1w" : "badge-2w"}`}>
+              {device.protocol === "1w" ? "1W" : "2W"}
+            </span>
+          </div>
+        </div>
 
         <button
           type="button"
@@ -45,22 +51,16 @@ export function DeviceCard({ device }: { device: Device }) {
         </span>
       ) : (
         <>
-          <div class="pos-indicator">
-            <div class="pos-top-row">
-              <span class="pos-value">0%</span>
-              <span class="pos-state">Open</span>
-            </div>
-            <div class="light-strip">
-              <div class="light-fill" style="width: 100%;"></div>
-            </div>
-          </div>
+          {hasPos ? (
+            <BlindPane device={device} />
+          ) : (
+            <div className="card-spacer" />
+          )}
 
-          <div className="card-spacer" />
-
-          <div class="card-btn-row">
-            <button class="card-btn">↑</button>
-            <button class="card-btn">■</button>
-            <button class="card-btn">↓</button>
+          <div className="card-btn-row">
+            <button className="card-btn">↑</button>
+            <button className="card-btn">■</button>
+            <button className="card-btn">↓</button>
             <button
               className="card-btn card-fav"
               aria-label="Favorite"
@@ -69,16 +69,6 @@ export function DeviceCard({ device }: { device: Device }) {
             >
               ★
             </button>
-          </div>
-          <div class="card-slider-row">
-            <span class="card-slider-label">Pos</span>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              class="card-slider"
-              data-slider="position"
-            />
           </div>
         </>
       )}
