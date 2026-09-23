@@ -1,10 +1,11 @@
-import { useEffect, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import { useOtaKey } from "./api/useOtaKey.tsx";
 
 export interface ApiResponse<Type> {
   data: Type | undefined;
   loaded: boolean;
   isError: boolean;
+  refresh: () => void;
 }
 
 export default function useApi<Type>({
@@ -25,8 +26,13 @@ export default function useApi<Type>({
   const [data, setData] = useState<Type | undefined>(undefined);
   const [loaded, setLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
+  const [refreshNonce, setRefreshNonce] = useState(0);
 
   const otaKeyApi = useOtaKey();
+
+  const refresh = useCallback(() => {
+    setRefreshNonce((prev) => prev + 1);
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -143,7 +149,8 @@ export default function useApi<Type>({
     otaKeyApi.data?.key,
     otaKeyApi.loaded,
     refreshTime,
+    refreshNonce,
   ]);
 
-  return { data, loaded, isError };
+  return { data, loaded, isError, refresh };
 }
