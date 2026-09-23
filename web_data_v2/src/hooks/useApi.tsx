@@ -1,5 +1,5 @@
 import { useEffect, useState } from "preact/hooks";
-import { Key } from "../models/Types";
+import { useOtaKey } from "./api/useOtaKey.tsx";
 
 export interface ApiResponse<Type> {
   data: Type | undefined;
@@ -13,28 +13,53 @@ export default function useApi<Type>({
   body,
   headers = {},
   includeOtaKey = true,
+  refreshTime = 0,
 }: {
   endpoint: string;
   method: "GET" | "POST";
   body?: unknown;
   headers?: HeadersInit;
   includeOtaKey?: boolean;
+  refreshTime?: number;
 }): ApiResponse<Type> {
   const [data, setData] = useState<Type | undefined>(undefined);
   const [loaded, setLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
 
+  const otaKeyApi = useOtaKey();
+
   useEffect(() => {
     const controller = new AbortController();
+    let intervalId: ReturnType<typeof setInterval> | null = null;
     let cancelled = false;
+    let inFlight = false;
 
-    async function doFetch() {
-      setLoaded(false);
+    async function doFetch(background = false) {
+      if (inFlight || controller.signal.aborted) return;
+
+      inFlight = true;
+
+      if (!background) {
+        setLoaded(false);
+      }
       setIsError(false);
 
-      const otaKey = includeOtaKey
-        ? await fetch("/api/ota/key", {})
-        : undefined;
+      const otaKey = includeOtaKey ? otaKeyApi.data?.key : undefined;
+
+      if (includeOtaKey && !otaKeyApi.loaded) {
+        inFlight = false;
+        return;
+      }
+
+      if (includeOtaKey && !otaKey) {
+        if (!cancelled) {
+          setIsError(true);
+          setData(undefined);
+          setLoaded(true);
+        }
+        inFlight = false;
+        return;
+      }
 
       try {
         const res = await fetch(endpoint, {
@@ -45,9 +70,7 @@ export default function useApi<Type>({
             ...headers,
             ...(otaKey
               ? {
-                  "X-OTA-Key": otaKey.ok
-                    ? ((await otaKey.json()) as Key).key
-                    : "",
+                  "X-OTA-Key": otaKey,
                 }
               : {}),
           },
@@ -69,7 +92,7 @@ export default function useApi<Type>({
         }
 
         // try parse JSON, fallback to undefined for empty body
-        let parsed: Type|undefined = undefined;
+        let parsed: Type | undefined = undefined;
         try {
           // 204 No Content will throw when parsing json, so guard
           if (res.status !== 204) {
@@ -80,7 +103,7 @@ export default function useApi<Type>({
         }
 
         if (!cancelled) {
-          setData(parsed as Type | undefined);
+          setData(parsed);
           setIsError(false);
           setLoaded(true);
         }
@@ -91,13 +114,24 @@ export default function useApi<Type>({
           setData(undefined);
           setLoaded(true);
         }
+      } finally {
+        inFlight = false;
       }
     }
 
     doFetch();
 
+    if (refreshTime > 0) {
+      intervalId = setInterval(() => {
+        void doFetch(true);
+      }, refreshTime * 1000);
+    }
+
     return () => {
       cancelled = true;
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
       controller.abort();
     };
   }, [
@@ -106,6 +140,9 @@ export default function useApi<Type>({
     JSON.stringify(body ?? null),
     JSON.stringify(headers),
     includeOtaKey,
+    otaKeyApi.data?.key,
+    otaKeyApi.loaded,
+    refreshTime,
   ]);
 
   return { data, loaded, isError };

@@ -10,5 +10,6 @@ export function useGithubReleases(): ApiResponse<GithubReleaseResponse[]> {
       "X-GitHub-Api-Version": "2022-11-28",
     },
     includeOtaKey: false,
+    refreshTime: 300, // Refresh every 5 minutes
   });
 }
