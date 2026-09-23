@@ -1,4 +1,4 @@
-import { createContext } from "preact";
+import { createContext, type ComponentChildren } from "preact";
 import {
   useCallback,
   useContext,
@@ -38,8 +38,14 @@ interface PairingWizardProviderProps {
     deviceName: string,
   ) => void | Promise<void>;
   onDevicePairingStatusUpdated?: () => void | Promise<void>;
-  children?: any;
+  children?: ComponentChildren;
 }
+
+type PairingApiResponse = {
+  success?: boolean;
+  deviceId?: string;
+  message?: string;
+};
 
 type Step =
   | "choose"
@@ -207,10 +213,10 @@ export function PairingWizardProvider({
         manufacturer: manufacturer1w,
       }),
     })
-      .then((r) => r.json())
-      .then((r: any) => {
-        if (r && r.success && r.deviceId) {
-          setPairedDeviceId(r.deviceId);
+      .then(async (r) => {
+        const data = (await r.json()) as PairingApiResponse;
+        if (data.success && data.deviceId) {
+          setPairedDeviceId(data.deviceId);
           setPairedDeviceName(deviceName1w);
           setStep("1w-confirm");
           setStatus(
@@ -301,15 +307,15 @@ export function PairingWizardProvider({
         is_low_power: isLowPowerAddress,
       }),
     })
-      .then((r) => r.json())
-      .then((r: any) => {
-        if (r && r.success) {
+      .then(async (r) => {
+        const data = (await r.json()) as PairingApiResponse;
+        if (data.success) {
           setStatus(`✓ Device ${addr} added.`);
           showToast(`Device ${addr} added`, ToastType.SUCCESS);
           onDeviceAddedProp?.(addr, nameInputAddress.trim() || addr);
           setTimeout(() => close(), 1000);
         } else {
-          setStatus(`Failed: ${r && r.message ? r.message : "Unknown error"}`);
+          setStatus(`Failed: ${data.message || "Unknown error"}`);
         }
       })
       .catch((e) => {

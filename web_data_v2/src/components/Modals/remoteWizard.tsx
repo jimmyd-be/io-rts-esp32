@@ -79,13 +79,13 @@ export function RemoteWizardProvider({
 
   const { t } = useI18n();
 
-  const [captureActive, setCaptureActive] = useState(false);
-  const [captureStatus, setCaptureStatus] = useState<{
+  const [, setCaptureActive] = useState(false);
+  const [, setCaptureStatus] = useState<{
     text: string;
     tone: "" | "red" | "green";
   }>({ text: "", tone: "" });
-  const [seconds, setSeconds] = useState(CAPTURE_SECONDS);
-  const [showRetry, setShowRetry] = useState(false);
+  const [, setSeconds] = useState(CAPTURE_SECONDS);
+  const [, setShowRetry] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const captureActiveRef = useRef(false);

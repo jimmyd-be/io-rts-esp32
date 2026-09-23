@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 
-type WebSocketMessage = Record<string, any>;
+type WebSocketMessage = Record<string, unknown>;
 
 type UseWebSocketOptions<T> = {
   url?: string;

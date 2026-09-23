@@ -12,6 +12,12 @@ type LogEntry = {
   level: LogLevel;
 };
 
+type WebSocketLogMessage = {
+  type?: string;
+  message?: string;
+  level?: LogLevel | boolean;
+};
+
 const logLevelVisible = (entryLevel: LogLevel, filter: LogFilter): boolean => {
   if (filter === "off") return false;
   if (filter === "info") return entryLevel === "info" || entryLevel === "error";
@@ -23,7 +29,7 @@ export function Log() {
   const [messages, setMessages] = useState<LogEntry[]>([]);
   const statusMessagesRef = useRef<HTMLDivElement | null>(null);
 
-  useWebSocket({
+  useWebSocket<WebSocketLogMessage>({
     url: `${window.location.protocol === "https:" ? "wss" : "ws"}://${webSocketHost}/ws`,
     helloMessage: '{"type":"hello"}',
     onOpen: () => {
@@ -34,7 +40,7 @@ export function Log() {
     },
     onMessage: (data) => {
       if (data.type === "log") {
-        logStatus(data.message as string, data.level);
+        logStatus(data.message || "", data.level);
       }
 
       if (data.type === "init") {
