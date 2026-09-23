@@ -33,7 +33,7 @@ export function NetworkSettings() {
           .then(() => {
             showToast("toast.network-saved-restarting", ToastType.SUCCESS);
           })
-          .catch((e) => {
+          .catch(() => {
             showToast("toast.error-saving-network", ToastType.ERROR);
           });
       }}

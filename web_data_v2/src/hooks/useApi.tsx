@@ -16,7 +16,7 @@ export default function useApi<Type>({
 }: {
   endpoint: string;
   method: "GET" | "POST";
-  body?: any;
+  body?: unknown;
   headers?: HeadersInit;
   includeOtaKey?: boolean;
 }): ApiResponse<Type> {
@@ -69,13 +69,13 @@ export default function useApi<Type>({
         }
 
         // try parse JSON, fallback to undefined for empty body
-        let parsed: any = undefined;
+        let parsed: Type|undefined = undefined;
         try {
           // 204 No Content will throw when parsing json, so guard
           if (res.status !== 204) {
             parsed = await res.json();
           }
-        } catch (e) {
+        } catch  {
           parsed = undefined;
         }
 
@@ -84,8 +84,8 @@ export default function useApi<Type>({
           setIsError(false);
           setLoaded(true);
         }
-      } catch (err: any) {
-        if (err.name === "AbortError") return;
+      } catch (err: { name?: string } | unknown) {
+        if ((err as { name?: string }).name === "AbortError") return;
         if (!cancelled) {
           setIsError(true);
           setData(undefined);

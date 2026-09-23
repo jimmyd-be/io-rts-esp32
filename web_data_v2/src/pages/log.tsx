@@ -23,7 +23,7 @@ export function Log() {
   const [messages, setMessages] = useState<LogEntry[]>([]);
   const statusMessagesRef = useRef<HTMLDivElement | null>(null);
 
-  const { connected } = useWebSocket({
+  useWebSocket({
     url: `${window.location.protocol === "https:" ? "wss" : "ws"}://${webSocketHost}/ws`,
     helloMessage: '{"type":"hello"}',
     onOpen: () => {
@@ -34,7 +34,7 @@ export function Log() {
     },
     onMessage: (data) => {
       if (data.type === "log") {
-        logStatus(data.message, data.level);
+        logStatus(data.message as string, data.level);
       }
 
       if (data.type === "init") {

@@ -59,7 +59,7 @@ async function postAction(
   otaKey: string,
   value?: unknown,
 ): Promise<{ success?: boolean; message?: string }> {
-  const payload: any = { deviceId, action };
+  const payload: {deviceId: string; action: string; value?: unknown} = { deviceId, action };
   if (value !== undefined) payload.value = value;
   return fetch("/api/action", {
     method: "POST",
@@ -128,7 +128,7 @@ export function DeviceModal({ device, onClose }: DeviceModalProps) {
     const GATE = ["GARAGE_OPENER", "GATE_OPENER", "ROLLING_DOOR_OPENER"];
     const type = (d.type_name || "UNKNOWN")
       .toUpperCase()
-      .replace(/[\s\-]+/g, "_");
+      .replace(/[\s-]+/g, "_");
     if (SHUTTER.includes(type)) return "shutter";
     if (VENETIAN.includes(type)) return "venetian";
     if (WINDOW.includes(type)) return "window";

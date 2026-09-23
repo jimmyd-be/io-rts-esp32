@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 
+//TODO refactor this into a proper i18n library, or use an existing one. This is a quick and dirty solution for now.
+
 // Modern, robust i18n hook for this project.
 // - reads preferred language from localStorage key 'io-homecontrol-language'
 // - fetches translation JSON from the server (tries several locations)
@@ -42,7 +44,7 @@ export default function useI18n(
           cache.current[lang] = json as I18nDict;
           return cache.current[lang];
         }
-      } catch (e) {
+      } catch  {
         // try next
         continue;
       }
@@ -105,14 +107,14 @@ export default function useI18n(
         if (!k) return;
         try {
           (el as any).placeholder = t(k);
-        } catch (e) {
+        } catch  {
           /* ignore */
         }
       });
 
     try {
       document.title = t("page.title");
-    } catch (e) {
+    } catch  {
       /* ignore */
     }
   }, [t]);
@@ -125,7 +127,7 @@ export default function useI18n(
       setCurrentLang(next);
       try {
         localStorage.setItem(STORAGE_KEY, next);
-      } catch (e) {
+      } catch  {
         /* ignore */
       }
       apply();
@@ -144,7 +146,7 @@ export default function useI18n(
       let saved: string | null = null;
       try {
         saved = localStorage.getItem(STORAGE_KEY);
-      } catch (e) {
+      } catch  {
         saved = null;
       }
       const auto = (
@@ -160,7 +162,7 @@ export default function useI18n(
           "lang",
         ) as HTMLSelectElement | null;
         if (select) select.value = lang;
-      } catch (e) {
+      } catch  {
         /* ignore */
       }
 
@@ -173,7 +175,7 @@ export default function useI18n(
         setCurrentLang("en");
         try {
           localStorage.setItem(STORAGE_KEY, "en");
-        } catch (e) {
+        } catch {
           /* ignore */
         }
         apply();
@@ -191,7 +193,7 @@ export default function useI18n(
         setCurrentLang(lang);
         try {
           localStorage.setItem(STORAGE_KEY, lang);
-        } catch (e) {
+        } catch {
           /* ignore */
         }
         apply();
