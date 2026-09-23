@@ -1,5 +1,7 @@
 import { ActionResult } from "../../models/Types";
 
+const FAVORITE_POSITION_PREFIX = "fav_pos_";
+
 async function postJson<T>(
   url: string,
   otaKey: string,
@@ -70,3 +72,51 @@ export function deleteRemote(
     remoteId,
   });
 }
+
+export function getFavoritePosition(deviceId: string): number | null {
+  const value = localStorage.getItem(FAVORITE_POSITION_PREFIX + deviceId);
+  return value !== null ? parseInt(value, 10) : null;
+}
+
+export function setFavoritePosition(deviceId: string, position: number): void {
+  localStorage.setItem(FAVORITE_POSITION_PREFIX + deviceId, String(position));
+}
+
+export async function postDeviceAction(
+  deviceId: string,
+  action: string,
+  otaKey: string,
+  value?: unknown,
+): Promise<ActionResult> {
+  const payload: { deviceId: string; action: string; value?: unknown } = {
+    deviceId,
+    action,
+  };
+
+  if (value !== undefined) payload.value = value;
+
+  const response = await fetch("/api/action", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      "X-OTA-Key": otaKey,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const text = await response.text();
+  const data = text ? (JSON.parse(text) as ActionResult) : {};
+
+  if (!response.ok) {
+    const message =
+      typeof data === "object" && data !== null && "message" in data
+        ? String((data as { message?: unknown }).message ?? response.statusText)
+        : response.statusText;
+
+    throw new Error(message || `Request failed with status ${response.status}`);
+  }
+
+  return data;
+}
+
