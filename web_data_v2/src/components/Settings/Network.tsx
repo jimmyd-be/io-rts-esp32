@@ -12,7 +12,7 @@ export function NetworkSettings() {
 
   const api = useNetworkConfig();
 
-  const [dhcpEnabled] = useState(api.data ? api.data.dhcp : true);
+  const [dhcpEnabled, setDhcpEnabled] = useState(api.data ? api.data.dhcp : true);
 
   return (
     <form
@@ -73,7 +73,7 @@ export function NetworkSettings() {
               >
                 DHCP
               </span>
-              <Checkbox checked={dhcpEnabled} />
+              <Checkbox checked={dhcpEnabled} onChange={(e) => setDhcpEnabled(e)} />
             </div>
           </div>
           <div style="flex-direction:column;gap:6px;display:flex;">
