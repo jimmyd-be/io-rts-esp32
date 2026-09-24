@@ -91,9 +91,7 @@ export function DeviceModal({ device, onClose }: DeviceModalProps) {
   );
   const [typeSelect, setTypeSelect] = useState(deviceState.type);
   const [mfrSelect, setMfrSelect] = useState(deviceState.manufacturer_id);
-  const [somfyNameInput, setSomfyNameInput] = useState(
-    deviceState.somfy_name || "",
-  );
+
   const [isInverted, setIsInverted] = useState(
     deviceState.is_inverted || false,
   );
@@ -485,30 +483,6 @@ export function DeviceModal({ device, onClose }: DeviceModalProps) {
     }
   }, [deviceState.id, isQuiet, showToast]);
 
-  const handleSomfyName = useCallback(async () => {
-    const val = somfyNameInput.trim();
-    if (!val) {
-      showToast("Name cannot be empty.", ToastType.ERROR);
-      return;
-    }
-    try {
-      const r = await postAction(
-        deviceState.id,
-        "setSomfyName",
-        otaData.data?.key as string,
-        val,
-      );
-      if (!r.success) {
-        showToast(r.message || "Write failed.", ToastType.ERROR);
-      } else {
-        setDeviceState((prev) => ({ ...prev, somfy_name: val }));
-        showToast("Written to device.", ToastType.SUCCESS);
-      }
-    } catch (e) {
-      showToast((e as Error).message, ToastType.ERROR);
-    }
-  }, [somfyNameInput, deviceState.id, showToast]);
-
   return (
     <div id="device-edit-modal" class="open">
       <div class="dev-sheet">
@@ -625,35 +599,6 @@ export function DeviceModal({ device, onClose }: DeviceModalProps) {
                   </div>
                 </div>
               )}
-              {deviceState.protocol !== "1w" &&
-                deviceState.somfy_name !== undefined && (
-                  <div class="dev-row">
-                    <div>
-                      <div class="dev-row-label">Somfy device name</div>
-                      <div class="dev-row-sub">
-                        Name stored on the device (max 15 chars). Written via
-                        radio.
-                      </div>
-                    </div>
-                    <div class="dev-row-right">
-                      <div style="display:flex;gap:8px;align-items:center;">
-                        <input
-                          type="text"
-                          class="s-input"
-                          maxLength={15}
-                          value={somfyNameInput}
-                          onInput={(e) =>
-                            setSomfyNameInput(e.currentTarget.value)
-                          }
-                          style="flex: 1;"
-                        />
-                        <button class="s-btn" onClick={handleSomfyName}>
-                          {t("button.write_to_device") || "Write to device"}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
               {deviceState.protocol !== "1w" && (
                 <div class="dev-row">
                   <div>
@@ -670,18 +615,6 @@ export function DeviceModal({ device, onClose }: DeviceModalProps) {
                 </div>
               )}
             </>
-          )}
-          {deviceState.protocol === "1w" && deviceState.info1_serial && (
-            <div class="dev-row">
-              <div>
-                <div class="dev-row-label">Serial</div>
-              </div>
-              <div class="dev-row-right">
-                <span style="font-size:13px;color:var(--text2);font-family:monospace;">
-                  {`${deviceState.info1_serial.node_id} · OEM ${deviceState.info1_serial.oem_id} · ${deviceState.info1_serial.year ? "20" + deviceState.info1_serial.year : "—"}`}
-                </span>
-              </div>
-            </div>
           )}
           <div class="dev-row">
             <div>
