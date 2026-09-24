@@ -5,6 +5,7 @@ import useI18n from "../../hooks/useI18n";
 import { useOtaKey } from "../../hooks/api/useOtaKey.tsx";
 import { ToastType } from "../ToastProvider";
 
+//TODO refactor this into different components for each section of the modal, and use a form library for validation and submission.
 interface DeviceModalProps {
   device: Device;
   onClose?: () => void;
