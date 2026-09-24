@@ -14,7 +14,7 @@ export function WifiSettings(): JSX.Element {
 
   const wifiData = useWifiConfig();
   const otaData = useOtaKey();
-  const t = useI18n();
+  const { t } = useI18n();
   const showToast = useToast();
 
   const [formValues, setFormValues] = useState({
@@ -109,8 +109,8 @@ export function WifiSettings(): JSX.Element {
               }
             >
               {wifiData.loaded && wifiData.data
-                ? t.t("status.wifi.connected")
-                : t.t("status.wifi.not-connected")}
+                ? t("status.wifi.connected")
+                : t("status.wifi.not-connected")}
             </span>
           </>
         }

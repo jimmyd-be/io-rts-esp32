@@ -1,5 +1,6 @@
 import { useEffect, useState } from "preact/hooks";
 import useI18n from "../hooks/useI18n";
+import { useInfo } from "../hooks/api/useInfo.tsx";
 
 const LANGUAGE_STORAGE_KEY = "io-homecontrol-language";
 const THEME_STORAGE_KEY = "io-homecontrol-theme";
@@ -18,6 +19,9 @@ function getStoredValue(key: string, fallback: string) {
 
 export function Header() {
   const t = useI18n();
+
+  const info = useInfo(60); // Refresh every 60 seconds
+
   const [language, setLanguage] = useState<string>(() =>
     getStoredValue(LANGUAGE_STORAGE_KEY, "en"),
   );
@@ -49,7 +53,7 @@ export function Header() {
   return (
     <header class="app-header">
       <div class="header-left">
-        <div class="app-dot"></div>
+        <div class={info.loaded ? "app-dot" : "app-dot offline"}></div>
         <img src="img/logo.png" alt="" style="height:24px;width:auto;" />
         <span class="app-wordmark">io-homecontrol</span>
       </div>

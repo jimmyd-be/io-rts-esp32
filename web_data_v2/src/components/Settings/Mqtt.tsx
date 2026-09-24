@@ -4,10 +4,12 @@ import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useMqttConfig } from "../../hooks/api/useMqttConfig";
 import { ToastType } from "../ToastProvider";
 import { useToast } from "../../hooks/useToast";
+import useI18n from "../../hooks/useI18n.tsx";
 
 export function MqttSettings() {
   const otaData = useOtaKey();
   const showToast = useToast();
+  const { t } = useI18n();
 
   const api = useMqttConfig();
 
@@ -44,7 +46,17 @@ export function MqttSettings() {
           summary={
             <>
               <span class="acc-sum-val">{api.data?.server}</span>
-              <span class="row-status">{api.data?.status}</span>
+              <span
+                class={
+                  api.loaded && api.data?.status === "connected"
+                    ? "success-text row-status"
+                    : "error-text row-status"
+                }
+              >
+                {api.loaded && api.data?.status === "connected"
+                  ? t("status.wifi.connected")
+                  : t("status.wifi.not-connected")}
+              </span>
             </>
           }
         >
