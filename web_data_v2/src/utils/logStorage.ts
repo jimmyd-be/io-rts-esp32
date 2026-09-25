@@ -71,3 +71,13 @@ export function appendStoredLogMessage(message: StoredLogEntry): void {
   storeLogMessages(next);
 }
 
+export function clearStoredLogMessages(): void {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Ignore storage failures.
+  }
+}
+

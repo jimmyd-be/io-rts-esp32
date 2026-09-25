@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWebSocket, WebSocketLogMessage } from "../hooks/useWebSocket";
-import { readStoredLogMessages, type StoredLogEntry } from "../utils/logStorage";
+import {
+  clearStoredLogMessages,
+  readStoredLogMessages,
+  type StoredLogEntry,
+} from "../utils/logStorage";
 
 export type LogLevel = StoredLogEntry["level"];
 export type LogFilter = "all" | "info" | "off";
@@ -55,6 +59,11 @@ export function Log() {
     [],
   );
 
+  const clearLogs = useCallback(() => {
+    clearStoredLogMessages();
+    setMessages([]);
+  }, []);
+
   const visibleMessages = useMemo(
     () => messages.filter((entry) => logLevelVisible(entry.level, filter)),
     [messages, filter],
@@ -75,6 +84,15 @@ export function Log() {
       </div>
 
       <div className="log-toolbar">
+        <button
+          type="button"
+          className="log-filter-btn"
+          onClick={clearLogs}
+          aria-label="Delete saved logs"
+        >
+          Delete logs
+        </button>
+
         <button
           type="button"
           className={`log-filter-btn ${filter === "all" ? "active" : ""}`}
