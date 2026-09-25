@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import { LogLevel } from "../pages/log.tsx";
+import type { StoredLogLevel } from "../utils/logStorage";
+import {
+  appendStoredLogMessage,
+  normalizeLogLevel,
+} from "../utils/logStorage";
 
 type WebSocketMessage = Record<string, unknown>;
 
@@ -10,7 +14,7 @@ export type WebSocketLogMessage = {
   is_stopped?: boolean;
   estimated?: boolean;
   message?: string;
-  level?: LogLevel | boolean;
+  level?: StoredLogLevel | boolean;
 };
 
 type UseWebSocketOptions<T> = {
@@ -67,8 +71,6 @@ export function useWebSocket<T = WebSocketMessage>({
   const connect = useCallback(() => {
     if (!url) return;
 
-    console.log("Connecting to WebSocket:", url);
-
     if (
       wsRef.current &&
       (wsRef.current.readyState === WebSocket.OPEN ||
@@ -95,6 +97,26 @@ export function useWebSocket<T = WebSocketMessage>({
     socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data) as T;
+
+        if (
+          data &&
+          typeof data === "object" &&
+          (data as { type?: unknown }).type === "log"
+        ) {
+          const logMessage = data as {
+            message?: unknown;
+            level?: StoredLogLevel | boolean;
+          };
+
+          if (typeof logMessage.message === "string") {
+            appendStoredLogMessage({
+              id: Date.now() + Math.random(),
+              message: logMessage.message,
+              level: normalizeLogLevel(logMessage.level),
+            });
+          }
+        }
+
         setLastMessage(data);
         onMessageRef.current?.(data);
       } catch (error) {

@@ -1,14 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useWebSocket, WebSocketLogMessage } from "../hooks/useWebSocket";
+import { readStoredLogMessages, type StoredLogEntry } from "../utils/logStorage";
 
-export type LogLevel = "debug" | "info" | "error";
+export type LogLevel = StoredLogEntry["level"];
 export type LogFilter = "all" | "info" | "off";
 
-export type LogEntry = {
-  id: number;
-  message: string;
-  level: LogLevel;
-};
+export type LogEntry = StoredLogEntry;
 
 const logLevelVisible = (entryLevel: LogLevel, filter: LogFilter): boolean => {
   if (filter === "off") return false;
@@ -18,7 +15,9 @@ const logLevelVisible = (entryLevel: LogLevel, filter: LogFilter): boolean => {
 
 export function Log() {
   const [filter, setFilter] = useState<LogFilter>("all");
-  const [messages, setMessages] = useState<LogEntry[]>([]);
+  const [messages, setMessages] = useState<LogEntry[]>(() =>
+    readStoredLogMessages(),
+  );
   const statusMessagesRef = useRef<HTMLDivElement | null>(null);
 
   useWebSocket<WebSocketLogMessage>({
@@ -42,16 +41,8 @@ export function Log() {
 
   const logStatus = useCallback(
     (message: string, level?: LogLevel | boolean) => {
-      let normalizedLevel: LogLevel;
-      if (level === true) {
-        normalizedLevel = "error";
-      } else if (level === false || level === undefined) {
-        normalizedLevel = "debug";
-      } else {
-        normalizedLevel = level;
-      }
-
-      if (filter === "off") return;
+      const normalizedLevel: LogLevel =
+        level === true ? "error" : level === false || level === undefined ? "debug" : level;
 
       setMessages((prev) => {
         const next = [
@@ -61,7 +52,7 @@ export function Log() {
         return next.slice(-100);
       });
     },
-    [filter],
+    [],
   );
 
   const visibleMessages = useMemo(
