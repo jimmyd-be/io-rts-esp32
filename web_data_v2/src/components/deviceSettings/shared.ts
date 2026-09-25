@@ -54,12 +54,16 @@ export async function postAction(
   action: string,
   otaKey: string,
   value?: unknown,
-): Promise<{ success?: boolean; message?: string }> {
-  const payload: {deviceId: string; action: string; value?: unknown} = {
-    deviceId,
-    action,
-  };
-  if (value !== undefined) payload.value = value;
+): Promise<{ success?: boolean; message?: string; deviceId?: string }> {
+  const payload: Record<string, unknown> = { action };
+  if (deviceId) payload.deviceId = deviceId;
+  if (value !== undefined) {
+    if (typeof value === "object" && value !== null) {
+      Object.assign(payload, value);
+    } else {
+      payload.value = value;
+    }
+  }
 
   return fetch("/api/action", {
     method: "POST",

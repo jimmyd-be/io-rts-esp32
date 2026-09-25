@@ -35,6 +35,7 @@ export function DeviceModalProvider({ children }: DeviceModalProviderProps) {
 
   const close = useCallback(() => {
     setSelectedDevice(null);
+
   }, []);
 
   const value = useMemo(

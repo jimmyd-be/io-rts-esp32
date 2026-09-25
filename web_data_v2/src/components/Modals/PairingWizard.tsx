@@ -10,6 +10,8 @@ import {
 import useI18n from "../../hooks/useI18n";
 import { useToast } from "../../hooks/useToast";
 import { ToastType } from "../ToastProvider";
+import { useOtaKey } from "../../hooks/api/useOtaKey.tsx";
+import { postAction } from "../deviceSettings/shared";
 
 export interface PairingWizardApi {
   open: () => void;
@@ -41,12 +43,6 @@ interface PairingWizardProviderProps {
   children?: ComponentChildren;
 }
 
-type PairingApiResponse = {
-  success?: boolean;
-  deviceId?: string;
-  message?: string;
-};
-
 type Step =
   | "choose"
   | "2w-discovery"
@@ -74,6 +70,7 @@ export function PairingWizardProvider({
   children,
 }: PairingWizardProviderProps) {
   const { t } = useI18n();
+  const otaKey = useOtaKey();
   const showToast = useToast();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -203,18 +200,12 @@ export function PairingWizardProvider({
 
     setStatus("Sending pairing frames…");
 
-    fetch("/api/action", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "pair1w",
-        name: deviceName1w.trim(),
-        deviceType: deviceType1w,
-        manufacturer: manufacturer1w,
-      }),
+    postAction("", "pair1w", otaKey.data?.key || "", {
+      name: deviceName1w.trim(),
+      deviceType: deviceType1w,
+      manufacturer: manufacturer1w,
     })
-      .then(async (r) => {
-        const data = (await r.json()) as PairingApiResponse;
+      .then((data: { success?: boolean; message?: string; deviceId?: string }) => {
         if (data.success && data.deviceId) {
           setPairedDeviceId(data.deviceId);
           setPairedDeviceName(deviceName1w);
@@ -229,19 +220,12 @@ export function PairingWizardProvider({
       .catch((e) => {
         setStatus(`Error: ${e.message || "Unknown error"}`);
       });
-  }, [deviceName1w, deviceType1w, manufacturer1w, showToast, t]);
+  }, [deviceName1w, deviceType1w, manufacturer1w, showToast, t, otaKey.data?.key]);
 
   // 1W Confirm: Resend
   const resend1wPairing = useCallback(() => {
     setStatus("Resending…");
-    fetch("/api/action", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        deviceId: pairedDeviceId,
-        action: "sendpair1w",
-      }),
-    })
+    postAction(pairedDeviceId, "sendpair1w", otaKey.data?.key || "")
       .then(() => {
         setStatus(
           "Pairing frames sent.\n\nDid the device confirm? (brief jog movement or LED blink)",
@@ -252,7 +236,7 @@ export function PairingWizardProvider({
           "Pairing frames sent.\n\nDid the device confirm? (brief jog movement or LED blink)",
         );
       });
-  }, [pairedDeviceId]);
+  }, [pairedDeviceId, otaKey.data?.key]);
 
   // 1W Confirm: Accept
   const confirm1wPairing = useCallback(() => {
@@ -264,27 +248,13 @@ export function PairingWizardProvider({
 
   // 1W Confirm: Cancel
   const cancel1wPairing = useCallback(() => {
-    fetch("/api/action", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        deviceId: pairedDeviceId,
-        action: "deactivateDevice",
-      }),
-    })
+    postAction(pairedDeviceId, "deactivateDevice", otaKey.data?.key || "")
       .then(() =>
-        fetch("/api/action", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            deviceId: pairedDeviceId,
-            action: "deleteDevice",
-          }),
-        }),
+        postAction(pairedDeviceId, "deleteDevice", otaKey.data?.key || ""),
       )
       .catch(() => {})
       .finally(() => close());
-  }, [pairedDeviceId, close]);
+  }, [pairedDeviceId, close, otaKey.data?.key]);
 
   // Add by address
   const addDeviceByAddress = useCallback(() => {
@@ -296,19 +266,14 @@ export function PairingWizardProvider({
 
     setStatus("Adding device…");
 
-    fetch("/api/devices/add", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        id: addr,
-        name: nameInputAddress.trim(),
-        device_type: parseInt(deviceTypeAddress.toString(), 10),
-        protocol: protocolAddress,
-        is_low_power: isLowPowerAddress,
-      }),
+    postAction("", "addDevice", otaKey.data?.key || "", {
+      id: addr,
+      name: nameInputAddress.trim(),
+      device_type: parseInt(deviceTypeAddress.toString(), 10),
+      protocol: protocolAddress,
+      is_low_power: isLowPowerAddress,
     })
-      .then(async (r) => {
-        const data = (await r.json()) as PairingApiResponse;
+      .then((data) => {
         if (data.success) {
           setStatus(`✓ Device ${addr} added.`);
           showToast(`Device ${addr} added`, ToastType.SUCCESS);
@@ -330,6 +295,7 @@ export function PairingWizardProvider({
     showToast,
     onDeviceAddedProp,
     close,
+    otaKey.data?.key,
   ]);
 
   // WebSocket callbacks
@@ -416,16 +382,7 @@ export function PairingWizardProvider({
       body: JSON.stringify({}),
     }).catch(() => {});
 
-    fetch("/api/action", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        deviceId: pendingDeviceId,
-        action: "linkRemote",
-        remoteId: remoteId,
-      }),
-    })
-      .then((r) => r.json())
+    postAction(pendingDeviceId, "linkRemote", otaKey.data?.key || "", remoteId)
       .then(() => {
         showToast(`Remote ${remoteId} linked`, ToastType.SUCCESS);
         onDevicePairingStatusUpdated?.();
@@ -440,6 +397,7 @@ export function PairingWizardProvider({
     showToast,
     onDevicePairingStatusUpdated,
     close,
+    otaKey.data?.key,
   ]);
 
   // Update countdown display
