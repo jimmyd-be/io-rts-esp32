@@ -25,7 +25,6 @@ type UseWebSocketOptions<T> = {
 };
 
 export function useWebSocket<T = WebSocketMessage>({
-  url: customUrl,
   autoConnect = true,
   reconnectDelayMs = 1000,
   maxReconnectDelayMs = 30000,
@@ -34,9 +33,9 @@ export function useWebSocket<T = WebSocketMessage>({
   onOpen,
   onClose,
 }: UseWebSocketOptions<T>) {
-  const url =
-    customUrl ||
+  const productionUrl =
     `${window.location.protocol === "https:" ? "wss" : "ws"}://${window.location.hostname}/ws`;
+  const url = import.meta.env.VITE_WEBSOCKET_URL || productionUrl;
 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectDelayRef = useRef(reconnectDelayMs);
@@ -67,6 +66,8 @@ export function useWebSocket<T = WebSocketMessage>({
 
   const connect = useCallback(() => {
     if (!url) return;
+
+    console.log("Connecting to WebSocket:", url);
 
     if (
       wsRef.current &&

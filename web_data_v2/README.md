@@ -1,12 +1,44 @@
-# `create-preact`
+# `Frontend`
 
-<h2 align="center">
-  <img height="256" width="256" src="./src/assets/preact.svg">
-</h2>
-
-<h3 align="center">Get started using Preact and Vite!</h3>
+![IO Control logo](./public/img/logo.png)
 
 ## Getting Started
+
+### Run the frontend locally
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Start the Vite dev server:
+
+   ```bash
+   npm run dev
+   ```
+
+3. Open the app in your browser:
+
+   - http://localhost:5173/
+
+Vite automatically loads `.env.development` when running the local dev server, so you can use it to point the frontend at your device or backend.
+
+### Environment configuration
+
+Create or edit `.env.development` in the project root if you want to override local development values.
+
+Example:
+
+```dotenv
+# Optional websocket override for local development.
+VITE_WEBSOCKET_URL=ws://{ip-address}/ws
+
+# Optional HTTP proxy target for /api requests.
+VITE_PROXY_TARGET=http://{ip-address}
+```
+
+### Available scripts
 
 - `npm run dev` - Starts a dev server at http://localhost:5173/
 
