@@ -36,4 +36,4 @@ jobs:
             -I helpers \
             -I components/web_server \
             -I config \
-            main/ helpers/ components/ config/
+            backend/main/ backend/helpers/ backend/components/ backend/config/
