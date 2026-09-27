@@ -413,5 +413,10 @@
   "popup.transit_saved": "Transition time saved.",
   "popup.transit_done": "Calibration done: {s} s",
   "popup.transit_failed": "Calibration failed.",
-  "popup.transit_cancelled": "Calibration cancelled."
+  "popup.transit_cancelled": "Calibration cancelled.",
+  "button.back": "Retour",
+  "button.cancel": "Annuler",
+  "button.pair": "Appairer",
+  "button.capture_remote": "Capturer la télécommande",
+  "button.enter_manually": "Saisir l'ID manuellement"
 }

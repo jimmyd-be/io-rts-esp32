@@ -413,5 +413,10 @@
   "popup.transit_saved": "Transition time saved.",
   "popup.transit_done": "Calibration done: {s} s",
   "popup.transit_failed": "Calibration failed.",
-  "popup.transit_cancelled": "Calibration cancelled."
+  "popup.transit_cancelled": "Calibration cancelled.",
+  "button.back": "Back",
+  "button.cancel": "Cancel",
+  "button.pair": "Pair",
+  "button.capture_remote": "Capture Remote",
+  "button.enter_manually": "Enter ID Manually"
 }
