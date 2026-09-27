@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { useOtaKey } from "./api/useOtaKey.tsx";
-
-export interface ApiResponse<Type> {
-  data: Type | undefined;
-  loaded: boolean;
-  isError: boolean;
-  refresh: () => void;
-}
+import type { ApiResponse } from "../models/Types";
+export type { ApiResponse } from "../models/Types";
 
 export default function useApi<Type>({
   endpoint,

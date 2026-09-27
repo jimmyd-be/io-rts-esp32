@@ -1,8 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 import useI18n from "../hooks/useI18n";
 import { useInfo } from "../hooks/api/useInfo.tsx";
+import { LANGUAGE_STORAGE_KEY } from "../models/Constants";
 
-const LANGUAGE_STORAGE_KEY = "io-homecontrol-language";
 const THEME_STORAGE_KEY = "io-homecontrol-theme";
 
 function getStoredValue(key: string, fallback: string) {

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { LANGUAGE_STORAGE_KEY } from "../models/Constants";
+import type { TranslationParams, UseI18nResult } from "../models/Types";
 
 //TODO refactor this into a proper i18n library, or use an existing one. This is a quick and dirty solution for now.
 
@@ -9,19 +11,8 @@ import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 // - provides t(key, params) that returns translated value if present, else fallback, else key
 
 type I18nDict = Record<string, string>;
-type TranslationParams = Record<string, string | number | boolean | null | undefined>;
-
-export interface UseI18nResult {
-  t: (key: string, params?: TranslationParams) => string;
-  setLang: (lang: string) => Promise<void>;
-  getLang: () => string;
-  currentLang: string;
-  supported: string[];
-  apply: () => void;
-}
 
 const DEFAULT_SUPPORTED = ["nl", "en", "de", "fr"];
-const STORAGE_KEY = "io-homecontrol-language";
 
 export default function useI18n(
   supported: string[] = DEFAULT_SUPPORTED,
@@ -124,7 +115,7 @@ export default function useI18n(
       setI18nState(dict || {});
       setCurrentLang(next);
       try {
-        localStorage.setItem(STORAGE_KEY, next);
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, next);
       } catch {
         /* ignore */
       }
@@ -143,7 +134,7 @@ export default function useI18n(
     (async () => {
       let saved: string | null = null;
       try {
-        saved = localStorage.getItem(STORAGE_KEY);
+        saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
       } catch {
         /* ignore */
       }
@@ -172,7 +163,7 @@ export default function useI18n(
         setI18nState(en || {});
         setCurrentLang("en");
         try {
-          localStorage.setItem(STORAGE_KEY, "en");
+          localStorage.setItem(LANGUAGE_STORAGE_KEY, "en");
         } catch {
           /* ignore */
         }
@@ -190,7 +181,7 @@ export default function useI18n(
         setI18nState(langDict || {});
         setCurrentLang(lang);
         try {
-          localStorage.setItem(STORAGE_KEY, lang);
+          localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
         } catch {
           /* ignore */
         }

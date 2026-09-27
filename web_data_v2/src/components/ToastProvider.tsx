@@ -1,26 +1,9 @@
 import { ComponentChildren, createContext } from "preact";
 import { useCallback, useState } from "preact/hooks";
 import useI18n from "../hooks/useI18n";
-
-export interface Toast {
-  id: string;
-  message: string;
-  type?: ToastType;
-  duration?: number;
-  isHiding?: boolean;
-}
-
-export enum ToastType {
-  SUCCESS = "success",
-  ERROR = "error",
-  INFO = "info",
-  DEFAULT = "",
-}
-export interface ToastContextType {
-  toasts: Toast[];
-  showToast: (message: string, type?: ToastType, duration?: number) => string;
-  dismissToast: (id: string) => void;
-}
+import type { Toast, ToastContextType } from "../models/Types";
+import { ToastType } from "../models/Types";
+export { ToastType };
 
 export const ToastContext = createContext<ToastContextType | null>(null);
 

@@ -11,33 +11,23 @@ import {
   cancelCaptureRequest,
   deleteRemote,
   linkRemote,
-  REMOTE_ID_RE,
   startCaptureRequest,
   unlinkRemote,
 } from "../../utils/RemoteApi.ts";
 import useI18n from "../../hooks/useI18n";
-import { Device, Remote } from "../../models/Types";
+import { REMOTE_ID_RE } from "../../models/Constants";
+import type {
+  Device,
+  OpenWizardOptions,
+  Remote,
+  RemoteWizardApi,
+  WizardMode,
+} from "../../models/Types";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 
-export type WizardMode = "add" | "edit";
 type Step = "choose" | "capture" | "manual" | "devices";
 
 const CAPTURE_SECONDS = 30;
-
-export interface OpenWizardOptions {
-  mode?: WizardMode;
-  remoteId?: string;
-  linkedDevices?: string[];
-}
-
-export interface RemoteWizardApi {
-  open: (options?: OpenWizardOptions) => void;
-  close: () => void;
-  /** Call when the backend reports a remote frame during capture. */
-  onRemoteSeen: (remoteId: string) => void;
-  /** Call when the backend reports the capture window expired. */
-  onCaptureTimeout: () => void;
-}
 
 const RemoteWizardContext = createContext<RemoteWizardApi | null>(null);
 

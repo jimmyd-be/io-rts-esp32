@@ -1,7 +1,4 @@
-import { Device } from "../models/Types";
-
-export type DeviceGroup =
-  "shutter" | "venetian" | "window" | "gate" | "switch" | "dimmer" | "readonly";
+import type { Device, DeviceGroup } from "../models/Types";
 
 export function getDeviceGroup(device: Device): DeviceGroup {
   const SHUTTER = [

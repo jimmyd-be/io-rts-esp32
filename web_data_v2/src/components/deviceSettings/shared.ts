@@ -1,52 +1,15 @@
-import { Device } from "../../models/Types.ts";
-
-export const DEVICE_TYPES = [
-  [2, "Roller shutter"],
-  [1, "Venetian blind"],
-  [10, "Blind"],
-  [13, "Dual shutter"],
-  [3, "Awning"],
-  [16, "Horizontal awning"],
-  [24, "Swinging shutter"],
-  [4, "Window opener"],
-  [5, "Garage opener"],
-  [7, "Gate opener"],
-  [8, "Rolling door opener"],
-  [6, "Light"],
-  [15, "On/off switch"],
-  [9, "Lock"],
-  [0, "Unknown"],
-] as const;
-
-export const MANUFACTURERS = [
-  [2, "Somfy"],
-  [1, "Velux"],
-  [3, "Honeywell"],
-  [4, "Hörmann"],
-  [5, "Assa Abloy"],
-  [6, "Niko"],
-  [7, "Window Master"],
-  [8, "Renson"],
-  [11, "Overkiz"],
-  [12, "Atlantic Group"],
-  [0, "Unknown"],
-] as const;
-
-const FAV_PREFIX = "fav_pos_";
-
-export interface DeviceRowProps {
-  device: Device;
-  setDeviceState: (value: Device | ((prev: Device) => Device)) => void;
-  onClose?: () => void;
-}
+import { FAVORITE_POSITION_STORAGE_PREFIX } from "../../models/Constants";
+import type { Device } from "../../models/Types.ts";
+export { DEVICE_TYPES, MANUFACTURERS } from "../../models/Constants";
+export type { DeviceRowProps } from "../../models/Types.ts";
 
 export function getFavPos(id: string): number | null {
-  const v = localStorage.getItem(FAV_PREFIX + id);
+  const v = localStorage.getItem(FAVORITE_POSITION_STORAGE_PREFIX + id);
   return v !== null ? parseInt(v, 10) : null;
 }
 
 export function setFavPos(id: string, pos: number): void {
-  localStorage.setItem(FAV_PREFIX + id, String(pos));
+  localStorage.setItem(FAVORITE_POSITION_STORAGE_PREFIX + id, String(pos));
 }
 
 export async function postAction(
@@ -98,4 +61,3 @@ export function getDeviceGroup(device: Device): string {
   if (type === "LIGHT") return device.subtype === 58 ? "switch" : "dimmer";
   return "readonly";
 }
-

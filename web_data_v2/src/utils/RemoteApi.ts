@@ -1,6 +1,5 @@
-import { ActionResult } from "../models/Types.ts";
-
-const FAVORITE_POSITION_PREFIX = "fav_pos_";
+import { FAVORITE_POSITION_STORAGE_PREFIX } from "../models/Constants";
+import type { ActionResult } from "../models/Types.ts";
 
 async function postJson<T>(
   url: string,
@@ -32,7 +31,6 @@ async function postJson<T>(
   return data;
 }
 
-export const REMOTE_ID_RE = /^[0-9A-F]{6}$/;
 export function startCaptureRequest(otaKey: string): Promise<unknown> {
   return postJson("/api/remote/capture/start", otaKey, {});
 }
@@ -74,12 +72,17 @@ export function deleteRemote(
 }
 
 export function getFavoritePosition(deviceId: string): number | null {
-  const value = localStorage.getItem(FAVORITE_POSITION_PREFIX + deviceId);
+  const value = localStorage.getItem(
+    FAVORITE_POSITION_STORAGE_PREFIX + deviceId,
+  );
   return value !== null ? parseInt(value, 10) : null;
 }
 
 export function setFavoritePosition(deviceId: string, position: number): void {
-  localStorage.setItem(FAVORITE_POSITION_PREFIX + deviceId, String(position));
+  localStorage.setItem(
+    FAVORITE_POSITION_STORAGE_PREFIX + deviceId,
+    String(position),
+  );
 }
 
 export async function postDeviceAction(
@@ -119,4 +122,3 @@ export async function postDeviceAction(
 
   return data;
 }
-

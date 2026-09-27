@@ -1,10 +1,4 @@
-export type StoredLogLevel = "debug" | "info" | "error";
-
-export type StoredLogEntry = {
-  id: number;
-  message: string;
-  level: StoredLogLevel;
-};
+import type { StoredLogEntry, StoredLogLevel } from "../models/Types";
 
 const STORAGE_KEY = "io-rts-esp32:web-logs";
 const MAX_LOG_MESSAGES = 100;
@@ -80,4 +74,3 @@ export function clearStoredLogMessages(): void {
     // Ignore storage failures.
   }
 }
-

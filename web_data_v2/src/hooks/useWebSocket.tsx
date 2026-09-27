@@ -1,21 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
-import type { StoredLogLevel } from "../utils/logStorage";
+import type { StoredLogLevel } from "../models/Types";
 import {
   appendStoredLogMessage,
   normalizeLogLevel,
 } from "../utils/logStorage";
+export type { WebSocketLogMessage } from "../models/Types";
 
 type WebSocketMessage = Record<string, unknown>;
-
-export type WebSocketLogMessage = {
-  type?: string;
-  position?: number;
-  id?: string;
-  is_stopped?: boolean;
-  estimated?: boolean;
-  message?: string;
-  level?: StoredLogLevel | boolean;
-};
 
 type UseWebSocketOptions<T> = {
   url?: string;

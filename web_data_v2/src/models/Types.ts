@@ -125,3 +125,107 @@ export interface InfoResponse {
   board: string;
   web_version: string;
 }
+
+export type ApiResponse<Type> = {
+  data: Type | undefined;
+  loaded: boolean;
+  isError: boolean;
+  refresh: () => void;
+};
+
+export type DeviceGroup =
+  | "shutter"
+  | "venetian"
+  | "window"
+  | "gate"
+  | "switch"
+  | "dimmer"
+  | "readonly";
+
+export interface DeviceRowProps {
+  device: Device;
+  setDeviceState: (value: Device | ((prev: Device) => Device)) => void;
+  onClose?: () => void;
+}
+
+export type StoredLogLevel = "debug" | "info" | "error";
+
+export interface StoredLogEntry {
+  id: number;
+  message: string;
+  level: StoredLogLevel;
+}
+
+export type LogLevel = StoredLogEntry["level"];
+export type LogFilter = "all" | "info" | "off";
+export type LogEntry = StoredLogEntry;
+
+export interface WebSocketLogMessage {
+  type?: string;
+  position?: number;
+  id?: string;
+  is_stopped?: boolean;
+  estimated?: boolean;
+  message?: string;
+  level?: StoredLogLevel | boolean;
+}
+
+export interface Toast {
+  id: string;
+  message: string;
+  type?: ToastType;
+  duration?: number;
+  isHiding?: boolean;
+}
+
+export enum ToastType {
+  SUCCESS = "success",
+  ERROR = "error",
+  INFO = "info",
+  DEFAULT = "",
+}
+
+export interface ToastContextType {
+  toasts: Toast[];
+  showToast: (message: string, type?: ToastType, duration?: number) => string;
+  dismissToast: (id: string) => void;
+}
+
+export interface UseI18nResult {
+  t: (key: string, params?: TranslationParams) => string;
+  setLang: (lang: string) => Promise<void>;
+  getLang: () => string;
+  currentLang: string;
+  supported: string[];
+  apply: () => void;
+}
+
+export type TranslationParams = Record<
+  string,
+  string | number | boolean | null | undefined
+>;
+
+export type WizardMode = "add" | "edit";
+
+export interface OpenWizardOptions {
+  mode?: WizardMode;
+  remoteId?: string;
+  linkedDevices?: string[];
+}
+
+export interface RemoteWizardApi {
+  open: (options?: OpenWizardOptions) => void;
+  close: () => void;
+  onRemoteSeen: (remoteId: string) => void;
+  onCaptureTimeout: () => void;
+}
+
+export interface PairingWizardApi {
+  open: () => void;
+  close: () => void;
+  onPairingActive: () => void;
+  onDeviceAdded: (deviceId: string, deviceName: string) => void;
+  onPairFailed: (data?: { status?: string; message?: string }) => void;
+  onRemoteSeen: (remoteId: string) => void;
+  onCaptureTimeout: () => void;
+}

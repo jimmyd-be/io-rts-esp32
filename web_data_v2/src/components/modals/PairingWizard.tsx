@@ -9,19 +9,14 @@ import {
 } from "preact/hooks";
 import useI18n from "../../hooks/useI18n";
 import { useToast } from "../../hooks/useToast";
-import { ToastType } from "../ToastProvider";
+import {
+  PAIRING_DEVICE_TYPES,
+  PAIRING_MANUFACTURERS,
+} from "../../models/Constants";
+import { ToastType } from "../../models/Types";
 import { useOtaKey } from "../../hooks/api/useOtaKey.tsx";
 import { postAction } from "../deviceSettings/shared";
-
-export interface PairingWizardApi {
-  open: () => void;
-  close: () => void;
-  onPairingActive: () => void;
-  onDeviceAdded: (deviceId: string, deviceName: string) => void;
-  onPairFailed: (data?: { status?: string; message?: string }) => void;
-  onRemoteSeen: (remoteId: string) => void;
-  onCaptureTimeout: () => void;
-}
+import type { PairingWizardApi } from "../../models/Types";
 
 const PairingWizardContext = createContext<PairingWizardApi | null>(null);
 
@@ -51,18 +46,6 @@ type Step =
   | "add-by-address"
   | "remote-capture"
   | "remote-capture-confirm";
-
-const DEVICE_TYPES = [
-  [2, "Roller shutter"],
-  [3, "Awning"],
-  [10, "Blind"],
-  [0, "All types"],
-] as const;
-
-const MANUFACTURERS = [
-  [2, "Somfy (default)"],
-  [1, "Velux"],
-] as const;
 
 export function PairingWizardProvider({
   onDeviceAdded: onDeviceAddedProp,
@@ -713,7 +696,7 @@ export function PairingWizardProvider({
                         fontFamily: "inherit",
                       }}
                     >
-                      {DEVICE_TYPES.map(([val, label]) => (
+                      {PAIRING_DEVICE_TYPES.map(([val, label]) => (
                         <option key={val} value={val}>
                           {label}
                         </option>
@@ -755,7 +738,7 @@ export function PairingWizardProvider({
                         fontFamily: "inherit",
                       }}
                     >
-                      {MANUFACTURERS.map(([val, label]) => (
+                      {PAIRING_MANUFACTURERS.map(([val, label]) => (
                         <option key={val} value={val}>
                           {label}
                         </option>

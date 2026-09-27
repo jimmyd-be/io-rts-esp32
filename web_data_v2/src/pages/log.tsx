@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useWebSocket, WebSocketLogMessage } from "../hooks/useWebSocket";
+import { useWebSocket } from "../hooks/useWebSocket";
 import {
   clearStoredLogMessages,
   readStoredLogMessages,
-  type StoredLogEntry,
 } from "../utils/logStorage";
-
-export type LogLevel = StoredLogEntry["level"];
-export type LogFilter = "all" | "info" | "off";
-
-export type LogEntry = StoredLogEntry;
+import type {
+  LogEntry,
+  LogFilter,
+  LogLevel,
+  WebSocketLogMessage,
+} from "../models/Types";
 
 const logLevelVisible = (entryLevel: LogLevel, filter: LogFilter): boolean => {
   if (filter === "off") return false;
