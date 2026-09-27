@@ -2,14 +2,14 @@
 # Upload web files to the device.
 # JS and CSS are uploaded as pre-compressed .gz only (saves LittleFS space).
 # index.html and other files are uploaded as-is.
-# With no arguments, uploads everything in web_data_v2/.
+# With no arguments, uploads everything in frontend/.
 #
-# Usage: ./upload_web.sh [file ...]   (paths relative to web_data_v2/)
+# Usage: ./upload_web.sh [file ...]   (paths relative to frontend/)
 #   DEVICE=192.168.1.x ./upload_web.sh   (override target IP)
 
 set -e
 DEVICE=${DEVICE:-192.168.178.57}
-DIR="$(dirname "$0")/web_data_v2"
+DIR="$(dirname "$0")/frontend"
 
 KEY=$(curl -s "http://$DEVICE/api/ota/key" | python3 -c "import sys,json; print(json.load(sys.stdin)['key'])")
 if [ -z "$KEY" ]; then echo "ERROR: could not get OTA key from $DEVICE"; exit 1; fi
@@ -51,7 +51,7 @@ upload_file() {
 }
 
 if [ $# -eq 0 ]; then
-  # No arguments — upload all files in web_data_v2/ automatically (no hardcoded list).
+  # No arguments — upload all files in frontend/ automatically (no hardcoded list).
   # JS and CSS upload as .gz (compressed). All other files upload as-is.
   # Pre-existing .gz files for js/css are skipped — the *.js/css handler creates/uses them.
   while IFS= read -r -d '' full; do

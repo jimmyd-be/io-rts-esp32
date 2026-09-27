@@ -21,16 +21,16 @@ jobs:
           node-version: '24'
 
       - name: Install dependencies
-        run: cd web_data_v2 && npm i
+        run: cd frontend && npm i
 
       - name: Build frontend
-        run: cd web_data_v2 && npm run build
+        run: cd frontend && npm run build
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: frontend-artifacts
-          path: web_data_v2/dist
+          path: frontend/dist
 
 
   build-heltec:
@@ -49,7 +49,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-artifacts
-          path: web_data_v2/dist
+          path: frontend/dist
 
       - name: Build firmware
         run: |
@@ -97,7 +97,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-artifacts
-          path: web_data_v2/dist
+          path: frontend/dist
 
       - name: Build firmware
         run: |
@@ -145,7 +145,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: frontend-artifacts
-          path: web_data_v2/dist
+          path: frontend/dist
 
       - name: Build firmware
         run: |

@@ -14,9 +14,9 @@ jobs:
         with:
           node-version: '24'
       - name: Install dependencies
-        run: cd web_data_v2 && npm install
+        run: cd frontend && npm install
       - name: Run build
-        run: cd web_data_v2 && npm run build
+        run: cd frontend && npm run build
 
   static-analysis:
     name: C++ Static Analysis
