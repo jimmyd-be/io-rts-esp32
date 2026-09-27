@@ -1,5 +1,5 @@
 import { useState } from "preact/hooks";
-import { useRemoteWizard } from "./Modals/remoteWizard.tsx";
+import { useRemoteWizard } from "./modals/remoteWizard.tsx";
 import { ApiResponse } from "../hooks/useApi";
 import { Remote } from "../models/Types";
 

@@ -2,7 +2,7 @@ import { DeviceCard } from "./DeviceCard.tsx";
 import { Device } from "../models/Types.ts";
 import { useEffect, useState } from "preact/hooks";
 import useI18n from "../hooks/useI18n.tsx";
-import { usePairingWizard } from "./Modals/PairingWizard.tsx";
+import { usePairingWizard } from "./modals/PairingWizard.tsx";
 
 interface DevicesSectionProps {
   devices?: Device[];

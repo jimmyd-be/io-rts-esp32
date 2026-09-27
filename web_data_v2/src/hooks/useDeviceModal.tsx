@@ -1,7 +1,7 @@
 import { ComponentChildren, createContext } from "preact";
 import { useCallback, useContext, useMemo, useState } from "preact/hooks";
 import { Device } from "../models/Types";
-import { DeviceModal } from "../components/Modals/DeviceModal";
+import { DeviceModal } from "../components/modals/DeviceModal";
 
 interface DeviceModalApi {
   isOpen: boolean;

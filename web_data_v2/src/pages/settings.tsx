@@ -1,20 +1,20 @@
-import { WifiSettings } from "../components/Settings/Wifi";
-import { NetworkSettings } from "../components/Settings/Network";
-import { FallbackApSettings } from "../components/Settings/FallbackAp";
-import { MqttSettings } from "../components/Settings/Mqtt";
-import { SyslogSettings } from "../components/Settings/Syslog";
-import { SomfySettings } from "../components/Settings/Somfy";
-import { ControllerSettings } from "../components/Settings/Controller";
-import { IoSystemKeySettings } from "../components/Settings/IoSystemKey";
-import { OtaKeySettings } from "../components/Settings/OtaKey";
-import { FirmwareSettings } from "../components/Settings/Firmware";
-import { WebUISettings } from "../components/Settings/WebUi";
-import { WebUIUpdateSettings } from "../components/Settings/WebUiUpdate";
-import { BackupSettings } from "../components/Settings/Backup";
-import { RebootSettings } from "../components/Settings/Reboot";
-import { SoftwareUpdateSettings } from "../components/Settings/SoftwareUpdate";
-import { FirmwareUpdateSettings } from "../components/Settings/FirmwareUpdate";
-import { PairingLogs } from "../components/Settings/PairingLogs";
+import { WifiSettings } from "../components/settings/Wifi";
+import { NetworkSettings } from "../components/settings/Network";
+import { FallbackApSettings } from "../components/settings/FallbackAp";
+import { MqttSettings } from "../components/settings/Mqtt";
+import { SyslogSettings } from "../components/settings/Syslog";
+import { SomfySettings } from "../components/settings/Somfy";
+import { ControllerSettings } from "../components/settings/Controller";
+import { IoSystemKeySettings } from "../components/settings/IoSystemKey";
+import { OtaKeySettings } from "../components/settings/OtaKey";
+import { FirmwareSettings } from "../components/settings/Firmware";
+import { WebUISettings } from "../components/settings/WebUi";
+import { WebUIUpdateSettings } from "../components/settings/WebUiUpdate";
+import { BackupSettings } from "../components/settings/Backup";
+import { RebootSettings } from "../components/settings/Reboot";
+import { SoftwareUpdateSettings } from "../components/settings/SoftwareUpdate";
+import { FirmwareUpdateSettings } from "../components/settings/FirmwareUpdate";
+import { PairingLogs } from "../components/settings/PairingLogs";
 import { useInfo } from "../hooks/api/useInfo";
 
 export function Settings() {
