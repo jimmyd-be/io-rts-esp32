@@ -30,7 +30,7 @@ jobs:
           cppcheck \
             --enable=warning \
             --error-exitcode=1 \
-            --suppressions-list=.cppcheck-suppressions \
+            --suppressions-list=./config/.cppcheck-suppressions \
             --inline-suppr \
             -I main \
             -I helpers \
