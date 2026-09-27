@@ -162,7 +162,6 @@ static void cmd_line_task(void *arg)
                 {
                     retry_counter++;
                     int32_t penalty = 2 * retry_counter;
-                    printf("Login failed! %ld attempts failed, %ld seconds penalty!\n", retry_counter, penalty);
                     vTaskDelay(pdMS_TO_TICKS(penalty * 1000));
                 }
             }
