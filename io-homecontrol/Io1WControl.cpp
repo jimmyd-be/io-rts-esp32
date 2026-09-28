@@ -61,7 +61,7 @@ bool Io1WControl::ReSendPair(IoDeviceInformation &info)
     // payload: enc_key[16] | manufacturer[1] | data(0x01) | seq[2] = 20 bytes
     uint8_t params[20];
     memcpy(params, enc_key, AES_KEY_SIZE);
-    params[16] = static_cast<uint8_t>(info.manufacturer);
+    params[16] = static_cast<uint8_t>(Manufacturer::SOMFY);
     params[17] = 0x01;
     params[18] = seq[0]; params[19] = seq[1];
 
