@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from "react";
+} from "preact/compat";
 import {
   cancelCaptureRequest,
   deleteRemote,
@@ -24,6 +24,7 @@ import type {
   WizardMode,
 } from "../../models/Types";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
+import { ReactNode } from "preact/compat";
 
 type Step = "choose" | "capture" | "manual" | "devices";
 
@@ -44,7 +45,7 @@ export interface RemoteWizardProviderProps {
   devices: Device[];
   remotes: Remote[];
   onSaved?: () => void | Promise<void>;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export function RemoteWizardProvider({
