@@ -9,14 +9,19 @@ import {
 } from "preact/hooks";
 import useI18n from "../../hooks/useI18n";
 import { useToast } from "../../hooks/useToast";
-import {
-  PAIRING_DEVICE_TYPES,
-  PAIRING_MANUFACTURERS,
-} from "../../models/Constants";
 import { ToastType } from "../../models/Types";
 import { useOtaKey } from "../../hooks/api/useOtaKey.tsx";
 import { postAction } from "../deviceSettings/shared";
 import type { PairingWizardApi } from "../../models/Types";
+import {
+  PairingAddByAddressStep,
+  PairingChoiceStep,
+  PairingOneWireConfirmStep,
+  PairingOneWireWizardStep,
+  PairingRemoteCaptureConfirmStep,
+  PairingRemoteCaptureStep,
+  PairingTwoWireDiscoveryStep,
+} from "./PairingWizardSteps";
 
 const PairingWizardContext = createContext<PairingWizardApi | null>(null);
 
@@ -439,626 +444,97 @@ export function PairingWizardProvider({
               <h3>{t("popup.pair_wizard_title") || "Pair Device"}</h3>
 
               {step === "choose" && (
-                <div>
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      color: "var(--text2)",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    Choose the connection type for this device:
-                  </p>
-
-                  {/* 2W Card */}
-                  <div
-                    style={{
-                      background: "var(--surface2)",
-                      border: "1px solid var(--separator)",
-                      borderRadius: "10px",
-                      padding: "12px 14px",
-                      marginBottom: "8px",
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background =
-                        "var(--surface3)";
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        "var(--blue,#5b9ecf)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background =
-                        "var(--surface2)";
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        "var(--separator)";
-                    }}
-                    onClick={start2wDiscovery}
-                  >
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: "600",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      2W — Bidirectional (most devices)
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "var(--text2)",
-                        lineHeight: "1.45",
-                      }}
-                    >
-                      The device reports its real position back to the
-                      controller. Supports auto-calibration and accurate
-                      position tracking. Required for Somfy RS100 IO, Velux, and
-                      similar modern motors.
-                    </div>
-                  </div>
-
-                  {/* 1W Card */}
-                  <div
-                    style={{
-                      background: "var(--surface2)",
-                      border: "1px solid var(--separator)",
-                      borderRadius: "10px",
-                      padding: "12px 14px",
-                      marginBottom: "8px",
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background =
-                        "var(--surface3)";
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        "var(--blue,#5b9ecf)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background =
-                        "var(--surface2)";
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        "var(--separator)";
-                    }}
-                    onClick={() => {
-                      setDeviceName1w("");
-                      setDeviceType1w(2);
-                      setManufacturer1w(2);
-                      setStep("1w-wizard");
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: "600",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      1W — Simplex (TX only)
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "var(--text2)",
-                        lineHeight: "1.45",
-                      }}
-                    >
-                      Commands are sent only; the device never replies. Position
-                      is estimated by a timer — manual calibration needed. Used
-                      for older or budget motors that do not send status.
-                    </div>
-                  </div>
-
-                  {/* Add by Address Card */}
-                  <div
-                    style={{
-                      background: "var(--surface2)",
-                      border: "1px solid var(--separator)",
-                      borderRadius: "10px",
-                      padding: "12px 14px",
-                      marginBottom: "8px",
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background =
-                        "var(--surface3)";
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        "var(--blue,#5b9ecf)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background =
-                        "var(--surface2)";
-                      (e.currentTarget as HTMLElement).style.borderColor =
-                        "var(--separator)";
-                    }}
-                    onClick={() => {
-                      setAddressInput("");
-                      setNameInputAddress("");
-                      setProtocolAddress("2W");
-                      setDeviceTypeAddress(0);
-                      setIsLowPowerAddress(false);
-                      setStep("add-by-address");
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: "600",
-                        marginBottom: "4px",
-                      }}
-                    >
-                      Add by address
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "var(--text2)",
-                        lineHeight: "1.45",
-                      }}
-                    >
-                      Device already has the system key — enter its address
-                      directly. Use when re-adding a known device after a
-                      controller reset. No radio pairing needed.
-                    </div>
-                  </div>
-
-                  <div
-                    style={{ display: "flex", gap: "8px", marginTop: "16px" }}
-                  >
-                    <button className="btn-ghost" onClick={close}>
-                      {t("button.cancel") || "Cancel"}
-                    </button>
-                  </div>
-                </div>
+                <PairingChoiceStep
+                  t={t}
+                  close={close}
+                  start2wDiscovery={start2wDiscovery}
+                  go1wWizard={() => {
+                    setDeviceName1w("");
+                    setDeviceType1w(2);
+                    setManufacturer1w(2);
+                    setStep("1w-wizard");
+                  }}
+                  goAddressWizard={() => {
+                    setAddressInput("");
+                    setNameInputAddress("");
+                    setProtocolAddress("2W");
+                    setDeviceTypeAddress(0);
+                    setIsLowPowerAddress(false);
+                    setStep("add-by-address");
+                  }}
+                />
               )}
 
               {step === "2w-discovery" && (
-                <div>
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      color: "var(--text2)",
-                      marginBottom: "16px",
-                      minHeight: "40px",
-                    }}
-                    dangerouslySetInnerHTML={{ __html: statusHtml }}
-                  />
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button className="btn-ghost" onClick={close}>
-                      {t("button.cancel") || "Cancel"}
-                    </button>
-                  </div>
-                </div>
+                <PairingTwoWireDiscoveryStep
+                  t={t}
+                  close={close}
+                  statusHtml={statusHtml}
+                />
               )}
 
               {step === "1w-wizard" && (
-                <div>
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      color: "var(--text2)",
-                      marginBottom: "10px",
-                      lineHeight: "1.5",
-                    }}
-                  >
-                    Put device in pairing mode (hold programming button until
-                    LED blinks), enter a name, then click Pair.
-                  </p>
-
-                  <input
-                    type="text"
-                    placeholder="Device name"
-                    maxLength={31}
-                    value={deviceName1w}
-                    onInput={(e) => setDeviceName1w(e.currentTarget.value)}
-                    style={{
-                      width: "100%",
-                      background: "var(--input-bg,var(--surface2))",
-                      border: "1px solid var(--input-border,var(--surface3))",
-                      borderRadius: "7px",
-                      color: "var(--text)",
-                      padding: "8px 12px",
-                      fontSize: "13px",
-                      fontFamily: "inherit",
-                      outline: "none",
-                      marginBottom: "6px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "var(--text3)",
-                        width: "90px",
-                        flexShrink: 0,
-                      }}
-                    >
-                      Device type
-                    </span>
-                    <select
-                      value={deviceType1w}
-                      onChange={(e) =>
-                        setDeviceType1w(parseInt(e.currentTarget.value, 10))
-                      }
-                      style={{
-                        flex: 1,
-                        background: "var(--input-bg,var(--surface2))",
-                        border: "1px solid var(--input-border,var(--surface3))",
-                        borderRadius: "6px",
-                        color: "var(--text)",
-                        padding: "6px 8px",
-                        fontSize: "12px",
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      {PAIRING_DEVICE_TYPES.map(([val, label]) => (
-                        <option key={val} value={val}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "var(--text3)",
-                        width: "90px",
-                        flexShrink: 0,
-                      }}
-                    >
-                      Manufacturer
-                    </span>
-                    <select
-                      value={manufacturer1w}
-                      onChange={(e) =>
-                        setManufacturer1w(parseInt(e.currentTarget.value, 10))
-                      }
-                      style={{
-                        flex: 1,
-                        background: "var(--input-bg,var(--surface2))",
-                        border: "1px solid var(--input-border,var(--surface3))",
-                        borderRadius: "6px",
-                        color: "var(--text)",
-                        padding: "6px 8px",
-                        fontSize: "12px",
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      {PAIRING_MANUFACTURERS.map(([val, label]) => (
-                        <option key={val} value={val}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {status && (
-                    <p
-                      style={{
-                        fontSize: "12px",
-                        color: "var(--text2)",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      {status}
-                    </p>
-                  )}
-
-                  <div
-                    style={{ display: "flex", gap: "8px", marginTop: "16px" }}
-                  >
-                    <button
-                      className="btn-danger-confirm"
-                      onClick={send1wPairingFrames}
-                    >
-                      {t("button.pair") || "Pair"}
-                    </button>
-                    <button
-                      className="btn-ghost"
-                      onClick={() => setStep("choose")}
-                    >
-                      {t("button.back") || "Back"}
-                    </button>
-                    <button className="btn-ghost" onClick={close}>
-                      {t("button.cancel") || "Cancel"}
-                    </button>
-                  </div>
-                </div>
+                <PairingOneWireWizardStep
+                  t={t}
+                  close={close}
+                  deviceName1w={deviceName1w}
+                  deviceType1w={deviceType1w}
+                  manufacturer1w={manufacturer1w}
+                  status={status}
+                  setDeviceName1w={setDeviceName1w}
+                  setDeviceType1w={setDeviceType1w}
+                  setManufacturer1w={setManufacturer1w}
+                  send1wPairingFrames={send1wPairingFrames}
+                  goToChoose={() => setStep("choose")}
+                />
               )}
 
               {step === "1w-confirm" && (
-                <div>
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      color: "var(--text2)",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    {status}
-                  </p>
-
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button
-                      className="btn-danger-confirm"
-                      onClick={confirm1wPairing}
-                    >
-                      {t("button.confirm") || "Confirmed ✓"}
-                    </button>
-                    <button className="btn-ghost" onClick={resend1wPairing}>
-                      {t("button.resend") || "Resend"}
-                    </button>
-                    <button className="btn-ghost" onClick={cancel1wPairing}>
-                      {t("button.cancel") || "Cancel"}
-                    </button>
-                  </div>
-                </div>
+                <PairingOneWireConfirmStep
+                  t={t}
+                  close={close}
+                  status={status}
+                  confirm1wPairing={confirm1wPairing}
+                  resend1wPairing={resend1wPairing}
+                  cancel1wPairing={cancel1wPairing}
+                />
               )}
 
               {step === "add-by-address" && (
-                <div>
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      color: "var(--text2)",
-                      marginBottom: "10px",
-                      lineHeight: "1.5",
-                    }}
-                  >
-                    Enter the device address and select its type. The device
-                    must already share the system key.
-                  </p>
-
-                  <input
-                    type="text"
-                    placeholder="Address (e.g. 750C4B)"
-                    maxLength={6}
-                    value={addressInput}
-                    onInput={(e) =>
-                      setAddressInput(e.currentTarget.value.toUpperCase())
-                    }
-                    style={{
-                      width: "100%",
-                      background: "var(--input-bg,var(--surface2))",
-                      border: "1px solid var(--input-border,var(--surface3))",
-                      borderRadius: "7px",
-                      color: "var(--text)",
-                      padding: "8px 12px",
-                      fontSize: "13px",
-                      fontFamily: "var(--mono)",
-                      textTransform: "uppercase",
-                      outline: "none",
-                      marginBottom: "6px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="Name (optional — fetched automatically)"
-                    maxLength={31}
-                    value={nameInputAddress}
-                    onInput={(e) => setNameInputAddress(e.currentTarget.value)}
-                    style={{
-                      width: "100%",
-                      background: "var(--input-bg,var(--surface2))",
-                      border: "1px solid var(--input-border,var(--surface3))",
-                      borderRadius: "7px",
-                      color: "var(--text)",
-                      padding: "8px 12px",
-                      fontSize: "13px",
-                      fontFamily: "inherit",
-                      outline: "none",
-                      marginBottom: "6px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "var(--text3)",
-                        width: "90px",
-                        flexShrink: 0,
-                      }}
-                    >
-                      Protocol
-                    </span>
-                    <select
-                      value={protocolAddress}
-                      onChange={(e) =>
-                        setProtocolAddress(e.currentTarget.value)
-                      }
-                      style={{
-                        flex: 1,
-                        background: "var(--input-bg,var(--surface2))",
-                        border: "1px solid var(--input-border,var(--surface3))",
-                        borderRadius: "6px",
-                        color: "var(--text)",
-                        padding: "6px 8px",
-                        fontSize: "12px",
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      <option value="2W">2W — Bidirectional</option>
-                      <option value="1W">1W — Simplex</option>
-                    </select>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: "var(--text3)",
-                        width: "90px",
-                        flexShrink: 0,
-                      }}
-                    >
-                      Device type
-                    </span>
-                    <select
-                      value={deviceTypeAddress}
-                      onChange={(e) =>
-                        setDeviceTypeAddress(
-                          parseInt(e.currentTarget.value, 10),
-                        )
-                      }
-                      style={{
-                        flex: 1,
-                        background: "var(--input-bg,var(--surface2))",
-                        border: "1px solid var(--input-border,var(--surface3))",
-                        borderRadius: "6px",
-                        color: "var(--text)",
-                        padding: "6px 8px",
-                        fontSize: "12px",
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      <option value={0}>Unknown</option>
-                      <option value={2}>Roller shutter</option>
-                      <option value={3}>Awning</option>
-                      <option value={10}>Blind</option>
-                    </select>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      marginBottom: "10px",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      id="addr-lp"
-                      checked={isLowPowerAddress}
-                      onChange={(e) =>
-                        setIsLowPowerAddress(e.currentTarget.checked)
-                      }
-                    />
-                    <label
-                      htmlFor="addr-lp"
-                      style={{
-                        fontSize: "12px",
-                        color: "var(--text2)",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Low power device (battery-operated)
-                    </label>
-                  </div>
-
-                  {status && (
-                    <p
-                      style={{
-                        fontSize: "12px",
-                        color: "var(--text2)",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      {status}
-                    </p>
-                  )}
-
-                  <div
-                    style={{ display: "flex", gap: "8px", marginTop: "16px" }}
-                  >
-                    <button
-                      className="btn-danger-confirm"
-                      onClick={addDeviceByAddress}
-                    >
-                      {t("button.add_device") || "Add Device"}
-                    </button>
-                    <button
-                      className="btn-ghost"
-                      onClick={() => setStep("choose")}
-                    >
-                      {t("button.back") || "Back"}
-                    </button>
-                    <button className="btn-ghost" onClick={close}>
-                      {t("button.cancel") || "Cancel"}
-                    </button>
-                  </div>
-                </div>
+                <PairingAddByAddressStep
+                  t={t}
+                  close={close}
+                  addressInput={addressInput}
+                  nameInputAddress={nameInputAddress}
+                  protocolAddress={protocolAddress}
+                  deviceTypeAddress={deviceTypeAddress}
+                  isLowPowerAddress={isLowPowerAddress}
+                  status={status}
+                  setAddressInput={setAddressInput}
+                  setNameInputAddress={setNameInputAddress}
+                  setProtocolAddress={setProtocolAddress}
+                  setDeviceTypeAddress={setDeviceTypeAddress}
+                  setIsLowPowerAddress={setIsLowPowerAddress}
+                  addDeviceByAddress={addDeviceByAddress}
+                  goToChoose={() => setStep("choose")}
+                />
               )}
 
               {step === "remote-capture" && (
-                <div>
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      color: "var(--text2)",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    {status}
-                  </p>
-
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button className="btn-ghost" onClick={close}>
-                      {t("button.cancel") || "Cancel"}
-                    </button>
-                  </div>
-                </div>
+                <PairingRemoteCaptureStep
+                  t={t}
+                  close={close}
+                  status={status}
+                />
               )}
 
               {step === "remote-capture-confirm" && (
-                <div>
-                  <p
-                    style={{
-                      fontSize: "13px",
-                      color: "var(--text2)",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    {status}
-                  </p>
-
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <button
-                      className="btn-danger-confirm"
-                      onClick={linkRemoteToDevice}
-                    >
-                      {t("button.link") || "Link"}
-                    </button>
-                    <button className="btn-ghost" onClick={close}>
-                      {t("button.skip") || "Skip"}
-                    </button>
-                  </div>
-                </div>
+                <PairingRemoteCaptureConfirmStep
+                  t={t}
+                  close={close}
+                  status={status}
+                  linkRemoteToDevice={linkRemoteToDevice}
+                />
               )}
             </div>
           </div>
