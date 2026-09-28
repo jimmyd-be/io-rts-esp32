@@ -1,6 +1,16 @@
+import { useOtaKey } from "../../hooks/api/useOtaKey.tsx";
+
 export function PairingLogs() {
+
+  const otaKey = useOtaKey();
+
   const downloadPairingLogs = async () => {
-    const response = await fetch("/api/pairing-log");
+    const response = await fetch("/api/pairing-log", {
+      headers: {
+        "Content-Type": "application/json",
+        "X-OTA-Key": otaKey.data?.key || "",
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`Pairing log request failed: ${response.status}`);

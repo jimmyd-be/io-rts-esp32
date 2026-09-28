@@ -1,5 +1,6 @@
 import { FAVORITE_POSITION_STORAGE_PREFIX } from "../../models/Constants";
 import type { Device } from "../../models/Types.ts";
+
 export { DEVICE_TYPES, MANUFACTURERS } from "../../models/Constants";
 export type { DeviceRowProps } from "../../models/Types.ts";
 

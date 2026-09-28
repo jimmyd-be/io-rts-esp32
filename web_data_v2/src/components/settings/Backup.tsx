@@ -107,6 +107,11 @@ export function BackupSettings() {
     }
   };
 
+  if (!otaData.data) {
+    return (
+      <div>Loading...</div>
+    )}
+
   return (
     <div class="acc-row" data-help="backup">
       <AccordionHead

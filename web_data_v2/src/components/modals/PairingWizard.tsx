@@ -162,7 +162,8 @@ export function PairingWizardProvider({
 
     fetch("/api/pair/start", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json",
+      "X-OTA-Key": otaKey.data?.key || ""},
     }).catch((e) => {
       clearCountdownTimer();
       setStatusHtml(
@@ -361,7 +362,9 @@ export function PairingWizardProvider({
 
     fetch("/api/remote/capture/cancel", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json",
+        "X-OTA-Key": otaKey.data?.key || ""
+      },
       body: JSON.stringify({}),
     }).catch(() => {});
 
