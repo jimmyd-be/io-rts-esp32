@@ -24,6 +24,19 @@ export function BackupSettings() {
   const otaHeaders = (): Record<string, string> =>
     otaData.data?.key ? { "X-OTA-Key": otaData.data.key } : {};
 
+  const readBackupResponse = async (
+    response: Response,
+  ): Promise<BackupResponse | undefined> => {
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) return undefined;
+
+    try {
+      return (await response.json()) as BackupResponse;
+    } catch {
+      return undefined;
+    }
+  };
+
   const exportBackup = async () => {
     setBusy(true);
     setResult(t("toast.backup-exporting"));
@@ -61,10 +74,13 @@ export function BackupSettings() {
         headers: { "Content-Type": "application/json", ...otaHeaders() },
         body: await file.text(),
       });
-      const data = (await response.json()) as BackupResponse;
-      if (!response.ok)
-        throw new Error(data.message || `HTTP ${response.status}`);
-      setResult(data.message || t("toast.backup-importing"), data.success);
+      if (!response.ok) {
+        const data = await readBackupResponse(response);
+        throw new Error(data?.message || `HTTP ${response.status}`);
+      }
+
+      const data = await readBackupResponse(response);
+      setResult(data?.message || t("toast.backup-importing"), data?.success);
     } catch (error) {
       setResult(
         t("toast.backup-restore-failed", {
@@ -88,12 +104,15 @@ export function BackupSettings() {
         method: "POST",
         headers: otaHeaders(),
       });
-      const data = (await response.json()) as BackupResponse;
-      if (!response.ok)
-        throw new Error(data.message || `HTTP ${response.status}`);
+      if (!response.ok) {
+        const data = await readBackupResponse(response);
+        throw new Error(data?.message || `HTTP ${response.status}`);
+      }
+
+      const data = await readBackupResponse(response);
       setResult(
-        data.message || t("toast.factory-reset-rebooting"),
-        data.success,
+        data?.message || t("toast.factory-reset-rebooting"),
+        data?.success,
       );
     } catch (error) {
       setResult(
