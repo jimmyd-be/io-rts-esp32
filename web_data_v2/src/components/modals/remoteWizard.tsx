@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useCallback,
   useContext,
@@ -75,16 +75,24 @@ export function RemoteWizardProvider({
     text: string;
     tone: "" | "red" | "green";
   }>({ text: "", tone: "" });
-  const [, setSeconds] = useState(CAPTURE_SECONDS);
+  const [seconds, setSeconds] = useState(CAPTURE_SECONDS);
   const [, setShowRetry] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const deviceStepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const captureActiveRef = useRef(false);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current !== null) {
       clearInterval(timerRef.current);
       timerRef.current = null;
+    }
+  }, []);
+
+  const clearDeviceStepTimer = useCallback(() => {
+    if (deviceStepTimerRef.current !== null) {
+      clearTimeout(deviceStepTimerRef.current);
+      deviceStepTimerRef.current = null;
     }
   }, []);
 
@@ -191,9 +199,10 @@ export function RemoteWizardProvider({
 
   const close = useCallback(() => {
     cancelCapture();
+    clearDeviceStepTimer();
     setRemoteId("");
     setIsOpen(false);
-  }, [cancelCapture]);
+  }, [cancelCapture, clearDeviceStepTimer]);
 
   const onRemoteSeen = useCallback(
     (id: string) => {
@@ -203,9 +212,13 @@ export function RemoteWizardProvider({
         text: t("status.remote_detected", { id }),
         tone: "green",
       });
-      setTimeout(() => goToDeviceStep(id), 800);
+      clearDeviceStepTimer();
+      deviceStepTimerRef.current = setTimeout(() => {
+        deviceStepTimerRef.current = null;
+        goToDeviceStep(id);
+      }, 800);
     },
-    [cancelCapture, goToDeviceStep],
+    [cancelCapture, clearDeviceStepTimer, goToDeviceStep, t],
   );
 
   const onCaptureTimeout = useCallback(() => {
@@ -215,7 +228,13 @@ export function RemoteWizardProvider({
     setShowRetry(true);
   }, [cancelCapture]);
 
-  useEffect(() => clearTimer, [clearTimer]);
+  useEffect(
+    () => () => {
+      clearTimer();
+      clearDeviceStepTimer();
+    },
+    [clearDeviceStepTimer, clearTimer],
+  );
 
   const toggleDevice = useCallback((id: string) => {
     setSelectedIds((prev) =>
@@ -356,7 +375,7 @@ export function RemoteWizardProvider({
                       Press any button on the remote…
                     </p>
                     <span id="arm-countdown" class="arm-countdown">
-                      30s
+                      {seconds}s
                     </span>
                   </div>
                   <div class="key-modal-actions">
