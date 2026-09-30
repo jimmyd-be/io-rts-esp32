@@ -139,7 +139,7 @@ export function RemoteWizardProvider({
       });
       setShowRetry(true);
     });
-  }, [clearTimer, otaData.data?.key]);
+  }, [clearTimer, otaData.data?.key, t]);
 
   const selectedForDevices = useCallback(
     (linked: string[]) =>
