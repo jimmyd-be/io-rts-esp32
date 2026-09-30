@@ -170,20 +170,22 @@ export function PairingChoiceStep({
 
 export function PairingTwoWireDiscoveryStep({
   t,
-  statusHtml,
+  statusText,
+  isError,
   close,
-}: PairingStepProps & { statusHtml: string }) {
+}: PairingStepProps & { statusText: string; isError: boolean }) {
   return (
     <div>
       <p
         style={{
           fontSize: "13px",
-          color: "var(--text2)",
+          color: isError ? "var(--red)" : "var(--text2)",
           marginBottom: "16px",
           minHeight: "40px",
         }}
-        dangerouslySetInnerHTML={{ __html: statusHtml }}
-      />
+      >
+        {statusText}
+      </p>
       <div style={{ display: "flex", gap: "8px" }}>
         <button className="btn-ghost" onClick={close}>
           {t("button.cancel") || "Cancel"}

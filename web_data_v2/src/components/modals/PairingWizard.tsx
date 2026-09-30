@@ -64,7 +64,8 @@ export function PairingWizardProvider({
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState<Step>("choose");
   const [status, setStatus] = useState("");
-  const [statusHtml, setStatusHtml] = useState("");
+  const [discoveryStatusText, setDiscoveryStatusText] = useState("");
+  const [isDiscoveryError, setIsDiscoveryError] = useState(false);
 
   // 2W Discovery
   const [countdown, setCountdown] = useState(120);
@@ -103,7 +104,8 @@ export function PairingWizardProvider({
     setIsOpen(false);
     setStep("choose");
     setStatus("");
-    setStatusHtml("");
+    setDiscoveryStatusText("");
+    setIsDiscoveryError(false);
     setDeviceName1w("");
     setDeviceType1w(2);
     setManufacturer1w(2);
@@ -124,7 +126,8 @@ export function PairingWizardProvider({
     setIsOpen(true);
     setStep("choose");
     setStatus("");
-    setStatusHtml("");
+    setDiscoveryStatusText("");
+    setIsDiscoveryError(false);
     setDeviceName1w("");
     setDeviceType1w(2);
     setManufacturer1w(2);
@@ -150,7 +153,8 @@ export function PairingWizardProvider({
   const start2wDiscovery = useCallback(() => {
     setStep("2w-discovery");
     setCountdown(120);
-    setStatusHtml("");
+    setDiscoveryStatusText("");
+    setIsDiscoveryError(false);
     clearCountdownTimer();
 
     countdownTimerRef.current = setInterval(() => {
@@ -171,9 +175,10 @@ export function PairingWizardProvider({
       "X-OTA-Key": otaKey.data?.key || ""},
     }).catch((e) => {
       clearCountdownTimer();
-      setStatusHtml(
+      setDiscoveryStatusText(
         `${t("popup.pair_failed") || "Pairing request failed."} ${e.message}`,
       );
+      setIsDiscoveryError(true);
     });
   }, [t, clearCountdownTimer]);
 
@@ -324,15 +329,15 @@ export function PairingWizardProvider({
       clearCountdownTimer();
 
       if (data?.status === "key_mismatch") {
-        setStatusHtml(
-          `<span style="color:var(--red)">${
-            data.message ||
+        setDiscoveryStatusText(
+          data.message ||
             t("popup.pair_key_mismatch") ||
-            "Device found but has a different system key. Factory reset the device and try again."
-          }</span>`,
+            "Device found but has a different system key. Factory reset the device and try again.",
         );
+        setIsDiscoveryError(true);
       } else {
-        setStatus(t("popup.pair_timeout") || "No device found.");
+        setDiscoveryStatusText(t("popup.pair_timeout") || "No device found.");
+        setIsDiscoveryError(false);
       }
     },
     [isOpen, clearCountdownTimer, t],
@@ -395,9 +400,10 @@ export function PairingWizardProvider({
   useEffect(() => {
     if (step === "2w-discovery") {
       const display = formatTime(countdown);
-      setStatusHtml(
-        `${t("popup.pair_step2_scanning") || "Scanning up to 2 minutes..."} <strong>${display}</strong>`,
+      setDiscoveryStatusText(
+        `${t("popup.pair_step2_scanning") || "Scanning up to 2 minutes..."} ${display}`,
       );
+      setIsDiscoveryError(false);
     }
   }, [countdown, step, t]);
 
@@ -469,7 +475,8 @@ export function PairingWizardProvider({
                 <PairingTwoWireDiscoveryStep
                   t={t}
                   close={close}
-                  statusHtml={statusHtml}
+                  statusText={discoveryStatusText}
+                  isError={isDiscoveryError}
                 />
               )}
 
