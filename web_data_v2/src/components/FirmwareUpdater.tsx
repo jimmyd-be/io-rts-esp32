@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "preact/hooks";
 import { useGithubReleases } from "../hooks/api/useGithubReleases";
 import { useInfo } from "../hooks/api/useInfo";
 import { GithubReleaseResponse } from "../models/Types";
+import { useOtaKey } from "../hooks/api/useOtaKey.tsx";
 
 const DISMISSED_KEY = "updateDismissed";
 const CHANNEL_KEY = "updateChannel";
@@ -105,6 +106,8 @@ export function FirmwareUpdater() {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState("");
 
+  const otaKey = useOtaKey();
+
   const release = useMemo(() => {
     const channel = localStorage.getItem(CHANNEL_KEY) || DEFAULT_CHANNEL;
     return releases.data?.find((candidate) => {
@@ -152,15 +155,9 @@ export function FirmwareUpdater() {
     setError("");
     setStatus({ label: "Starting update…", progress: 0 });
     try {
-      const keyResponse = await fetch(`/api/ota/key?${Date.now()}`, {
-        cache: "no-store",
-      });
-      if (!keyResponse.ok) throw new Error("Failed to retrieve OTA key.");
-      const keyData = (await keyResponse.json()) as { key?: string };
-      if (!keyData.key) throw new Error("Failed to retrieve OTA key.");
 
       try {
-        await otaFromUrl(firmwareUrl, "firmware", keyData.key, (label) =>
+        await otaFromUrl(firmwareUrl, "firmware", otaKey.data?.key as string, (label) =>
           setStatus({ label, progress: 25 }),
         );
       } catch (updateError) {
@@ -173,7 +170,7 @@ export function FirmwareUpdater() {
       });
       await pollUntilOnline(Date.now() + 60000);
       try {
-        await otaFromUrl(webUrl, "web", keyData.key, (label) =>
+        await otaFromUrl(webUrl, "web", otaKey.data?.key as string, (label) =>
           setStatus({ label, progress: 75 }),
         );
       } catch (updateError) {
