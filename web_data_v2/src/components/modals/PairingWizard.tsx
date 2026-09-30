@@ -180,7 +180,7 @@ export function PairingWizardProvider({
       );
       setIsDiscoveryError(true);
     });
-  }, [t, clearCountdownTimer]);
+  }, [t, clearCountdownTimer, otaKey.data?.key]);
 
   // 1W Wizard
   const send1wPairingFrames = useCallback(() => {

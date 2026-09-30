@@ -131,7 +131,7 @@ export function RemoteWizardProvider({
       });
       setShowRetry(true);
     });
-  }, [clearTimer]);
+  }, [clearTimer, otaData.data?.key]);
 
   const selectedForDevices = useCallback(
     (linked: string[]) =>
@@ -282,7 +282,7 @@ export function RemoteWizardProvider({
       setDevicesError("Error: " + (e as Error).message);
       setSaving(false);
     }
-  }, [mode, remoteId, selectedIds, close, onSaved]);
+  }, [mode, remoteId, selectedIds, close, onSaved, otaData.data?.key]);
 
   const remove = useCallback(async () => {
     if (!confirm(t("confirm.delete_remote", { id: remoteId }))) return;
@@ -294,7 +294,7 @@ export function RemoteWizardProvider({
     } catch (e) {
       setDevicesError("Error: " + (e as Error).message);
     }
-  }, [remoteId, close, onSaved]);
+  }, [remoteId, close, onSaved, otaData.data?.key]);
 
   const api = useMemo<RemoteWizardApi>(
     () => ({ open, close, onRemoteSeen, onCaptureTimeout }),
