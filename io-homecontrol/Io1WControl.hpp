@@ -12,7 +12,7 @@ namespace iohome
 /// Builds and transmits 1W io-homecontrol frames by calling TransmitFrame on an
 /// existing IoHomeControl instance. Each command is sent 4 times on CH2 with a
 /// long preamble (LPM=1). The source address in every frame is info.node_id —
-/// each 1W device has its own virtual remote address, matching cridp's design.
+/// each 1W device has its own virtual remote address (node_id).
 class Io1WControl
 {
 public:
@@ -47,7 +47,7 @@ public:
     bool Stop(IoDeviceInformation &info);
 
 private:
-    void BuildBroadcastTarget(uint8_t dest[NODE_ID_SIZE], DeviceType type) const;
+    void BuildBroadcastTarget(uint8_t dest[NODE_ID_SIZE], const IoDeviceInformation &info) const;
     void TransmitFrame4x(const IoFrame &frame) const;
 
     IoHomeControl *mIoHome;

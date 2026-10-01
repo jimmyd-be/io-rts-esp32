@@ -816,14 +816,36 @@ static esp_err_t api_action_post(httpd_req_t *req)
                 std::lock_guard<std::mutex> lock(s_manager->mIoDevicesMutex);
                 auto it = s_manager->mIoDevices.find(deviceId);
                 if (it != s_manager->mIoDevices.end()) {
-                    it->second.info.device_type = static_cast<iohome::DeviceType>((uint8_t)value);
+                    it->second.info.device_type =
+                        static_cast<iohome::DeviceType>((uint8_t)value);
                     ok = true;
                 }
             }
             if (ok) {
                 Helpers::StoredIoDevice stored;
                 if (Helpers::DeviceStorage::LoadIoDevice(deviceId, stored) == ESP_OK) {
-                    stored.device.info.device_type = static_cast<iohome::DeviceType>((uint8_t)value);
+                    stored.device.info.device_type =
+                        static_cast<iohome::DeviceType>((uint8_t)value);
+                    Helpers::DeviceStorage::SaveIoDevice(deviceId, stored);
+                }
+            }
+        }
+    } else if (strcmp(action, "set1wBroadcastRoute") == 0) {
+        // 1W broadcast typn (device_subtype): (typn<<6)|0x3F — 0=00003F, 2=0000BF, 3=0000FF, etc.
+        if (strlen(deviceId) > 0 && value >= 0 && value <= 15) {
+            {
+                std::lock_guard<std::mutex> lock(s_manager->mIoDevicesMutex);
+                auto it = s_manager->mIoDevices.find(deviceId);
+                if (it != s_manager->mIoDevices.end() &&
+                    it->second.info.protocol_mode == iohome::ProtocolMode::PROTO_1W) {
+                    it->second.info.device_subtype = (uint8_t)value;
+                    ok = true;
+                }
+            }
+            if (ok) {
+                Helpers::StoredIoDevice stored;
+                if (Helpers::DeviceStorage::LoadIoDevice(deviceId, stored) == ESP_OK) {
+                    stored.device.info.device_subtype = (uint8_t)value;
                     Helpers::DeviceStorage::SaveIoDevice(deviceId, stored);
                 }
             }
@@ -2455,12 +2477,15 @@ static esp_err_t api_upload_iohomecontrol(httpd_req_t *req)
             dev.info.sequence_1w = 1;
         }
 
-        // The iohomecontrol "type" field is a broadcast-target routing code {0,0},
-        // not the io-homecontrol DeviceType enum — the two numbering systems are
-        // unrelated. Default to ROLLER_SHUTTER so the UI shows open/close/stop/
-        // position controls for all imported devices. The user can adjust per-device
-        // if needed. A numeric "device_type" override is still accepted for tools
-        // that export the correct enum value.
+        // Import "type"[0] is 1W broadcast typn, not the io-homecontrol DeviceType enum.
+        // Store type[0] in device_subtype; default typn 0 → destination 00:00:3F.
+        cJSON *typeRouteArr = cJSON_GetObjectItem(entry, "type");
+        if (cJSON_IsArray(typeRouteArr) && cJSON_GetArraySize(typeRouteArr) > 0) {
+            cJSON *route0 = cJSON_GetArrayItem(typeRouteArr, 0);
+            if (cJSON_IsNumber(route0))
+                dev.info.device_subtype = (uint8_t)route0->valuedouble;
+        }
+
         cJSON *typeOverride = cJSON_GetObjectItem(entry, "device_type");
         dev.info.device_type = cJSON_IsNumber(typeOverride)
             ? static_cast<iohome::DeviceType>((uint8_t)typeOverride->valuedouble)

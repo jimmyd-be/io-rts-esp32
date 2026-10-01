@@ -504,6 +504,7 @@ namespace IoRts
                     Helpers::DeviceStorage::SaveSequence1W(deviceID, dev.info.sequence_1w);
                     ESP_LOGI(TAG, "Migrated 1W seq for %s to NVS: 0x%04X", deviceID.c_str(), dev.info.sequence_1w);
                 }
+
             }
 
             // Add to our local map regardless of active/inactive state
@@ -945,16 +946,30 @@ namespace IoRts
         if (!mIo1W) return "";
 
         uint8_t rand_id[3];
-        esp_fill_random(rand_id, 3);
         char id_str[7];
-        snprintf(id_str, sizeof(id_str), "%02X%02X%02X", rand_id[0], rand_id[1], rand_id[2]);
+        bool unique = false;
+        for (int attempt = 0; attempt < 32 && !unique; attempt++)
+        {
+            esp_fill_random(rand_id, 3);
+            snprintf(id_str, sizeof(id_str), "%02X%02X%02X", rand_id[0], rand_id[1], rand_id[2]);
+            std::lock_guard<std::mutex> lock(mIoDevicesMutex);
+            unique = (mIoDevices.find(id_str) == mIoDevices.end());
+        }
+        if (!unique)
+        {
+            ESP_LOGE("IoRtsManager", "Pair1WDevice: could not allocate unique virtual remote address");
+            return "";
+        }
 
         iohome::IoDeviceInformation info = {};
         info.protocol_mode = iohome::ProtocolMode::PROTO_1W;
         memcpy(info.node_id, rand_id, iohome::NODE_ID_SIZE);
         strncpy(info.name, name.c_str(), sizeof(info.name) - 1);
-        info.device_type  = type;
-        info.manufacturer = manufacturer;
+        info.device_type     = type;
+        info.manufacturer    = manufacturer;
+        // Default broadcast typn 0 → 00:00:3F; override device_subtype via import or set1wBroadcastRoute
+        info.device_subtype  = 0;
+        info.is_low_power    = true;
 
         if (!mIo1W->PairDevice(info))
         {
@@ -978,8 +993,11 @@ namespace IoRts
         Helpers::StoredIoDevice sd;
         sd.device = dev;
         Helpers::DeviceStorage::SaveIoDevice(id_str, sd);
+        Helpers::DeviceStorage::SaveSequence1W(id_str, dev.info.sequence_1w);
 
-        ESP_LOGI("IoRtsManager", "Pair1WDevice: paired '%s' as %s", name.c_str(), id_str);
+        ESP_LOGI("IoRtsManager",
+                 "Pair1WDevice: '%s' as %s typn=%u man=%u (re-pair motor if typn was wrong)",
+                 name.c_str(), id_str, info.device_subtype, (unsigned)info.manufacturer);
         return id_str;
     }
 
