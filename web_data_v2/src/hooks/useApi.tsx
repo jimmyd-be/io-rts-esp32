@@ -67,7 +67,7 @@ export default function useApi<Type>({
           method,
           headers: {
             Accept: "application/json",
-            "Content-Type": body ? "application/json" : "text/plain",
+            ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
             ...headers,
             ...(otaKey
               ? {

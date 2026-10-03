@@ -138,6 +138,9 @@ export function IoSystemKeySettings() {
     editInputRef.current?.select();
   }, [isEditOpen]);
 
+  const otaKeyRef = useRef(otaKey);
+  useEffect(() => { otaKeyRef.current = otaKey; }, [otaKey]);
+
   useEffect(() => {
     return () => {
       if (sniffPollTimerRef.current) {
@@ -152,13 +155,13 @@ export function IoSystemKeySettings() {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          "X-OTA-Key": otaKey,
+          "X-OTA-Key": otaKeyRef.current,
         },
         body: JSON.stringify({ active: false }),
         credentials: "same-origin",
       }).catch(() => undefined);
     };
-  }, [otaKey]);
+  }, []);
 
   function stopSniffPoll() {
     if (sniffPollTimerRef.current) {
