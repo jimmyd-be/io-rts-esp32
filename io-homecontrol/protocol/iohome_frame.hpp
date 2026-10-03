@@ -136,4 +136,12 @@ namespace iohome
     return (frame.ctrl_byte_0 & CTRL0_PROTOCOL_MASK) == 0;
   }
 
+  /// @brief Get 'low power' flag value from IoFrame (CTRL1_LOW_POWER bit 5)
+  /// @param frame IoFrame structure
+  /// @return true if destination device is duty-cycled (solar/battery), false otherwise
+  inline bool is_low_power(const IoFrame &frame)
+  {
+    return (frame.ctrl_byte_1 & CTRL1_LOW_POWER) != 0;
+  }
+
 } // namespace iohome
