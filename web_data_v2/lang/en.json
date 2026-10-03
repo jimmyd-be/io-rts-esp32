@@ -289,7 +289,7 @@
   "help.fallback-ap.timeout.body": "How long the hotspot stays active before shutting down automatically. Set to 0 to keep it on indefinitely. After the timeout, the device returns to normal WiFi-only mode.",
   "help.network.title": "Network / IP",
   "help.network.dhcp.label": "DHCP (recommended)",
-  "help.network.dhcp.body": "The router assigns an IP address automatically. Access the device at http://io-rts-esp32.local (mDNS) or find its IP in your router's client list.",
+  "help.network.dhcp.body": "The router assigns an IP address automatically. Access the device at https://io-rts-esp32.local (mDNS) or find its IP in your router's client list. The self-signed certificate may trigger a browser warning.",
   "help.network.static-ip.label": "Static IP",
   "help.network.static-ip.body": "Fixes the device to a specific IP address. Useful when you need a predictable address without relying on mDNS. Always also set Gateway and DNS — without them, cloud imports, time sync, and OTA updates won't work.",
   "help.network.hostname.label": "Hostname",

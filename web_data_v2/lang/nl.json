@@ -376,7 +376,7 @@
   "help.fallback-ap.timeout.body": "Hoe lang de hotspot actief blijft voordat hij automatisch uitschakelt. Stel in op 0 om onbeperkt aan te blijven. Na de time-out gaat het apparaat terug naar de normale WiFi-modus.",
   "help.network.title": "Netwerk / IP",
   "help.network.dhcp.label": "DHCP (aanbevolen)",
-  "help.network.dhcp.body": "De router wijst automatisch een IP-adres toe. Toegang tot het apparaat via http://io-rts-esp32.local (mDNS) of zoek het IP-adres in de clientenlijst van uw router.",
+  "help.network.dhcp.body": "De router wijst automatisch een IP-adres toe. Toegang tot het apparaat via https://io-rts-esp32.local (mDNS) of zoek het IP-adres in de clientenlijst van uw router. Het zelfondertekende certificaat kan een browserwaarschuwing veroorzaken.",
   "help.network.static-ip.label": "Vast IP-adres",
   "help.network.static-ip.body": "Koppelt het apparaat aan een specifiek IP-adres. Nuttig wanneer u een voorspelbaar adres nodig heeft zonder mDNS. Stel ook altijd Gateway en DNS in — zonder deze werken cloudimports, tijdsynchronisatie en OTA-updates niet.",
   "help.network.hostname.label": "Hostnaam",

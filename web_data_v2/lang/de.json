@@ -375,7 +375,7 @@
   "help.fallback-ap.timeout.body": "Wie lange der Hotspot aktiv bleibt, bevor er automatisch abschaltet. Auf 0 setzen, um ihn unbegrenzt eingeschaltet zu lassen. Nach dem Timeout kehrt das Gerät in den normalen WLAN-Modus zurück.",
   "help.network.title": "Netzwerk / IP",
   "help.network.dhcp.label": "DHCP (empfohlen)",
-  "help.network.dhcp.body": "Der Router weist automatisch eine IP-Adresse zu. Zugriff auf das Gerät über http://io-rts-esp32.local (mDNS) oder suchen Sie die IP-Adresse in der Client-Liste Ihres Routers.",
+  "help.network.dhcp.body": "Der Router weist automatisch eine IP-Adresse zu. Zugriff auf das Gerät über https://io-rts-esp32.local (mDNS) oder suchen Sie die IP-Adresse in der Client-Liste Ihres Routers. Das selbstsignierte Zertifikat kann eine Browserwarnung auslösen.",
   "help.network.static-ip.label": "Feste IP-Adresse",
   "help.network.static-ip.body": "Weist dem Gerät eine bestimmte IP-Adresse zu. Nützlich, wenn Sie eine vorhersagbare Adresse ohne mDNS benötigen. Setzen Sie immer auch Gateway und DNS — ohne diese funktionieren Cloud-Importe, Zeitsynchronisation und OTA-Updates nicht.",
   "help.network.hostname.label": "Hostname",

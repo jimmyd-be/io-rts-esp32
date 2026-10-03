@@ -1,7 +1,8 @@
 idf_component_register(
     SRCS "web_server.cpp" "syslog.cpp" "pair_log.cpp"
     INCLUDE_DIRS "include"
-    REQUIRES esp_http_server esp_netif esp_wifi joltwallet__littlefs espressif__cjson espressif__mqtt nvs_flash esp_driver_spi esp_driver_gpio mbedtls app_update esp_http_client json_streaming_parser2
+    EMBED_TXTFILES "certs/server-cert.pem" "certs/server-key.pem"
+    REQUIRES esp_http_server esp_https_server esp_netif esp_wifi joltwallet__littlefs espressif__cjson espressif__mqtt nvs_flash esp_driver_spi esp_driver_gpio mbedtls app_update esp_http_client json_streaming_parser2
 )
 
 # Access project headers without creating a circular component dependency

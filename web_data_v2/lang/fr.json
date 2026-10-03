@@ -375,7 +375,7 @@
   "help.fallback-ap.timeout.body": "Durée pendant laquelle le point d'accès reste actif avant de s'éteindre automatiquement. Réglez sur 0 pour le maintenir indéfiniment. Après le délai, l'appareil retourne en mode Wi-Fi normal.",
   "help.network.title": "Réseau / IP",
   "help.network.dhcp.label": "DHCP (recommandé)",
-  "help.network.dhcp.body": "Le routeur attribue automatiquement une adresse IP. Accédez à l'appareil via http://io-rts-esp32.local (mDNS) ou trouvez son IP dans la liste des clients de votre routeur.",
+  "help.network.dhcp.body": "Le routeur attribue automatiquement une adresse IP. Accédez à l'appareil via https://io-rts-esp32.local (mDNS) ou trouvez son IP dans la liste des clients de votre routeur. Le certificat auto-signé peut déclencher un avertissement du navigateur.",
   "help.network.static-ip.label": "IP statique",
   "help.network.static-ip.body": "Fixe l'appareil à une adresse IP spécifique. Utile quand vous avez besoin d'une adresse prévisible sans mDNS. Définissez toujours aussi la passerelle et le DNS — sans eux, les imports cloud, la synchronisation horaire et les mises à jour OTA ne fonctionneront pas.",
   "help.network.hostname.label": "Nom d'hôte",

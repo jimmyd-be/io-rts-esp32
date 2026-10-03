@@ -11,3 +11,16 @@ menu "OTA Update"
             in NVS — retrieve it once from the serial boot log.
 
 endmenu
+
+menu "Web Server"
+
+    config WEB_HTTPS_ENABLED
+        bool "Enable HTTPS with a self-signed certificate"
+        depends on WEB_ENABLED
+        default y
+        help
+            Start an HTTPS server on port 443 in addition to the HTTP server on
+            port 80. The bundled certificate is self-signed, so browsers will
+            show a trust warning unless you add the certificate to your trust store.
+
+endmenu

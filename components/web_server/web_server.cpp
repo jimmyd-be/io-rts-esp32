@@ -5,6 +5,9 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_http_server.h"
+#if CONFIG_WEB_HTTPS_ENABLED
+#include "esp_https_server.h"
+#endif
 #include "esp_littlefs.h"
 #include "esp_random.h"
 #include "cJSON.h"
@@ -65,7 +68,22 @@ static const char *TAG = "web_server";
 
 static IoRts::IoRtsManager *s_manager = nullptr;
 static httpd_handle_t       s_server  = nullptr;
-static int s_ws_fds[WS_MAX_CLIENTS];
+static httpd_handle_t       s_https_server = nullptr;
+
+struct ws_client {
+    httpd_handle_t server;
+    int fd;
+};
+
+static ws_client s_ws_clients[WS_MAX_CLIENTS];
+static portMUX_TYPE s_ws_lock = portMUX_INITIALIZER_UNLOCKED;
+
+#if CONFIG_WEB_HTTPS_ENABLED
+extern const unsigned char server_cert_pem_start[] asm("_binary_certs_server_cert_pem_start");
+extern const unsigned char server_cert_pem_end[]   asm("_binary_certs_server_cert_pem_end");
+extern const unsigned char server_key_pem_start[]  asm("_binary_certs_server_key_pem_start");
+extern const unsigned char server_key_pem_end[]    asm("_binary_certs_server_key_pem_end");
+#endif
 
 // Diagnostic: track last WS upgrade fd and init frame result
 static int  s_diag_last_fd       = -99;
@@ -105,8 +123,12 @@ static int web_log_vprintf(const char *fmt, va_list args)
     int ret = s_orig_vprintf(fmt, args);
     if (s_log_queue) {
         bool has_clients = false;
+        ws_client clients[WS_MAX_CLIENTS];
+        portENTER_CRITICAL(&s_ws_lock);
+        memcpy(clients, s_ws_clients, sizeof(clients));
+        portEXIT_CRITICAL(&s_ws_lock);
         for (int i = 0; i < WS_MAX_CLIENTS; i++)
-            if (s_ws_fds[i] != -1) { has_clients = true; break; }
+            if (clients[i].fd != -1) { has_clients = true; break; }
         if (!has_clients && !syslog_is_active()) { va_end(copy); return ret; }
         char raw[LOG_LINE_MAX];
         vsnprintf(raw, sizeof(raw), fmt, copy);
@@ -137,10 +159,76 @@ static void log_drain_task(void *)
 
 // Job queued to the httpd task so the send always happens in the right context.
 struct ws_send_job {
+    httpd_handle_t server;
     int    fd;
     size_t len;
     char   buf[]; // flexible array — payload follows the struct
 };
+
+static int ws_client_find(httpd_handle_t server, int fd)
+{
+    int slot = -1;
+    portENTER_CRITICAL(&s_ws_lock);
+    for (int i = 0; i < WS_MAX_CLIENTS; i++)
+        if (s_ws_clients[i].server == server && s_ws_clients[i].fd == fd)
+            { slot = i; break; }
+    portEXIT_CRITICAL(&s_ws_lock);
+    return slot;
+}
+
+static void ws_client_remove(httpd_handle_t server, int fd)
+{
+    portENTER_CRITICAL(&s_ws_lock);
+    for (int i = 0; i < WS_MAX_CLIENTS; i++) {
+        if (s_ws_clients[i].server == server && s_ws_clients[i].fd == fd) {
+            s_ws_clients[i].server = nullptr;
+            s_ws_clients[i].fd = -1;
+            break;
+        }
+    }
+    portEXIT_CRITICAL(&s_ws_lock);
+}
+
+static void ws_clients_copy(ws_client *clients)
+{
+    portENTER_CRITICAL(&s_ws_lock);
+    memcpy(clients, s_ws_clients, sizeof(s_ws_clients));
+    portEXIT_CRITICAL(&s_ws_lock);
+}
+
+static bool ws_client_add(httpd_handle_t server, int fd)
+{
+    ws_client stale[WS_MAX_CLIENTS];
+    portENTER_CRITICAL(&s_ws_lock);
+    for (int i = 0; i < WS_MAX_CLIENTS; i++) {
+        if (s_ws_clients[i].fd == -1) {
+            s_ws_clients[i] = {server, fd};
+            portEXIT_CRITICAL(&s_ws_lock);
+            return true;
+        }
+    }
+    memcpy(stale, s_ws_clients, sizeof(stale));
+    portEXIT_CRITICAL(&s_ws_lock);
+
+    for (int i = 0; i < WS_MAX_CLIENTS; i++) {
+        if (stale[i].fd == -1 ||
+            httpd_ws_get_fd_info(stale[i].server, stale[i].fd) == HTTPD_WS_CLIENT_WEBSOCKET)
+            continue;
+
+        bool replaced = false;
+        portENTER_CRITICAL(&s_ws_lock);
+        if (s_ws_clients[i].server == stale[i].server && s_ws_clients[i].fd == stale[i].fd) {
+            s_ws_clients[i] = {server, fd};
+            replaced = true;
+        }
+        portEXIT_CRITICAL(&s_ws_lock);
+        if (replaced) {
+            ESP_LOGW(TAG, "ws: evicting stale fd=%d slot=%d for new client fd=%d", stale[i].fd, i, fd);
+            return true;
+        }
+    }
+    return false;
+}
 
 static void ws_send_job_fn(void *arg)
 {
@@ -148,16 +236,12 @@ static void ws_send_job_fn(void *arg)
 
     // Guard 1: check our own table first. A previous queued job may have already
     // marked this fd dead and removed it; if so, skip immediately without touching httpd.
-    bool tracked = false;
-    for (int i = 0; i < WS_MAX_CLIENTS; i++)
-        if (s_ws_fds[i] == job->fd) { tracked = true; break; }
-    if (!tracked) { free(job); return; }
+    if (ws_client_find(job->server, job->fd) < 0) { free(job); return; }
 
     // Guard 2: verify httpd still knows this fd as a WS session (catches fd reuse where
     // the OS recycled the fd for a new non-WS connection after our table was populated).
-    if (httpd_ws_get_fd_info(s_server, job->fd) != HTTPD_WS_CLIENT_WEBSOCKET) {
-        for (int i = 0; i < WS_MAX_CLIENTS; i++)
-            if (s_ws_fds[i] == job->fd) { s_ws_fds[i] = -1; break; }
+    if (httpd_ws_get_fd_info(job->server, job->fd) != HTTPD_WS_CLIENT_WEBSOCKET) {
+        ws_client_remove(job->server, job->fd);
         free(job);
         return;
     }
@@ -166,25 +250,25 @@ static void ws_send_job_fn(void *arg)
     frame.type    = HTTPD_WS_TYPE_TEXT;
     frame.payload = (uint8_t *)job->buf;
     frame.len     = job->len;
-    esp_err_t err = httpd_ws_send_frame_async(s_server, job->fd, &frame);
+    esp_err_t err = httpd_ws_send_frame_async(job->server, job->fd, &frame);
     if (err != ESP_OK) {
         ESP_LOGW(TAG, "ws_send fd=%d err=%s — removing client", job->fd, esp_err_to_name(err));
-        for (int i = 0; i < WS_MAX_CLIENTS; i++)
-            if (s_ws_fds[i] == job->fd) { s_ws_fds[i] = -1; break; }
-        httpd_sess_trigger_close(s_server, job->fd);
+        ws_client_remove(job->server, job->fd);
+        httpd_sess_trigger_close(job->server, job->fd);
     }
     free(job);
 }
 
-static void ws_send_str(int fd, const char *str)
+static void ws_send_str(httpd_handle_t server, int fd, const char *str)
 {
     size_t len = strlen(str);
     ws_send_job *job = static_cast<ws_send_job *>(malloc(sizeof(ws_send_job) + len + 1));
     if (!job) return;
+    job->server = server;
     job->fd  = fd;
     job->len = len;
     memcpy(job->buf, str, len + 1);
-    if (httpd_queue_work(s_server, ws_send_job_fn, job) != ESP_OK)
+    if (httpd_queue_work(server, ws_send_job_fn, job) != ESP_OK)
         free(job); // queue full — drop message, keep connection alive
 }
 
@@ -195,30 +279,13 @@ static esp_err_t ws_handler(httpd_req_t *req)
 
     int fd = httpd_req_to_sockfd(req);
 
-    // Detect new client by absence in s_ws_fds (req->method is 0 for WS frames in
+    // Detect new client by absence in s_ws_clients (req->method is 0 for WS frames in
     // esp-idf, not HTTP_GET=1, so we cannot use the method to distinguish first call).
-    bool is_new = true;
-    for (int i = 0; i < WS_MAX_CLIENTS; i++)
-        if (s_ws_fds[i] == fd) { is_new = false; break; }
+    bool is_new = ws_client_find(req->handle, fd) < 0;
 
     if (is_new) {
         s_diag_last_fd = fd;
-        bool stored = false;
-        for (int i = 0; i < WS_MAX_CLIENTS; i++) {
-            if (s_ws_fds[i] == -1) { s_ws_fds[i] = fd; stored = true; break; }
-        }
-        if (!stored) {
-            // Evict any stale fds (clients that disconnected before the keepalive could clean them up)
-            for (int i = 0; i < WS_MAX_CLIENTS && !stored; i++) {
-                if (s_ws_fds[i] != -1 &&
-                    httpd_ws_get_fd_info(req->handle, s_ws_fds[i]) != HTTPD_WS_CLIENT_WEBSOCKET) {
-                    ESP_LOGW(TAG, "ws: evicting stale fd=%d slot=%d for new client fd=%d", s_ws_fds[i], i, fd);
-                    s_ws_fds[i] = fd;
-                    stored = true;
-                }
-            }
-        }
-        if (!stored) {
+        if (!ws_client_add(req->handle, fd)) {
             ESP_LOGW(TAG, "ws: max clients reached, rejecting fd=%d", fd);
             if (fd >= 0) httpd_sess_trigger_close(req->handle, fd);
             return ESP_OK;
@@ -231,7 +298,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
             if (buf) { hello.payload = buf; httpd_ws_recv_frame(req, &hello, hello.len); free(buf); }
         }
         ESP_LOGI(TAG, "WS new client fd=%d", fd);
-        ws_send_str(fd, "{\"type\":\"init\"}");
+        ws_send_str(req->handle, fd, "{\"type\":\"init\"}");
         return ESP_OK;
     }
 
@@ -242,8 +309,7 @@ static esp_err_t ws_handler(httpd_req_t *req)
         s_diag_recv_err = (int)err;
         s_diag_recv_fd  = fd;
         ESP_LOGW(TAG, "WS recv err fd=%d: %s — closing session", fd, esp_err_to_name(err));
-        for (int i = 0; i < WS_MAX_CLIENTS; i++)
-            if (s_ws_fds[i] == fd) { s_ws_fds[i] = -1; break; }
+        ws_client_remove(req->handle, fd);
         if (fd >= 0) httpd_sess_trigger_close(req->handle, fd);
         return ESP_OK;
     }
@@ -262,36 +328,44 @@ static esp_err_t ws_handler(httpd_req_t *req)
 void web_server_broadcast_position(const char *device_id, int position, bool is_stopped, bool estimated)
 {
     if (!s_server) return;
+    ws_client clients[WS_MAX_CLIENTS];
+    ws_clients_copy(clients);
     char buf[160];
     snprintf(buf, sizeof(buf),
         "{\"type\":\"position\",\"id\":\"%s\",\"position\":%d,\"is_stopped\":%s,\"estimated\":%s}",
         device_id, position, is_stopped ? "true" : "false", estimated ? "true" : "false");
     for (int i = 0; i < WS_MAX_CLIENTS; i++)
-        if (s_ws_fds[i] != -1) ws_send_str(s_ws_fds[i], buf);
+        if (clients[i].fd != -1) ws_send_str(clients[i].server, clients[i].fd, buf);
 }
 
 void web_server_broadcast_device_event(const char *device_id, const char *event_type)
 {
     if (!s_server) return;
+    ws_client clients[WS_MAX_CLIENTS];
+    ws_clients_copy(clients);
     char buf[128];
     snprintf(buf, sizeof(buf), "{\"type\":\"%s\",\"id\":\"%s\"}", event_type, device_id);
     for (int i = 0; i < WS_MAX_CLIENTS; i++)
-        if (s_ws_fds[i] != -1) ws_send_str(s_ws_fds[i], buf);
+        if (clients[i].fd != -1) ws_send_str(clients[i].server, clients[i].fd, buf);
 }
 
 // Periodic keepalive — detects stale fd slots via the C-1 send-failure cleanup path
 static void ws_keepalive_cb(void *)
 {
+    ws_client clients[WS_MAX_CLIENTS];
+    ws_clients_copy(clients);
     for (int i = 0; i < WS_MAX_CLIENTS; i++)
-        if (s_ws_fds[i] != -1)
-            ws_send_str(s_ws_fds[i], "{\"type\":\"ping\"}");
+        if (clients[i].fd != -1)
+            ws_send_str(clients[i].server, clients[i].fd, "{\"type\":\"ping\"}");
 }
 
 void web_server_broadcast_message(const char *json_str)
 {
     if (!s_server) return;
+    ws_client clients[WS_MAX_CLIENTS];
+    ws_clients_copy(clients);
     for (int i = 0; i < WS_MAX_CLIENTS; i++)
-        if (s_ws_fds[i] != -1) ws_send_str(s_ws_fds[i], json_str);
+        if (clients[i].fd != -1) ws_send_str(clients[i].server, clients[i].fd, json_str);
 }
 
 // Classify a log line as "error", "info", or "debug" for the web log filter.
@@ -334,8 +408,10 @@ void web_server_broadcast_log(const char *message)
     json_escape(message, escaped, sizeof(escaped));
     char buf[480];
     snprintf(buf, sizeof(buf), "{\"type\":\"log\",\"level\":\"%s\",\"message\":\"%s\"}", level, escaped);
+    ws_client clients[WS_MAX_CLIENTS];
+    ws_clients_copy(clients);
     for (int i = 0; i < WS_MAX_CLIENTS; i++)
-        if (s_ws_fds[i] != -1) ws_send_str(s_ws_fds[i], buf);
+        if (clients[i].fd != -1) ws_send_str(clients[i].server, clients[i].fd, buf);
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -864,10 +940,12 @@ static esp_err_t api_debug_get(httpd_req_t *req)
     if (!ota_check_key(req)) { httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Unauthorized"); return ESP_OK; }
     cJSON *obj = cJSON_CreateObject();
     cJSON *fds_arr = cJSON_AddArrayToObject(obj, "ws_fds");
+    ws_client clients[WS_MAX_CLIENTS];
+    ws_clients_copy(clients);
     int active = 0;
     for (int i = 0; i < WS_MAX_CLIENTS; i++) {
-        cJSON_AddItemToArray(fds_arr, cJSON_CreateNumber(s_ws_fds[i]));
-        if (s_ws_fds[i] != -1) active++;
+        cJSON_AddItemToArray(fds_arr, cJSON_CreateNumber(clients[i].fd));
+        if (clients[i].fd != -1) active++;
     }
     cJSON_AddNumberToObject(obj, "ws_active", active);
     cJSON_AddBoolToObject(obj, "log_queue_ok", s_log_queue != nullptr);
@@ -883,9 +961,9 @@ static esp_err_t api_debug_get(httpd_req_t *req)
     // Try sending a test frame to all clients and report results
     cJSON *results = cJSON_AddArrayToObject(obj, "send_results");
     for (int i = 0; i < WS_MAX_CLIENTS; i++) {
-        if (s_ws_fds[i] == -1) continue;
-        int fd = s_ws_fds[i];
-        ws_send_str(fd, "{\"type\":\"debug_ping\"}");
+        if (clients[i].fd == -1) continue;
+        int fd = clients[i].fd;
+        ws_send_str(clients[i].server, fd, "{\"type\":\"debug_ping\"}");
         cJSON *r = cJSON_CreateObject();
         cJSON_AddNumberToObject(r, "fd", fd);
         cJSON_AddItemToArray(results, r);
@@ -3678,7 +3756,8 @@ done:
 void web_server_start(void *ioRtsManager)
 {
     s_manager = static_cast<IoRts::IoRtsManager *>(ioRtsManager);
-    for (int i = 0; i < WS_MAX_CLIENTS; i++) s_ws_fds[i] = -1;
+    for (int i = 0; i < WS_MAX_CLIENTS; i++)
+        s_ws_clients[i] = {nullptr, -1};
 
     // Mount web LittleFS partition
     esp_vfs_littlefs_conf_t conf = {};
@@ -3695,15 +3774,18 @@ void web_server_start(void *ioRtsManager)
 
     // Start HTTP server
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    config.stack_size = 8192;
-    config.task_priority = tskIDLE_PRIORITY + 3; // below radio (8), IO processing (6), status updates (4)
-    config.max_uri_handlers = 70;
-    config.max_open_sockets = 13; // browser opens many parallel connections for static files + WS
-    config.send_wait_timeout = 2;  // seconds; cap blocking sends to dead clients
-    config.recv_wait_timeout = 2;
-    config.lru_purge_enable  = true; // evict oldest socket when table is full
-    config.uri_match_fn = httpd_uri_match_wildcard;
-    config.enable_so_linger = false;
+    auto configure_httpd = [](httpd_config_t &cfg) {
+        cfg.stack_size = 8192;
+        cfg.task_priority = tskIDLE_PRIORITY + 3; // below radio (8), IO processing (6), status updates (4)
+        cfg.max_uri_handlers = 70;
+        cfg.max_open_sockets = 13; // browser opens many parallel connections for static files + WS
+        cfg.send_wait_timeout = 2;  // seconds; cap blocking sends to dead clients
+        cfg.recv_wait_timeout = 2;
+        cfg.lru_purge_enable  = true; // evict oldest socket when table is full
+        cfg.uri_match_fn = httpd_uri_match_wildcard;
+        cfg.enable_so_linger = false;
+    };
+    configure_httpd(config);
 
     httpd_handle_t server = NULL;
     err = httpd_start(&server, &config);
@@ -3712,6 +3794,21 @@ void web_server_start(void *ioRtsManager)
         return;
     }
     s_server = server;
+
+#if CONFIG_WEB_HTTPS_ENABLED
+    httpd_ssl_config_t https_config = HTTPD_SSL_CONFIG_DEFAULT();
+    configure_httpd(https_config.httpd);
+    https_config.httpd.max_open_sockets = 5;
+    https_config.servercert = server_cert_pem_start;
+    https_config.servercert_len = server_cert_pem_end - server_cert_pem_start;
+    https_config.prvtkey_pem = server_key_pem_start;
+    https_config.prvtkey_len = server_key_pem_end - server_key_pem_start;
+    err = httpd_ssl_start(&s_https_server, &https_config);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to start HTTPS server: %s", esp_err_to_name(err));
+        s_https_server = nullptr;
+    }
+#endif
 
     // Start WebSocket keepalive timer — pings all clients every 30 s
     {
@@ -3728,6 +3825,8 @@ void web_server_start(void *ioRtsManager)
         httpd_uri_t r = {};
         r.uri = uri; r.method = method; r.handler = handler;
         httpd_register_uri_handler(server, &r);
+        if (s_https_server)
+            httpd_register_uri_handler(s_https_server, &r);
     };
 
     // WebSocket endpoint
@@ -3738,6 +3837,8 @@ void web_server_start(void *ioRtsManager)
         r.is_websocket = true;
 #endif
         httpd_register_uri_handler(server, &r);
+        if (s_https_server)
+            httpd_register_uri_handler(s_https_server, &r);
     }
 
     // API routes (before wildcard)
@@ -3816,7 +3917,11 @@ void web_server_start(void *ioRtsManager)
     syslog_id_init();
     ota_key_init();
 
-    ESP_LOGI(TAG, "HTTP server started");
+    ESP_LOGI(TAG, "HTTP server started on port %u", config.server_port);
+#if CONFIG_WEB_HTTPS_ENABLED
+    if (s_https_server)
+        ESP_LOGI(TAG, "HTTPS server started on port 443 (self-signed certificate)");
+#endif
 
     const esp_partition_t *running = esp_ota_get_running_partition();
     ESP_LOGI(TAG, "Running partition: %s (offset 0x%08" PRIx32 ")", running->label, running->address);

@@ -38,6 +38,7 @@ These features are currently available:
   - Ethernet support (based on W5500 module)
   - DHCP support, with DNS provided by DHCP server
   - Static IPv4 support, including manual DNS server configuration
+- Web interface available over HTTPS at `https://io-rts-esp32.local` (port 443) using a self-signed certificate. Browsers will warn until the certificate is trusted; HTTP on port 80 remains available for compatibility. WiFi provisioning mode continues to use HTTP at `http://192.168.4.1`.
 - (S)NTP support for time synchronization
 - Front-end:
   - Command line features: see [dedicated page](doc/command_line.md) for more information
