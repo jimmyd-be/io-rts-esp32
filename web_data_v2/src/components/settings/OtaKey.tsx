@@ -48,7 +48,7 @@ export function OtaKeySettings() {
         >
           <div style="display:flex;gap:6px;align-items:center;">
             <input
-              type="text"
+              type="password"
               name={"key"}
               class="s-input key-display"
               value={otaKeyApi.data?.key ?? ""}

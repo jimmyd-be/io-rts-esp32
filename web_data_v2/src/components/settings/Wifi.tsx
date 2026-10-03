@@ -82,7 +82,7 @@ export function WifiSettings(): JSX.Element {
           },
           body: JSON.stringify({
             ssid: formValues.ssid,
-            password: formValues.password,
+            ...(formValues.password !== "" ? { password: formValues.password } : {}),
           }),
         })
           .then((r) => {

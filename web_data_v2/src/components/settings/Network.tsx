@@ -163,7 +163,6 @@ export function NetworkSettings() {
               <input
                 type="text"
                 name="sntp"
-                disabled={dhcpEnabled}
                 class="s-input"
                 placeholder="pool.ntp.org"
                 style="margin-top:4px;"

@@ -60,6 +60,7 @@ jobs:
         run: |
           . $IDF_PATH/export.sh
           TAG="${{ github.ref_name }}"
+          TAG="${TAG//\//-}"
           cp build/io-rts-esp32.bin "heltec-${TAG}-firmware.bin"
           cp build/web.bin          "heltec-${TAG}-web.bin"
           python -m esptool --chip esp32 merge-bin \
