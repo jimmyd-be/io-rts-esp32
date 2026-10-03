@@ -40,7 +40,7 @@ export default function useApi<Type>({
 
       inFlight = true;
 
-      if (!background) {
+      if (!background && data === undefined) {
         setLoaded(false);
         setIsError(false);
       }
