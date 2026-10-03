@@ -26,7 +26,8 @@ export function OtaKeySettings() {
           },
           body: JSON.stringify(data),
         })
-          .then(() => {
+          .then((r) => {
+            if (!r.ok) throw new Error(r.statusText);
             showToast("toast.ota-key-saved", ToastType.SUCCESS);
           })
           .catch(() => {

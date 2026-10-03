@@ -61,6 +61,7 @@ jobs:
           . $IDF_PATH/export.sh
           TAG="${{ github.ref_name }}"
           TAG="${TAG//\//-}"
+          echo "BUILD_TAG=$TAG" >> "$GITHUB_ENV"
           cp build/io-rts-esp32.bin "heltec-${TAG}-firmware.bin"
           cp build/web.bin          "heltec-${TAG}-web.bin"
           python -m esptool --chip esp32 merge-bin \
@@ -78,9 +79,9 @@ jobs:
         with:
           name: heltec-artifacts
           path: |
-            heltec-${{ github.ref_name }}-full.bin
-            heltec-${{ github.ref_name }}-firmware.bin
-            heltec-${{ github.ref_name }}-web.bin
+            heltec-${{ env.BUILD_TAG }}-full.bin
+            heltec-${{ env.BUILD_TAG }}-firmware.bin
+            heltec-${{ env.BUILD_TAG }}-web.bin
 
   build-lilygoT3S3:
     name: Build (LilyGo T3S3 ESP32-S3)
@@ -109,6 +110,8 @@ jobs:
         run: |
           . $IDF_PATH/export.sh
           TAG="${{ github.ref_name }}"
+          TAG="${TAG//\//-}"
+          echo "BUILD_TAG=$TAG" >> "$GITHUB_ENV"
           cp build_t3s3/io-rts-esp32.bin "lilygo-t3s3-${TAG}-firmware.bin"
           cp build_t3s3/web.bin          "lilygo-t3s3-${TAG}-web.bin"
           python -m esptool --chip esp32s3 merge-bin \
@@ -126,9 +129,9 @@ jobs:
         with:
           name: lilygo-t3s3-artifacts
           path: |
-            lilygo-t3s3-${{ github.ref_name }}-full.bin
-            lilygo-t3s3-${{ github.ref_name }}-firmware.bin
-            lilygo-t3s3-${{ github.ref_name }}-web.bin
+            lilygo-t3s3-${{ env.BUILD_TAG }}-full.bin
+            lilygo-t3s3-${{ env.BUILD_TAG }}-firmware.bin
+            lilygo-t3s3-${{ env.BUILD_TAG }}-web.bin
 
   build-lilygoLora32:
     name: Build (LilyGo Lora32 v1.6.1 ESP32)
@@ -157,6 +160,8 @@ jobs:
         run: |
           . $IDF_PATH/export.sh
           TAG="${{ github.ref_name }}"
+          TAG="${TAG//\//-}"
+          echo "BUILD_TAG=$TAG" >> "$GITHUB_ENV"
           cp build_lora32/io-rts-esp32.bin "lilygo-lora32-${TAG}-firmware.bin"
           cp build_lora32/web.bin          "lilygo-lora32-${TAG}-web.bin"
           python -m esptool --chip esp32 merge-bin \
@@ -174,6 +179,6 @@ jobs:
         with:
           name: lilygo-lora32-artifacts
           path: |
-            lilygo-lora32-${{ github.ref_name }}-full.bin
-            lilygo-lora32-${{ github.ref_name }}-firmware.bin
-            lilygo-lora32-${{ github.ref_name }}-web.bin
+            lilygo-lora32-${{ env.BUILD_TAG }}-full.bin
+            lilygo-lora32-${{ env.BUILD_TAG }}-firmware.bin
+            lilygo-lora32-${{ env.BUILD_TAG }}-web.bin

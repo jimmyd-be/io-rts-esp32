@@ -19,6 +19,13 @@ export function WebUIUpdateSettings() {
           return;
         }
 
+        if (!otaData.data?.key) {
+          setStatus("OTA key not available, please wait and try again.");
+          return;
+        }
+
+        const key = otaData.data.key;
+
         setStatus("Uploading Web UI...");
 
         try {
@@ -27,7 +34,7 @@ export function WebUIUpdateSettings() {
             body: file,
             headers: {
               "Content-Type": "application/octet-stream",
-              "X-OTA-Key": otaData.data?.key || "",
+              "X-OTA-Key": key,
             },
           });
 
