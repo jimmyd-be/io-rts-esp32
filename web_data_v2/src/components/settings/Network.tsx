@@ -20,7 +20,7 @@ export function NetworkSettings() {
         e.preventDefault();
 
         const fd = new FormData(e.currentTarget);
-        const data = Object.fromEntries(fd.entries());
+        const data = { ...Object.fromEntries(fd.entries()), dhcp: dhcpEnabled };
 
         fetch("/api/network/config", {
           method: "POST",
@@ -59,6 +59,7 @@ export function NetworkSettings() {
               </label>
               <input
                 type="text"
+                name="hostname"
                 value={api.data ? api.data.hostname : undefined}
                 class="s-input"
                 placeholder="io-rts-esp32"
@@ -84,6 +85,7 @@ export function NetworkSettings() {
                 </label>
                 <input
                   type="text"
+                  name="ip"
                   value={api.data ? api.data.ip : undefined}
                   disabled={dhcpEnabled}
                   class="s-input"
@@ -97,6 +99,7 @@ export function NetworkSettings() {
                 </label>
                 <input
                   type="text"
+                  name="mask"
                   value={api.data ? api.data.mask : undefined}
                   disabled={dhcpEnabled}
                   class="s-input"
@@ -112,6 +115,7 @@ export function NetworkSettings() {
                 </label>
                 <input
                   type="text"
+                  name="gateway"
                   disabled={dhcpEnabled}
                   class="s-input"
                   placeholder="192.168.1.1"
@@ -125,6 +129,7 @@ export function NetworkSettings() {
                 </label>
                 <input
                   type="text"
+                  name="dns1"
                   class="s-input"
                   disabled={dhcpEnabled}
                   placeholder="8.8.8.8"
@@ -139,6 +144,7 @@ export function NetworkSettings() {
               </label>
               <input
                 type="text"
+                name="sntp"
                 disabled={dhcpEnabled}
                 class="s-input"
                 placeholder="pool.ntp.org"

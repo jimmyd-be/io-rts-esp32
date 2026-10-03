@@ -173,6 +173,8 @@ export function PairingWizardProvider({
       method: "POST",
       headers: { "Content-Type": "application/json",
       "X-OTA-Key": otaKey.data?.key || ""},
+    }).then((r) => {
+      if (!r.ok) throw new Error(r.statusText);
     }).catch((e) => {
       clearCountdownTimer();
       setDiscoveryStatusText(

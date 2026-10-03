@@ -2,12 +2,14 @@ import { AccordionHead } from "../AccordionHead";
 import { useEffect, useState } from "preact/hooks";
 import { JSX } from "preact";
 import { useFallBackConfig } from "../../hooks/api/useFallBackConfig";
+import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { Checkbox } from "../Checkbox";
 import { ToastType } from "../ToastProvider";
 import { useToast } from "../../hooks/useToast";
 
 export function FallbackApSettings(): JSX.Element {
   const api = useFallBackConfig();
+  const otaData = useOtaKey();
   const showToast = useToast();
 
   const [formValues, setFormValues] = useState({
@@ -56,6 +58,7 @@ export function FallbackApSettings(): JSX.Element {
           headers: {
             Accept: "application/json",
             "Content-Type": "application/json",
+            "X-OTA-Key": otaData.data?.key ?? "",
           },
           body: JSON.stringify({
             enabled: formValues.enabled,

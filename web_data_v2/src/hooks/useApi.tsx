@@ -42,8 +42,8 @@ export default function useApi<Type>({
 
       if (!background) {
         setLoaded(false);
+        setIsError(false);
       }
-      setIsError(false);
 
       const otaKey = includeOtaKey ? otaKeyApi.data?.key : undefined;
 

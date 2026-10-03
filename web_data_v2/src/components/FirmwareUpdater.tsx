@@ -136,6 +136,11 @@ export function FirmwareUpdater() {
 
   const startUpdate = async () => {
     if (!release || !info.data || updating) return;
+    if (!otaKey.data?.key) {
+      setError("OTA key not available, please wait and try again.");
+      return;
+    }
+    const key = otaKey.data.key;
     const firmwareUrl = findAssetUrl(
       release,
       `${info.data.board}-${release.tag_name}-firmware.bin`,
@@ -156,27 +161,17 @@ export function FirmwareUpdater() {
     setStatus({ label: "Starting update…", progress: 0 });
     try {
 
-      try {
-        await otaFromUrl(firmwareUrl, "firmware", otaKey.data?.key as string, (label) =>
-          setStatus({ label, progress: 25 }),
-        );
-      } catch (updateError) {
-        if (!(updateError instanceof TypeError)) throw updateError;
-        setStatus({ label: "Rebooting…", progress: null });
-      }
+      await otaFromUrl(firmwareUrl, "firmware", key, (label) =>
+        setStatus({ label, progress: 25 }),
+      );
       setStatus({
         label: "Waiting for device to come back online…",
         progress: null,
       });
       await pollUntilOnline(Date.now() + 60000);
-      try {
-        await otaFromUrl(webUrl, "web", otaKey.data?.key as string, (label) =>
-          setStatus({ label, progress: 75 }),
-        );
-      } catch (updateError) {
-        if (!(updateError instanceof TypeError)) throw updateError;
-        setStatus({ label: "Rebooting…", progress: null });
-      }
+      await otaFromUrl(webUrl, "web", key, (label) =>
+        setStatus({ label, progress: 75 }),
+      );
       setStatus({
         label: "Waiting for device to come back online…",
         progress: null,

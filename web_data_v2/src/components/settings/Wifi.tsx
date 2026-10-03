@@ -85,7 +85,8 @@ export function WifiSettings(): JSX.Element {
             password: formValues.password,
           }),
         })
-          .then(() => {
+          .then((r) => {
+            if (!r.ok) throw new Error(r.statusText);
             showToast("toast.wifi-saved-restarting", ToastType.SUCCESS);
           })
           .catch(() => {
@@ -150,6 +151,7 @@ export function WifiSettings(): JSX.Element {
           <div id="wifi-scan-results" style="display: block;">
             {scanResults.map((result: WifiScanResult) => (
               <div
+                key={result.ssid}
                 class="wifi-scan-row"
                 onClick={() => {
                   handleFieldChange("ssid", result.ssid);
