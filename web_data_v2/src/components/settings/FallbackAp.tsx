@@ -68,7 +68,8 @@ export function FallbackApSettings(): JSX.Element {
             ap_ssid: formValues.ap_ssid,
           }),
         })
-          .then(() => {
+          .then((r) => {
+            if (!r.ok) throw new Error(r.statusText);
             showToast("toast.fallback-saved", ToastType.SUCCESS);
           })
           .catch(() => {

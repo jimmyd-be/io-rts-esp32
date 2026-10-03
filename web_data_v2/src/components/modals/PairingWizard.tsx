@@ -151,6 +151,11 @@ export function PairingWizardProvider({
 
   // 2W Discovery
   const start2wDiscovery = useCallback(() => {
+    if (!otaKey.data?.key) {
+      setDiscoveryStatusText(t("popup.pair_failed") || "OTA key not available, please wait.");
+      setIsDiscoveryError(true);
+      return;
+    }
     setStep("2w-discovery");
     setCountdown(120);
     setDiscoveryStatusText("");

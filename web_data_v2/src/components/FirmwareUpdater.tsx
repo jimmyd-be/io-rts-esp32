@@ -161,17 +161,27 @@ export function FirmwareUpdater() {
     setStatus({ label: "Starting update…", progress: 0 });
     try {
 
-      await otaFromUrl(firmwareUrl, "firmware", key, (label) =>
-        setStatus({ label, progress: 25 }),
-      );
+      try {
+        await otaFromUrl(firmwareUrl, "firmware", key, (label) =>
+          setStatus({ label, progress: 25 }),
+        );
+      } catch (e) {
+        if (!(e instanceof TypeError)) throw e;
+        // Device dropped the connection while rebooting after flash — expected.
+      }
       setStatus({
         label: "Waiting for device to come back online…",
         progress: null,
       });
       await pollUntilOnline(Date.now() + 60000);
-      await otaFromUrl(webUrl, "web", key, (label) =>
-        setStatus({ label, progress: 75 }),
-      );
+      try {
+        await otaFromUrl(webUrl, "web", key, (label) =>
+          setStatus({ label, progress: 75 }),
+        );
+      } catch (e) {
+        if (!(e instanceof TypeError)) throw e;
+        // Device dropped the connection while rebooting after flash — expected.
+      }
       setStatus({
         label: "Waiting for device to come back online…",
         progress: null,

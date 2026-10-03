@@ -1,5 +1,5 @@
 import { AccordionHead } from "../AccordionHead";
-import { useState } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { useOtaKey } from "../../hooks/api/useOtaKey";
 import { useNetworkConfig } from "../../hooks/api/useNetworkConfig";
 import { Checkbox } from "../Checkbox";
@@ -12,7 +12,10 @@ export function NetworkSettings() {
 
   const api = useNetworkConfig();
 
-  const [dhcpEnabled, setDhcpEnabled] = useState(api.data ? api.data.dhcp : true);
+  const [dhcpEnabled, setDhcpEnabled] = useState(true);
+  useEffect(() => {
+    if (api.data) setDhcpEnabled(api.data.dhcp);
+  }, [api.data]);
 
   return (
     <form
@@ -30,7 +33,8 @@ export function NetworkSettings() {
             "X-OTA-Key": otaData.data?.key || "",
           },
         })
-          .then(() => {
+          .then((r) => {
+            if (!r.ok) throw new Error(r.statusText);
             showToast("toast.network-saved-restarting", ToastType.SUCCESS);
           })
           .catch(() => {
@@ -135,6 +139,20 @@ export function NetworkSettings() {
                   placeholder="8.8.8.8"
                   style="margin-top:4px;"
                   value={api.data ? api.data.dns1 : undefined}
+                />
+              </div>
+              <div style="flex:1">
+                <label class={"label-title"} data-i18n="label.dns2">
+                  DNS (secondary)
+                </label>
+                <input
+                  type="text"
+                  name="dns2"
+                  class="s-input"
+                  disabled={dhcpEnabled}
+                  placeholder="8.8.4.4"
+                  style="margin-top:4px;"
+                  value={api.data ? api.data.dns2 : undefined}
                 />
               </div>
             </div>

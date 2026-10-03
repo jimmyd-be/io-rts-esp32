@@ -149,9 +149,9 @@ export function WifiSettings(): JSX.Element {
         </div>
         {scanResults.length > 0 && (
           <div id="wifi-scan-results" style="display: block;">
-            {scanResults.map((result: WifiScanResult) => (
+            {scanResults.map((result: WifiScanResult, idx: number) => (
               <div
-                key={result.ssid}
+                key={`${result.ssid}-${idx}`}
                 class="wifi-scan-row"
                 onClick={() => {
                   handleFieldChange("ssid", result.ssid);

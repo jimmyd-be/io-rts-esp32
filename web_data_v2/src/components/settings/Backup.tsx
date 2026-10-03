@@ -80,7 +80,7 @@ export function BackupSettings() {
       }
 
       const data = await readBackupResponse(response);
-      setResult(data?.message || t("toast.backup-importing"), data?.success);
+      setResult(data?.message || t("toast.backup-importing"), data?.success ?? true);
     } catch (error) {
       setResult(
         t("toast.backup-restore-failed", {
