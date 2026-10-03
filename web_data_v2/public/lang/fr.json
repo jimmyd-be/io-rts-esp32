@@ -418,5 +418,8 @@
   "button.cancel": "Annuler",
   "button.pair": "Appairer",
   "button.capture_remote": "Capturer la télécommande",
-  "button.enter_manually": "Saisir l'ID manuellement"
+  "button.enter_manually": "Saisir l'ID manuellement",
+  "label.not-available": "Non disponible",
+  "toast.syslog-saved": "Paramètres syslog enregistrés.",
+  "toast.error-saving-syslog": "Erreur lors de l'enregistrement de la configuration syslog."
 }

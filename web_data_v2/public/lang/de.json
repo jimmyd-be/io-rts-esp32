@@ -418,5 +418,8 @@
   "button.cancel": "Abbrechen",
   "button.pair": "Koppeln",
   "button.capture_remote": "Fernbedienung erfassen",
-  "button.enter_manually": "ID manuell eingeben"
+  "button.enter_manually": "ID manuell eingeben",
+  "label.not-available": "Nicht verfügbar",
+  "toast.syslog-saved": "Syslog-Einstellungen gespeichert.",
+  "toast.error-saving-syslog": "Fehler beim Speichern der Syslog-Konfiguration."
 }

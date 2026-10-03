@@ -1,4 +1,5 @@
 import { render } from "preact";
+import { useEffect } from "preact/hooks";
 import { LocationProvider, Route, Router } from "preact-iso";
 
 import { Header } from "./components/Header.tsx";
@@ -12,6 +13,18 @@ import { FirmwareUpdater } from "./components/FirmwareUpdater";
 import { ToastProvider } from "./components/ToastProvider";
 
 export function App() {
+  useEffect(() => {
+    function onWheel(e: WheelEvent) {
+      const main = document.querySelector("main");
+      if (!main) return;
+      if (!main.contains(e.target as Node)) {
+        main.scrollTop += e.deltaY;
+      }
+    }
+    document.addEventListener("wheel", onWheel, { passive: true });
+    return () => document.removeEventListener("wheel", onWheel);
+  }, []);
+
   return (
     <ToastProvider>
       <LocationProvider>

@@ -20,6 +20,7 @@ file(WRITE ${CMAKE_SOURCE_DIR}/web_data_v2/version.json "{\"version\":\"${PROJEC
 
 # Stage web assets with CSS/JS replaced by .gz versions (saves ~40 KB on the partition)
 set(WEB_STAGED_DIR "${CMAKE_BINARY_DIR}/web_staged")
+file(REMOVE_RECURSE "${WEB_STAGED_DIR}")
 file(COPY "${CMAKE_SOURCE_DIR}/web_data_v2/dist/" DESTINATION "${WEB_STAGED_DIR}")
 file(COPY "${CMAKE_SOURCE_DIR}/web_data_v2/version.json" DESTINATION "${WEB_STAGED_DIR}")
 

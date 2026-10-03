@@ -418,5 +418,8 @@
   "button.cancel": "Annuleren",
   "button.pair": "Koppelen",
   "button.capture_remote": "Afstandsbediening vastleggen",
-  "button.enter_manually": "ID handmatig invoeren"
+  "button.enter_manually": "ID handmatig invoeren",
+  "label.not-available": "Niet beschikbaar",
+  "toast.syslog-saved": "Syslog-instellingen opgeslagen.",
+  "toast.error-saving-syslog": "Fout bij opslaan syslog-configuratie."
 }

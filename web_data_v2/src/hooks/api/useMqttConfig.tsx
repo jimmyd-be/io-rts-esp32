@@ -5,5 +5,6 @@ export function useMqttConfig(): ApiResponse<MqttConfig> {
   return useApi<MqttConfig>({
     endpoint: "/api/mqtt",
     method: "GET",
+    refreshTime: 10,
   });
 }

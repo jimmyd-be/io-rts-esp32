@@ -418,5 +418,8 @@
   "button.cancel": "Cancel",
   "button.pair": "Pair",
   "button.capture_remote": "Capture Remote",
-  "button.enter_manually": "Enter ID Manually"
+  "button.enter_manually": "Enter ID Manually",
+  "label.not-available": "Not available",
+  "toast.syslog-saved": "Syslog settings saved.",
+  "toast.error-saving-syslog": "Error saving syslog config."
 }
