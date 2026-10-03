@@ -3,6 +3,9 @@ import { useOtaKey } from "./api/useOtaKey.tsx";
 import type { ApiResponse } from "../models/Types";
 export type { ApiResponse } from "../models/Types";
 
+// Survives component unmount/remount — pages show cached values instantly on re-navigation
+const apiCache = new Map<string, unknown>();
+
 export default function useApi<Type>({
   endpoint,
   method,
@@ -18,8 +21,11 @@ export default function useApi<Type>({
   includeOtaKey?: boolean;
   refreshTime?: number;
 }): ApiResponse<Type> {
-  const [data, setData] = useState<Type | undefined>(undefined);
-  const [loaded, setLoaded] = useState(false);
+  const cacheKey = `${method}:${endpoint}:${JSON.stringify(body ?? null)}`;
+  const [data, setData] = useState<Type | undefined>(
+    () => apiCache.get(cacheKey) as Type | undefined
+  );
+  const [loaded, setLoaded] = useState(() => apiCache.has(cacheKey));
   const [isError, setIsError] = useState(false);
   const [refreshNonce, setRefreshNonce] = useState(0);
 
@@ -104,6 +110,7 @@ export default function useApi<Type>({
         }
 
         if (!cancelled) {
+          apiCache.set(cacheKey, parsed);
           setData(parsed);
           setIsError(false);
           setLoaded(true);
