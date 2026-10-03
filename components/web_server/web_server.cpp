@@ -846,7 +846,10 @@ static esp_err_t api_action_post(httpd_req_t *req)
                 Helpers::StoredIoDevice stored;
                 if (Helpers::DeviceStorage::LoadIoDevice(deviceId, stored) == ESP_OK) {
                     stored.device.info.device_subtype = (uint8_t)value;
-                    Helpers::DeviceStorage::SaveIoDevice(deviceId, stored);
+                    if (Helpers::DeviceStorage::SaveIoDevice(deviceId, stored) != ESP_OK)
+                        ok = false;
+                } else {
+                    ok = false;
                 }
             }
         }
@@ -2482,7 +2485,7 @@ static esp_err_t api_upload_iohomecontrol(httpd_req_t *req)
         cJSON *typeRouteArr = cJSON_GetObjectItem(entry, "type");
         if (cJSON_IsArray(typeRouteArr) && cJSON_GetArraySize(typeRouteArr) > 0) {
             cJSON *route0 = cJSON_GetArrayItem(typeRouteArr, 0);
-            if (cJSON_IsNumber(route0))
+            if (cJSON_IsNumber(route0) && route0->valuedouble <= 15)
                 dev.info.device_subtype = (uint8_t)route0->valuedouble;
         }
 

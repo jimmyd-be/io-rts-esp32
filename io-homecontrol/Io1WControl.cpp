@@ -34,7 +34,9 @@ void Io1WControl::BuildBroadcastTarget(uint8_t dest[NODE_ID_SIZE], const IoDevic
 void Io1WControl::TransmitFrame4x(const IoFrame &frame) const
 {
     // Four repeats: first TX long preamble, then short preamble, ~40 ms between repeats.
-    // Space enqueues so the long preamble (~200 ms+) can finish before the next TX.
+    // Queue depth must stay ≤ 1: process_radio_task dequeues back-to-back when non-empty.
+    // kAfterLongPreambleMs: long preamble = 213 ms airtime + ~5 ms frame = ~218 ms.
+    // 280 ms gives ~62 ms of slack. Do not reduce below ~220 ms.
     static constexpr int kRepeatGapMs = 40;
     static constexpr int kAfterLongPreambleMs = 280;
 
