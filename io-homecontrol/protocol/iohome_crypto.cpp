@@ -289,25 +289,24 @@ namespace iohome
     }
 
     bool encrypt_1w_key(
-        const uint8_t controller_node_id[NODE_ID_SIZE],
+        const uint8_t virtual_remote_node_id[NODE_ID_SIZE],
         const uint8_t key_in[AES_KEY_SIZE],
         uint8_t enc_key_out[AES_KEY_SIZE])
     {
-      // IV = controller node address repeated across 16 bytes
-      // [0..2]=node, [3..5]=node, [6..8]=node, [9..11]=node, [12..14]=node, [15]=node[0]
+      // IV = virtual 1W remote node_id repeated in the 16-byte block.
       uint8_t iv[AES_BLOCK_SIZE] = {};
       for (int i = 0; i < 13; i += 3)
       {
-        iv[i]     = controller_node_id[0];
-        iv[i + 1] = controller_node_id[1];
-        iv[i + 2] = controller_node_id[2];
+        iv[i]     = virtual_remote_node_id[0];
+        iv[i + 1] = virtual_remote_node_id[1];
+        iv[i + 2] = virtual_remote_node_id[2];
       }
-      iv[15] = controller_node_id[0];
+      iv[15] = virtual_remote_node_id[0];
 
-      // CFB128 over exactly one block = AES_ECB(TRANSFER_KEY, IV) XOR key_in
-      // (same pattern as crypt_2w_key, different IV construction)
+      // Single-block CFB128 encrypt == plaintext XOR AES-ECB(TRANSFER_KEY, IV).
       uint8_t keystream[AES_BLOCK_SIZE];
-      if (!aes128_encrypt(iv, TRANSFER_KEY, keystream)) return false;
+      if (!aes128_encrypt(iv, TRANSFER_KEY, keystream))
+        return false;
       for (int i = 0; i < AES_KEY_SIZE; i++)
         enc_key_out[i] = key_in[i] ^ keystream[i];
       return true;

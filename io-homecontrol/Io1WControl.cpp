@@ -14,39 +14,46 @@ static const char *TAG = "Io1WControl";
 namespace iohome
 {
 
+// 1W cmd 0x00 uses ACEI 0x43 on the wire (OEM remotes may use other values e.g. 0x61).
+static constexpr uint8_t ACEI_1W_EXECUTE = 0x43;
+
 Io1WControl::Io1WControl(IoHomeControl *io_home)
     : mIoHome(io_home)
 {
 }
 
-void Io1WControl::BuildBroadcastTarget(uint8_t dest[NODE_ID_SIZE], DeviceType) const
+void Io1WControl::BuildBroadcastTarget(uint8_t dest[NODE_ID_SIZE], const IoDeviceInformation &info) const
 {
-    // All 1W frames use the global broadcast address. The HMAC selects the device.
+    // 1W broadcast destination: (typn << 6) | 0x3F; typn is device_subtype (import JSON "type"[0]).
+    const uint16_t bcast = (static_cast<uint16_t>(info.device_subtype) << 6) | 0x3Fu;
     dest[0] = 0x00;
-    dest[1] = 0x00;
-    dest[2] = 0x3F;
+    dest[1] = static_cast<uint8_t>(bcast >> 8);
+    dest[2] = static_cast<uint8_t>(bcast & 0xFF);
 }
 
 void Io1WControl::TransmitFrame4x(const IoFrame &frame) const
 {
-    // Queue frames one at a time with a 350 ms gap between enqueues.
-    // process_radio_task skips its waitTime whenever sTxIoQueue is non-empty,
-    // so all 4 frames would be dequeued back-to-back: each Send() calls Standby()
-    // which kills the previous frame's preamble after ~1 ms.  The 1024-byte
-    // preamble takes ~213 ms to transmit, so we must keep the queue at most 1
-    // entry deep until the current transmission is complete.
+    // Four repeats: first TX long preamble, then short preamble, ~40 ms between repeats.
+    // Space enqueues so the long preamble (~200 ms+) can finish before the next TX.
+    static constexpr int kRepeatGapMs = 40;
+    static constexpr int kAfterLongPreambleMs = 280;
+
     for (int i = 0; i < 4; i++)
     {
-        mIoHome->TransmitFrame(frame, FREQUENCY_CHANNEL_2, LONG_PREAMBLE_LENGTH);
+        const uint16_t preamble =
+            (i == 0) ? LONG_PREAMBLE_LENGTH : SHORT_PREAMBLE_LENGTH;
+        mIoHome->TransmitFrame(frame, FREQUENCY_CHANNEL_2, preamble);
         if (i < 3)
-            vTaskDelay(pdMS_TO_TICKS(350));
+            vTaskDelay(pdMS_TO_TICKS(i == 0 ? kAfterLongPreambleMs : kRepeatGapMs));
     }
 }
 
 bool Io1WControl::ReSendPair(IoDeviceInformation &info)
 {
     const uint8_t *src = info.node_id;
-    const uint8_t dest[NODE_ID_SIZE] = {0x00, 0x00, 0x3F};
+
+    uint8_t dest[NODE_ID_SIZE];
+    BuildBroadcastTarget(dest, info);
 
     uint8_t seq[2] = {(uint8_t)(info.sequence_1w >> 8), (uint8_t)(info.sequence_1w & 0xFF)};
     info.sequence_1w++;
@@ -71,8 +78,10 @@ bool Io1WControl::ReSendPair(IoDeviceInformation &info)
     set_source(frame, src);
     set_command(frame, 0x30, params, sizeof(params));
     TransmitFrame4x(frame);
-    ESP_LOGI(TAG, "ReSendPair: ADD (0x30) sent from %02X%02X%02X seq=%04X",
-             src[0], src[1], src[2], (seq[0] << 8) | seq[1]);
+    ESP_LOGI(TAG,
+             "ReSendPair: ADD (0x30) from %02X%02X%02X to %02X%02X%02X typn=%u man=0x%02X seq=%04X",
+             src[0], src[1], src[2], dest[0], dest[1], dest[2],
+             info.device_subtype, params[16], (seq[0] << 8) | seq[1]);
     return true;
 }
 
@@ -90,7 +99,7 @@ bool Io1WControl::WinkDevice(IoDeviceInformation &info)
     const uint8_t *src = info.node_id;
 
     uint8_t dest[NODE_ID_SIZE];
-    BuildBroadcastTarget(dest, info.device_type);
+    BuildBroadcastTarget(dest, info);
 
     uint8_t seq[2] = {(uint8_t)(info.sequence_1w >> 8), (uint8_t)(info.sequence_1w & 0xFF)};
     info.sequence_1w++;
@@ -124,7 +133,7 @@ bool Io1WControl::UnpairDevice(IoDeviceInformation &info)
     const uint8_t *src = info.node_id;
 
     uint8_t dest[NODE_ID_SIZE];
-    BuildBroadcastTarget(dest, info.device_type);
+    BuildBroadcastTarget(dest, info);
 
     uint8_t seq[2] = {(uint8_t)(info.sequence_1w >> 8), (uint8_t)(info.sequence_1w & 0xFF)};
     info.sequence_1w++;
@@ -157,7 +166,7 @@ bool Io1WControl::Send(IoDeviceInformation &info, float position_pct)
     const uint8_t *src = info.node_id;
 
     uint8_t dest[NODE_ID_SIZE];
-    BuildBroadcastTarget(dest, info.device_type);
+    BuildBroadcastTarget(dest, info);
 
     uint8_t seq[2] = {(uint8_t)(info.sequence_1w >> 8), (uint8_t)(info.sequence_1w & 0xFF)};
     info.sequence_1w++;
@@ -165,7 +174,7 @@ bool Io1WControl::Send(IoDeviceInformation &info, float position_pct)
     // main = position_pct * 512 (0x0000 = fully open, 0xC800 = fully closed)
     uint16_t main_val = (uint16_t)roundf(position_pct * 512.0f);
     uint8_t  origin   = 0x01;
-    uint8_t  acei     = 0x43;
+    uint8_t  acei     = ACEI_1W_EXECUTE;
 
     uint8_t frame_for_hmac[7] = {
         0x00, origin, acei,
@@ -204,14 +213,14 @@ bool Io1WControl::Stop(IoDeviceInformation &info)
     const uint8_t *src = info.node_id;
 
     uint8_t dest[NODE_ID_SIZE];
-    BuildBroadcastTarget(dest, info.device_type);
+    BuildBroadcastTarget(dest, info);
 
     uint8_t seq[2] = {(uint8_t)(info.sequence_1w >> 8), (uint8_t)(info.sequence_1w & 0xFF)};
     info.sequence_1w++;
 
     constexpr uint16_t STOP_VAL = 0xD200;
     uint8_t  origin = 0x01;
-    uint8_t  acei   = 0x43;
+    uint8_t  acei   = ACEI_1W_EXECUTE;
 
     uint8_t frame_for_hmac[7] = {
         0x00, origin, acei,
