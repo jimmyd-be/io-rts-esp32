@@ -20,7 +20,11 @@ file(WRITE ${CMAKE_SOURCE_DIR}/web_data_v2/version.json "{\"version\":\"${PROJEC
 
 # Stage web assets with CSS/JS replaced by .gz versions (saves ~40 KB on the partition)
 set(WEB_STAGED_DIR "${CMAKE_BINARY_DIR}/web_staged")
-file(COPY "${CMAKE_SOURCE_DIR}/web_data_v2/" DESTINATION "${WEB_STAGED_DIR}")
+file(REMOVE_RECURSE "${WEB_STAGED_DIR}")
+file(COPY "${CMAKE_SOURCE_DIR}/web_data_v2/" DESTINATION "${WEB_STAGED_DIR}"
+    PATTERN "node_modules" EXCLUDE
+    PATTERN "dist" EXCLUDE
+)
 
 find_program(GZIP_EXECUTABLE gzip)
 if(GZIP_EXECUTABLE)
