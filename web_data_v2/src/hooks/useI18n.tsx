@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useEffect, useState } from "preact/hooks";
 import { LANGUAGE_STORAGE_KEY } from "../models/Constants";
 import type { TranslationParams, UseI18nResult } from "../models/Types";
 
@@ -14,18 +14,37 @@ type I18nDict = Record<string, string>;
 
 const DEFAULT_SUPPORTED = ["nl", "en", "de", "fr"];
 
+// Module-level cache shared across all useI18n() instances — survives component
+// unmount/remount so re-navigation never causes a translation flash.
+const langCache: Record<string, I18nDict> = {};
+
+function getInitialLang(supported: string[]): string {
+  try {
+    const saved = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (saved && supported.includes(saved)) return saved;
+  } catch { /* ignore */ }
+  const auto = (typeof navigator !== "undefined" ? navigator.language || "en" : "en")
+    .slice(0, 2).toLowerCase();
+  return supported.includes(auto) ? auto : "en";
+}
+
 export default function useI18n(
   supported: string[] = DEFAULT_SUPPORTED,
 ): UseI18nResult {
-  const [currentLang, setCurrentLang] = useState<string>("en");
-  const [i18nState, setI18nState] = useState<I18nDict>({});
-  const [fallbackState, setFallbackState] = useState<I18nDict>({});
-  const cache = useRef<Record<string, I18nDict>>({});
+  const [currentLang, setCurrentLang] = useState<string>(
+    () => getInitialLang(supported)
+  );
+  const [i18nState, setI18nState] = useState<I18nDict>(
+    () => langCache[getInitialLang(supported)] || {}
+  );
+  const [fallbackState, setFallbackState] = useState<I18nDict>(
+    () => langCache["en"] || {}
+  );
 
   const candidatesFor = (lang: string) => [`/lang/${lang}.json`];
 
   const loadLang = useCallback(async (lang: string): Promise<I18nDict> => {
-    if (cache.current[lang]) return cache.current[lang];
+    if (langCache[lang]) return langCache[lang];
 
     for (const url of candidatesFor(lang)) {
       try {
@@ -33,8 +52,8 @@ export default function useI18n(
         if (!res.ok) continue;
         const json = await res.json();
         if (json && typeof json === "object") {
-          cache.current[lang] = json as I18nDict;
-          return cache.current[lang];
+          langCache[lang] = json as I18nDict;
+          return langCache[lang];
         }
         } catch {
         // try next
@@ -42,7 +61,7 @@ export default function useI18n(
       }
     }
 
-    cache.current[lang] = {};
+    langCache[lang] = {};
     return {};
   }, []);
 
