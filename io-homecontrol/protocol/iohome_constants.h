@@ -26,7 +26,7 @@ namespace iohome
   constexpr uint32_t BAND_WIDTH = 50000;          // Hz
   constexpr uint32_t FREQ_DEVIATION = 19200;      // Hz
   constexpr uint16_t LONG_PREAMBLE_LENGTH = 1024; // 8192 bits, for start frame. Note that 4096 is not enough for solar (low power) blinds!
-  constexpr uint16_t SHORT_PREAMBLE_LENGTH = 8;   // 64 bits, for other frames
+  constexpr uint16_t SHORT_PREAMBLE_LENGTH = 32;  // 256 bits; protocol standard ~16-36 bytes (measured from reference controller)
 
   // Sync Word
   constexpr uint32_t SYNC_WORD = 0x33FF55;

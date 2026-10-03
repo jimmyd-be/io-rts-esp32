@@ -400,7 +400,7 @@ namespace iohome
           preambleSyncDetected = true;
           preambleSyncDetectedStartUs = esp_timer_get_time();
         }
-        else if ((esp_timer_get_time() - preambleSyncDetectedStartUs) > CHANNEL_PREAMBLE_SYNC_TIMEOUT_US * 1000)
+        else if ((esp_timer_get_time() - preambleSyncDetectedStartUs) > CHANNEL_PREAMBLE_SYNC_TIMEOUT_US)
         {
           IO_LOGW("process_radio_task: Preamble/sync detection timeout, resetting radio");
           ioHome->mRadio->StartReceive();
@@ -663,7 +663,7 @@ namespace iohome
       if (xSemaphoreTake(sMutex, MUTEX_MAX_WAIT_TICKS))
       {
         RxFrameQueueItem item;
-        if (xQueueReceive(sRxIoQueue, &item, RECEIVED_IO_TREATMENT_WAIT_TICKS))
+        if (xQueueReceive(sRxIoQueue, &item, 0))
         {
           // Auto-stop key sniffing after timeout
           if (sSniffKeyActive && (esp_timer_get_time() - sSniffStartUs) > KEY_SNIFF_TIMEOUT_US)
@@ -2135,7 +2135,7 @@ namespace iohome
         vTaskDelay(pdMS_TO_TICKS(TIME_BETWEEN_RETRY_MS));
       tries--;
 
-      if (TransmitFrame(request, frequency, is_start(request) ? LONG_PREAMBLE_LENGTH : SHORT_PREAMBLE_LENGTH))
+      if (TransmitFrame(request, frequency, (request.ctrl_byte_1 & CTRL1_LOW_POWER) ? LONG_PREAMBLE_LENGTH : SHORT_PREAMBLE_LENGTH))
       {
         RxFrameQueueItem rxItem;
         if (ReceiveMatchingFrame(request.dest_node, request.src_node, -1,
@@ -2153,7 +2153,7 @@ namespace iohome
           {
             if (setStartFlagToAuthentResponse)
               challengeResponse.ctrl_byte_0 |= CTRL0_START;
-            if (TransmitFrame(challengeResponse, frequency, LONG_PREAMBLE_LENGTH))
+            if (TransmitFrame(challengeResponse, frequency, SHORT_PREAMBLE_LENGTH))
             {
               // Now wait for final response
               if (ReceiveMatchingFrame(request.dest_node, request.src_node, expected_response_cmd,
