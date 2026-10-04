@@ -8,6 +8,7 @@ import { useToast } from "../hooks/useToast";
 import { ToastType } from "./ToastProvider";
 import { useOtaKey } from "../hooks/api/useOtaKey";
 import { getFavoritePosition, postDeviceAction } from "../utils/RemoteApi.ts";
+import { wasScrolling } from "../utils/touchScroll.ts";
 
 interface DeviceCardProps {
   device: Device;
@@ -47,6 +48,8 @@ export function DeviceCard({ device, sortableRef, sortableStyle, dragHandleProps
 
   const triggerAction = useCallback(
     async (action: string, value?: unknown, target?: number | null) => {
+      if (wasScrolling()) return;
+
       if (target !== undefined) {
         setBlindTarget(target);
       }
