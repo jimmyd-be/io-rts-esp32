@@ -1,0 +1,30 @@
+# Changelog
+
+## [Unreleased] — fix/web-ui-polish
+
+### Fixed
+
+#### Build
+- **LittleFS partition overflow** — `CMakeLists.txt` now clears `web_staged/` before each reconfigure, preventing stale JS hash files and old web UI assets from accumulating and pushing the 450 KB LittleFS partition to capacity. Previously this caused mid-transfer TCP drops when serving assets.
+
+#### Web UI — correctness
+- **OTA key guard** — upload flows (firmware, web, pairing, remote wizard) now bail early with a user-visible error when the OTA key is not yet available, instead of sending an empty key.
+- **OTA key input** — changed from `type="text"` to `type="password"` so the key is masked by default.
+- **`r.ok` checks** — all `fetch()` calls that were missing a response-ok check (OTA key save, fallback AP, pairing start) now throw on non-2xx so the error toast fires correctly.
+- **`FirmwareUpdater`** — added `TypeError` catch for the ESP32 TCP drop on reboot during OTA so the progress flow completes cleanly.
+- **WiFi form** — password field is omitted from the POST body when left blank (prevents overwriting a saved password with an empty string); scan result keys are now stable (`ssid-idx`) to avoid Preact reconciliation warnings.
+- **Network form** — added `name=` attributes on all inputs; added missing `dns2` field; DHCP state initialises from API data via `useEffect`; SNTP field is no longer incorrectly disabled when DHCP is on.
+- **Backup** — `data?.success ?? true` default no longer incorrectly styles a fresh (no-data) state as an error.
+- **IoSystemKey** — fixed stale closure in unmount cleanup by holding the OTA key in a `useRef`.
+- **SoftwareUpdate** — removed non-functional "Check" button and raw i18n key `button.stable-only`.
+- **Snapshot CI** — tag sanitisation (`/` → `-`) is now applied and exported via `GITHUB_ENV` in all three board jobs (heltec, t3s3, lora32); upload-artifact paths use the sanitised tag.
+
+#### Web UI — flicker / performance
+- **`useApi` flicker** — loading state is only reset when no cached data exists, so navigating back to a page shows the previous data instantly instead of a blank screen.
+- **API response cache** — module-level `apiCache` in `useApi` survives component unmount/remount; pages restore from cache immediately on re-navigation.
+- **i18n translation cache** — module-level `langCache` in `useI18n` means translation files are fetched once per session; subsequent mounts show translated text immediately without a key-flash.
+
+#### Web UI — UX
+- **MQTT status** — `useMqttConfig` now polls every 10 seconds so the connected/disconnected status stays live without a page reload.
+- **Scroll outside layout** — wheel events on the margins outside the 600 px centred layout are now forwarded to `<main>`, so scrolling works anywhere on the page on wide desktops.
+- **Missing i18n keys** — added `label.not-available`, `toast.syslog-saved`, and `toast.error-saving-syslog` to all four language files (en, nl, de, fr); these were previously showing their raw key strings.
