@@ -5,6 +5,7 @@ import { PositionRow } from "../deviceSettings/PositionRow.tsx";
 import { TransitTimeRow } from "../deviceSettings/TransitTimeRow.tsx";
 import { InvertOpenCloseRow } from "../deviceSettings/InvertOpenCloseRow.tsx";
 import { QuietModeRow } from "../deviceSettings/QuietModeRow.tsx";
+import { LowPowerRow } from "../deviceSettings/LowPowerRow.tsx";
 import { IdentifyRow } from "../deviceSettings/IdentifyRow.tsx";
 import { DeviceTypeRow } from "../deviceSettings/DeviceTypeRow.tsx";
 import { ResetPositionRow } from "../deviceSettings/ResetPositionRow.tsx";
@@ -63,6 +64,7 @@ export function DeviceModal({ device, onClose }: DeviceModalProps) {
             setDeviceState={setDeviceState}
           />
           <QuietModeRow device={deviceState} setDeviceState={setDeviceState} />
+          <LowPowerRow device={deviceState} setDeviceState={setDeviceState} />
           <IdentifyRow device={deviceState} setDeviceState={setDeviceState} />
           <DeviceTypeRow
             device={deviceState}

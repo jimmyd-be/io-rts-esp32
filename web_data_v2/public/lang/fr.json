@@ -404,6 +404,8 @@
   "confirm.delete_remote": "Supprimer la télécommande {id} de tous les appareils ?",
   "label.quiet_mode": "Mode silencieux",
   "popup.quiet_desc": "Fonctionnement moteur plus lent et silencieux.",
+  "label.low_power_mode": "Mode basse consommation",
+  "popup.low_power_desc": "Activer pour les appareils alimentés par panneau solaire ou batterie. Utilise une longue préambule pour réveiller l'appareil.",
   "popup.transit_time": "Transition time",
   "popup.transit_not_set": "Not set",
   "popup.transit_time_s": "{s} s",

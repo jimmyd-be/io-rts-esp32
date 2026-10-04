@@ -648,6 +648,28 @@ namespace IoRts
         return err == ESP_OK;
     }
 
+    bool IoRtsManager::SetLowPower(const std::string &deviceID, bool low_power)
+    {
+        mIoDevicesMutex.lock();
+        auto it = mIoDevices.find(deviceID);
+        bool found = it != mIoDevices.end();
+        if (found)
+            it->second.info.is_low_power = low_power;
+        mIoDevicesMutex.unlock();
+
+        if (!found)
+            return false;
+
+        Helpers::StoredIoDevice stored;
+        if (Helpers::DeviceStorage::LoadIoDevice(deviceID, stored) != ESP_OK)
+            return false;
+        stored.device.info.is_low_power = low_power;
+        esp_err_t err = Helpers::DeviceStorage::SaveIoDevice(deviceID, stored);
+        if (err == ESP_OK)
+            ESP_LOGI(TAG, "Low power mode for %s set to %s", deviceID.c_str(), low_power ? "on" : "off");
+        return err == ESP_OK;
+    }
+
     bool IoRtsManager::SetLocalName(const std::string &deviceID, const std::string &name)
     {
         mIoDevicesMutex.lock();

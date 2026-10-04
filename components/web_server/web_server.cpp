@@ -663,6 +663,12 @@ static esp_err_t api_action_post(httpd_req_t *req)
             ok = s_manager->SetQuiet(deviceId, cJSON_IsTrue(jVal));
         else
             ok = false;
+    } else if (strcmp(action, "setLowPower") == 0) {
+        cJSON *jVal = cJSON_GetObjectItem(json, "value");
+        if (cJSON_IsBool(jVal))
+            ok = s_manager->SetLowPower(deviceId, cJSON_IsTrue(jVal));
+        else
+            ok = false;
     } else if (strcmp(action, "rename") == 0) {
         cJSON *jName = cJSON_GetObjectItem(json, "value");
         const char *newName = cJSON_IsString(jName) ? jName->valuestring : "";

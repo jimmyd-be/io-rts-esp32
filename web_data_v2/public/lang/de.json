@@ -404,6 +404,8 @@
   "confirm.delete_remote": "Fernbedienung {id} von allen Geräten entfernen?",
   "label.quiet_mode": "Leiser Modus",
   "popup.quiet_desc": "Langsamerer, leiserer Motorlauf.",
+  "label.low_power_mode": "Niedrigleistungsmodus",
+  "popup.low_power_desc": "Für solar- oder akkubetriebene Geräte aktivieren. Verwendet eine lange Präambel, um das Gerät zu wecken.",
   "popup.transit_time": "Transition time",
   "popup.transit_not_set": "Not set",
   "popup.transit_time_s": "{s} s",

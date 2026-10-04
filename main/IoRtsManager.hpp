@@ -75,6 +75,7 @@ namespace IoRts
         /// @param quiet true for slower, quieter motor operation
         /// @return true on success
         bool SetQuiet(const std::string &deviceID, bool quiet);
+        bool SetLowPower(const std::string &deviceID, bool low_power);
 
         /// @brief Schedule a confirmation poll for a device after its estimated stop time
         /// @param deviceID Device ID
