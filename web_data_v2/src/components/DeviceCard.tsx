@@ -105,9 +105,9 @@ export function DeviceCard({ device, sortableRef, sortableStyle, dragHandleProps
 
       <div className="card-top">
         {dragHandleProps && (
-          <button type="button" className="drag-handle" aria-label="Drag to reorder" {...(dragHandleProps as Record<string, unknown>)}>
+          <span className="drag-handle" aria-label="Drag to reorder" role="button" tabIndex={0} {...(dragHandleProps as Record<string, unknown>)}>
             ⠿
-          </button>
+          </span>
         )}
         <div>
           <div className="card-name">{device.name}</div>

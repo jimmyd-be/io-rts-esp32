@@ -2,10 +2,11 @@ import { Device } from "../models/Types.ts";
 import { useEffect, useRef, useState } from "preact/hooks";
 import useI18n from "../hooks/useI18n.tsx";
 import { usePairingWizard } from "./modals/PairingWizard.tsx";
-import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, closestCenter, PointerSensor, TouchSensor, useSensor, useSensors, DragOverlay } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { SortableDeviceCard } from "./SortableDeviceCard.tsx";
-import type { DragEndEvent } from "@dnd-kit/core";
+import { DeviceCard } from "./DeviceCard.tsx";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 
 const ORDER_KEY = "device-order";
 
@@ -33,13 +34,14 @@ interface DevicesSectionProps {
 export function DevicesSection({ devices }: DevicesSectionProps) {
   const [devicesState, setDevices] = useState<Device[]>([]);
   const [activeCount, setActiveCount] = useState(0);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const { t } = useI18n();
   const pairingWizard = usePairingWizard();
   const orderRef = useRef<string[]>(loadOrder());
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
   );
 
   useEffect(() => {
@@ -57,7 +59,12 @@ export function DevicesSection({ devices }: DevicesSectionProps) {
     setActiveCount(devices.filter((d) => !d.inactive).length);
   }, [devices]);
 
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(event.active.id as string);
+  }
+
   function handleDragEnd(event: DragEndEvent) {
+    setActiveId(null);
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -69,6 +76,10 @@ export function DevicesSection({ devices }: DevicesSectionProps) {
       saveOrder(orderRef.current);
       return reordered;
     });
+  }
+
+  function handleDragCancel() {
+    setActiveId(null);
   }
 
   const countText = `${activeCount} ${t ? t("nav.devices") : "devices"}`;
@@ -100,7 +111,7 @@ export function DevicesSection({ devices }: DevicesSectionProps) {
         </button>
       </div>
 
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
         <SortableContext items={devicesState.map((d) => d.id)} strategy={rectSortingStrategy}>
           <ul id="device-list">
             {!devicesState ? (
@@ -132,6 +143,11 @@ export function DevicesSection({ devices }: DevicesSectionProps) {
             )}
           </ul>
         </SortableContext>
+        <DragOverlay>
+          {activeId ? (
+            <DeviceCard device={devicesState.find((d) => d.id === activeId)!} />
+          ) : null}
+        </DragOverlay>
       </DndContext>
     </>
   );
