@@ -2335,7 +2335,9 @@ namespace iohome
               deviceIt->second.position = UNKNOWN_POSITION;
           }
         }
-        if (deviceIt->second.is_stopped && !hasReachedTargetPosition(deviceIt->second.target, deviceIt->second.position))
+        if (deviceIt->second.is_stopped &&
+            !hasReachedTargetPosition((uint16_t)(deviceIt->second.target * CMD_PARAM_STATUS_POS_MAX / 100.0f),
+                                      (uint16_t)(deviceIt->second.position * CMD_PARAM_STATUS_POS_MAX / 100.0f)))
           deviceIt->second.is_stopped = false; // some devices set 'stopped' flag when moving, force it to update status!
 
         // Extract tilt value from 16-byte tilt-extended response only (from 03200100 query)
