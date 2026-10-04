@@ -1839,6 +1839,59 @@ static esp_err_t api_syslog_ping_post(httpd_req_t *req)
     return ESP_OK;
 }
 
+// ─── GET /api/settings ──────────────────────────────────────────────────────
+
+static esp_err_t api_settings_get(httpd_req_t *req)
+{
+    char buf[512] = {};
+    size_t len = sizeof(buf);
+    nvs_handle_t h;
+    if (nvs_open("io_settings", NVS_READONLY, &h) == ESP_OK) {
+        nvs_get_str(h, "device_order", buf, &len);
+        nvs_close(h);
+    }
+
+    cJSON *obj = cJSON_CreateObject();
+    cJSON *arr = buf[0] ? cJSON_Parse(buf) : cJSON_CreateArray();
+    cJSON_AddItemToObject(obj, "device_order", arr ? arr : cJSON_CreateArray());
+    send_json(req, obj);
+    return ESP_OK;
+}
+
+// ─── POST /api/settings ─────────────────────────────────────────────────────
+
+static esp_err_t api_settings_post(httpd_req_t *req)
+{
+    if (!ota_check_key(req)) { httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Unauthorized"); return ESP_OK; }
+    char *body = nullptr;
+    if (read_body(req, &body) != ESP_OK) { send_result(req, false, "Failed to read body"); return ESP_OK; }
+
+    cJSON *json = cJSON_Parse(body);
+    free(body);
+    if (!json) { send_result(req, false, "Invalid JSON"); return ESP_OK; }
+
+    cJSON *order = cJSON_GetObjectItem(json, "device_order");
+    if (!cJSON_IsArray(order)) { cJSON_Delete(json); send_result(req, false, "Missing device_order array"); return ESP_OK; }
+
+    char *serialised = cJSON_PrintUnformatted(order);
+    cJSON_Delete(json);
+    if (!serialised) { send_result(req, false, "Serialisation failed"); return ESP_OK; }
+
+    if (strlen(serialised) >= 512) { free(serialised); send_result(req, false, "Order too large"); return ESP_OK; }
+
+    nvs_handle_t h;
+    bool ok = false;
+    if (nvs_open("io_settings", NVS_READWRITE, &h) == ESP_OK) {
+        ok = (nvs_set_str(h, "device_order", serialised) == ESP_OK);
+        if (ok) nvs_commit(h);
+        nvs_close(h);
+    }
+    free(serialised);
+
+    send_result(req, ok, ok ? "Settings saved" : "NVS write failed");
+    return ESP_OK;
+}
+
 // ─── POST /api/reboot ───────────────────────────────────────────────────────
 
 static esp_err_t api_reboot_post(httpd_req_t *req)
@@ -3801,6 +3854,8 @@ void web_server_start(void *ioRtsManager)
     reg("/api/somfy/credentials", HTTP_POST, api_somfy_credentials_post);
     reg("/api/somfy/import",      HTTP_POST, api_somfy_import_post);
     reg("/api/somfy/add",         HTTP_POST, api_somfy_add_post);
+    reg("/api/settings",          HTTP_GET,  api_settings_get);
+    reg("/api/settings",          HTTP_POST, api_settings_post);
     reg("/api/reboot",            HTTP_POST, api_reboot_post);
     reg("/api/io/key",            HTTP_GET,  api_io_key_get);
     reg("/api/io/key",            HTTP_POST, api_io_key_post);

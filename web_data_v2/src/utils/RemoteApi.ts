@@ -31,6 +31,21 @@ async function postJson<T>(
   return data;
 }
 
+export async function fetchDeviceOrder(): Promise<string[]> {
+  try {
+    const response = await fetch("/api/settings", { headers: { Accept: "application/json" } });
+    if (!response.ok) return [];
+    const data = (await response.json()) as { device_order?: string[] };
+    return Array.isArray(data.device_order) ? data.device_order : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveDeviceOrder(otaKey: string, order: string[]): Promise<unknown> {
+  return postJson("/api/settings", otaKey, { device_order: order });
+}
+
 export function startCaptureRequest(otaKey: string): Promise<unknown> {
   return postJson("/api/remote/capture/start", otaKey, {});
 }

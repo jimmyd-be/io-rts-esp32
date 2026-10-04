@@ -7,6 +7,8 @@ import { SortableContext, rectSortingStrategy, arrayMove } from "@dnd-kit/sortab
 import { SortableDeviceCard } from "./SortableDeviceCard.tsx";
 import { DeviceCard } from "./DeviceCard.tsx";
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import { useOtaKey } from "../hooks/api/useOtaKey.tsx";
+import { fetchDeviceOrder, saveDeviceOrder } from "../utils/RemoteApi.ts";
 
 const ORDER_KEY = "device-order";
 
@@ -37,7 +39,17 @@ export function DevicesSection({ devices }: DevicesSectionProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const { t } = useI18n();
   const pairingWizard = usePairingWizard();
+  const otaKey = useOtaKey();
   const orderRef = useRef<string[]>(loadOrder());
+
+  useEffect(() => {
+    fetchDeviceOrder().then((serverOrder) => {
+      if (serverOrder.length > 0) {
+        orderRef.current = serverOrder;
+        saveOrder(serverOrder);
+      }
+    }).catch(() => {});
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -74,6 +86,9 @@ export function DevicesSection({ devices }: DevicesSectionProps) {
       const reordered = arrayMove(prev, oldIndex, newIndex);
       orderRef.current = reordered.map((d) => d.id);
       saveOrder(orderRef.current);
+      if (otaKey.data?.key) {
+        saveDeviceOrder(otaKey.data.key, orderRef.current).catch(() => {});
+      }
       return reordered;
     });
   }
