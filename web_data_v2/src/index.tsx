@@ -11,6 +11,7 @@ import { Log } from "./pages/log";
 import { Settings } from "./pages/settings";
 import { FirmwareUpdater } from "./components/FirmwareUpdater";
 import { ToastProvider } from "./components/ToastProvider";
+import { InstallBanner } from "./components/InstallBanner";
 
 export function App() {
   useEffect(() => {
@@ -39,6 +40,7 @@ export function App() {
           </Router>
         </main>
         <Footer />
+        <InstallBanner />
       </LocationProvider>
     </ToastProvider>
   );

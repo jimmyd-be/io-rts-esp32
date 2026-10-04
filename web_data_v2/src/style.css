@@ -2425,3 +2425,41 @@ small.field-hint {
 .estimating .pos-value {
   color: var(--text3);
 }
+
+/* PWA install banner */
+.install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text1);
+  z-index: 200;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
+}
+.install-banner span { flex: 1; }
+.install-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.install-dismiss {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 4px;
+  line-height: 1;
+}
