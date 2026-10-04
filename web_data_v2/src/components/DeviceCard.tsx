@@ -11,9 +11,12 @@ import { getFavoritePosition, postDeviceAction } from "../utils/RemoteApi.ts";
 
 interface DeviceCardProps {
   device: Device;
+  sortableRef?: (node: HTMLElement | null) => void;
+  sortableStyle?: { transform?: string; transition?: string; zIndex?: number; opacity?: number };
+  dragHandleProps?: Record<string, unknown>;
 }
 
-export function DeviceCard({ device }: DeviceCardProps) {
+export function DeviceCard({ device, sortableRef, sortableStyle, dragHandleProps }: DeviceCardProps) {
   const { t } = useI18n();
   const { open } = useDeviceModal();
   const showToast = useToast();
@@ -91,14 +94,21 @@ export function DeviceCard({ device }: DeviceCardProps) {
 
   return (
     <li
+      ref={sortableRef}
       key={device.id}
       className={`device ${device.inactive ? "inactive" : ""} ${device.is_stopped ? "" : "moving"} ${device.position_estimated ? "estimating" : ""}`}
       data-id={device.id}
+      style={sortableStyle}
     >
       <div className="warn-dot" />
       <div className="moving-dot" />
 
       <div className="card-top">
+        {dragHandleProps && (
+          <button type="button" className="drag-handle" aria-label="Drag to reorder" {...(dragHandleProps as Record<string, unknown>)}>
+            ⠿
+          </button>
+        )}
         <div>
           <div className="card-name">{device.name}</div>
           <div className="card-meta">
