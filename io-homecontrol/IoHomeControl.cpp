@@ -2153,7 +2153,7 @@ namespace iohome
           {
             if (setStartFlagToAuthentResponse)
               challengeResponse.ctrl_byte_0 |= CTRL0_START;
-            if (TransmitFrame(challengeResponse, frequency, SHORT_PREAMBLE_LENGTH))
+            if (TransmitFrame(challengeResponse, frequency, (challengeResponse.ctrl_byte_1 & CTRL1_LOW_POWER) ? LONG_PREAMBLE_LENGTH : SHORT_PREAMBLE_LENGTH))
             {
               // Now wait for final response
               if (ReceiveMatchingFrame(request.dest_node, request.src_node, expected_response_cmd,
