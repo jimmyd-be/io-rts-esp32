@@ -85,7 +85,7 @@ export function TransitTimeRow({ device, setDeviceState, onClose }: DeviceRowPro
         style="width: 64px;"
         placeholder="s"
       />
-      <button type="button" class="s-btn primary" onClick={handleSaveTransitTime}>
+      <button type="button" class="s-btn primary" onClick={handleSaveTransitTime} disabled={!otaData.loaded || !otaData.data?.key}>
         {t("button.save") || "Save"}
       </button>
       <button

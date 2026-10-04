@@ -33,7 +33,10 @@ export async function postAction(
     method: "POST",
     headers: { "Content-Type": "application/json", "X-OTA-Key": otaKey },
     body: JSON.stringify(payload),
-  }).then((r) => r.json());
+  }).then(async (r) => {
+    if (!r.ok) throw new Error(`Server error ${r.status}`);
+    return r.json();
+  });
 }
 
 export function getDeviceGroup(device: Device): string {
