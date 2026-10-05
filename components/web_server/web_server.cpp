@@ -934,7 +934,8 @@ static esp_err_t api_mqtt_get(httpd_req_t *req)
     cJSON_AddStringToObject(obj, "user",        Config::MqttConfig::GetClientUsername().c_str());
     cJSON_AddStringToObject(obj, "server",      Config::MqttConfig::GetBrokerAddress().c_str());
     cJSON_AddNumberToObject(obj, "port",        Config::MqttConfig::GetBrokerPort());
-    cJSON_AddStringToObject(obj, "password",    Config::MqttConfig::GetClientPassword().c_str());
+    bool hasPassword = !Config::MqttConfig::GetClientPassword().empty();
+    cJSON_AddStringToObject(obj, "password",    hasPassword ? "********" : "");
     cJSON_AddStringToObject(obj, "client_id",   Config::MqttConfig::GetClientId().c_str());
     cJSON_AddStringToObject(obj, "topic",       Config::MqttConfig::GetTopicPrefix().c_str());
     cJSON_AddStringToObject(obj, "discovery",   Config::MqttConfig::GetDiscoveryPrefix().c_str());
@@ -976,7 +977,7 @@ static esp_err_t api_mqtt_post(httpd_req_t *req)
 
     if (!user.empty())      Config::MqttConfig::SetClientUsername(user);
     if (!server.empty())    Config::MqttConfig::SetBrokerAddress(server);
-    if (!password.empty())  Config::MqttConfig::SetClientPassword(password);
+    if (!password.empty() && password != "********")  Config::MqttConfig::SetClientPassword(password);
     if (!client_id.empty()) Config::MqttConfig::SetClientId(client_id);
     if (!topic.empty())     Config::MqttConfig::SetTopicPrefix(topic);
     if (!discovery.empty()) Config::MqttConfig::SetDiscoveryPrefix(discovery);
