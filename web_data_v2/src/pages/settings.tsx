@@ -12,7 +12,6 @@ import { WebUISettings } from "../components/settings/WebUi";
 import { WebUIUpdateSettings } from "../components/settings/WebUiUpdate";
 import { BackupSettings } from "../components/settings/Backup";
 import { RebootSettings } from "../components/settings/Reboot";
-import { SoftwareUpdateSettings } from "../components/settings/SoftwareUpdate";
 import { FirmwareUpdateSettings } from "../components/settings/FirmwareUpdate";
 import { PairingLogs } from "../components/settings/PairingLogs";
 import { useInfo } from "../hooks/api/useInfo";
@@ -75,7 +74,6 @@ export function Settings() {
           <BackupSettings />
           <PairingLogs />
           <RebootSettings />
-          <SoftwareUpdateSettings />
         </div>
       </div>
     </section>
