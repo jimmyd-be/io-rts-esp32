@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '24'
 
@@ -27,7 +27,7 @@ jobs:
         run: cd web_data_v2 && npm run build
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-artifacts
           path: web_data_v2/dist
@@ -41,12 +41,12 @@ jobs:
       image: espressif/idf:v6.0.1
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Download frontend artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frontend-artifacts
           path: web_data_v2/dist
@@ -75,7 +75,7 @@ jobs:
             0x390000 build/web.bin
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: heltec-artifacts
           path: |
@@ -91,12 +91,12 @@ jobs:
       image: espressif/idf:v6.0.1
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Download frontend artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frontend-artifacts
           path: web_data_v2/dist
@@ -125,7 +125,7 @@ jobs:
             0x390000 build_t3s3/web.bin
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lilygo-t3s3-artifacts
           path: |
@@ -141,12 +141,12 @@ jobs:
       image: espressif/idf:v6.0.1
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: Download frontend artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: frontend-artifacts
           path: web_data_v2/dist
@@ -175,7 +175,7 @@ jobs:
             0x390000 build_lora32/web.bin
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lilygo-lora32-artifacts
           path: |
