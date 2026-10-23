@@ -412,6 +412,17 @@ static esp_err_t static_file_handler(httpd_req_t *req)
     bool orig_exists = (stat(filepath, &st) == 0);
     bool gz_exists   = (stat(gz_path, &gz_st) == 0);
     if (!orig_exists && !gz_exists) {
+        const char *last_segment = strrchr(uri, '/');
+        const char *filename = last_segment ? last_segment + 1 : uri;
+        if (strncmp(uri, "/api/", 5) != 0 && strcmp(uri, "/api") != 0 &&
+            !strrchr(filename, '.')) {
+            snprintf(filepath, sizeof(filepath), "%s/index.html", WEB_BASE_PATH);
+            snprintf(gz_path, sizeof(gz_path), "%s.gz", filepath);
+            orig_exists = (stat(filepath, &st) == 0);
+            gz_exists   = (stat(gz_path, &gz_st) == 0);
+        }
+    }
+    if (!orig_exists && !gz_exists) {
         httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "File not found");
         return ESP_FAIL;
     }
