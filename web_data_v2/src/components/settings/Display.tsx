@@ -80,7 +80,7 @@ export function DisplaySettings() {
             <Checkbox
               name="display_enabled"
               checked={enabled}
-              disabled={!saving}
+              disabled={saving}
               ariaLabel={t("label.enable-display")}
               onChange={(checked) => void changeEnabled(checked)}
             />
