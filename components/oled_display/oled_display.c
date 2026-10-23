@@ -591,6 +591,8 @@ static void process_event(const oled_evt_t *evt)
         oled_render_status_line(evt->cmd_str);
         s_status_time = evt->cmd_str[0] ? xTaskGetTickCount() : 0;
         break;
+    case OLED_EVT_ENABLE:
+        return;
     }
 }
 
